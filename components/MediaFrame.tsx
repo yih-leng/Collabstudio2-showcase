@@ -58,7 +58,15 @@ function MediaBody({ media, mode }: { media: FrameMedia; mode: 'player' | 'thumb
 
   if (media.kind === 'video') {
     return mode === 'player' ? (
-      <video src={media.url} controls playsInline preload="metadata" aria-label={media.caption ?? 'Video'} />
+      <video
+        src={media.url}
+        controls
+        controlsList="nodownload noremoteplayback"
+        disablePictureInPicture
+        playsInline
+        preload="metadata"
+        aria-label={media.caption ?? 'Video'}
+      />
     ) : (
       <video src={`${media.url}#t=0.5`} muted playsInline preload="metadata" aria-hidden tabIndex={-1} />
     );
@@ -131,7 +139,14 @@ function AudioBody({ media, mode }: { media: FrameMedia; mode: 'player' | 'thumb
       <span className={styles.audioTitle}>{media.caption || 'Audio track'}</span>
       {mode === 'player' && (
         // Native controls: play, scrub, volume and download, all keyboard-reachable.
-        <audio className={styles.audioPlayer} src={media.url} controls preload="metadata" aria-label={media.caption ?? 'Audio track'} />
+        <audio
+          className={styles.audioPlayer}
+          src={media.url}
+          controls
+          controlsList="nodownload noremoteplayback"
+          preload="metadata"
+          aria-label={media.caption ?? 'Audio track'}
+        />
       )}
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { Badge, Card, CardTitle, Tag } from "@collabrium/ui";
-import { Star } from "@phosphor-icons/react";
+import { Info, Star } from "@phosphor-icons/react";
 import type { ProjectCardData } from "@/lib/types";
 import { MediaFrame } from "./MediaFrame";
 import styles from "./ProjectCard.module.css";
@@ -35,6 +35,19 @@ export function ProjectCard({
       <Card>
         <div className={styles.media}>
           <MediaFrame media={project.cover} aspect="16:9" mode="thumb" />
+          {project.status === "in_progress" && (
+            <span className={styles.wip}>
+              <Info weight="fill" aria-hidden />
+              In progress · subject to change
+            </span>
+          )}
+        </div>
+        <CardTitle href={href} headingLevel={headingLevel}>
+          {project.title}
+        </CardTitle>
+        <div className={styles.client}>
+          {clientNames}
+          {project.year ? ` · ${project.year}` : ""}
         </div>
         <div className={styles.meta}>
           {project.featured && (
@@ -47,13 +60,6 @@ export function ProjectCard({
               {c.name}
             </Tag>
           ))}
-        </div>
-        <CardTitle href={href} headingLevel={headingLevel}>
-          {project.title}
-        </CardTitle>
-        <div className={styles.client}>
-          {clientNames}
-          {project.year ? ` · ${project.year}` : ""}
         </div>
       </Card>
     </div>

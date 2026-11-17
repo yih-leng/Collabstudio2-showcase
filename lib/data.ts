@@ -48,6 +48,12 @@ export async function getLists(): Promise<Lists> {
 }
 
 /** Projects the current visitor may see, newest site order first. Excludes trash. */
+/** Our Works order: featured work first (in featured order), then the rest in site order. */
+function workOrder(projects: Project[]): Project[] {
+  const featured = projects.filter((p) => p.featured).sort((a, b) => a.featured_order - b.featured_order);
+  return [...featured, ...projects.filter((p) => !p.featured)];
+}
+
 async function getVisibleProjects(): Promise<Project[]> {
   const sb = await getServerClient();
   const { data } = await sb.from('projects').select('*').is('deleted_at', null).order('sort_order');
@@ -85,7 +91,7 @@ function resolveCard(p: Project, lists: Lists, media: Media[]): ProjectCardData 
 /** Published projects for the public grid (internal ones only for signed-in admins). */
 export async function getPublishedProjects(): Promise<ProjectCardData[]> {
   const [projects, lists] = await Promise.all([getVisibleProjects(), getLists()]);
-  const published = projects.filter((p) => p.visibility === 'published');
+  const published = workOrder(projects.filter((p) => p.visibility === 'published'));
   const media = await getMediaByIds(published.map((p) => p.cover_media_id).filter(Boolean) as string[]);
   return published.map((p) => resolveCard(p, lists, media));
 }
@@ -164,8 +170,8 @@ export const getProjectDetail = cache(async (slug: string): Promise<ProjectDetai
 
   const card = resolveCard(project, lists, media);
 
-  // Next / previous among published work, in site order.
-  const all = visible.filter((p) => p.visibility === 'published');
+  // Next / previous among published work, in the same order as Our Works.
+  const all = workOrder(visible.filter((p) => p.visibility === 'published'));
   const idx = all.findIndex((p) => p.id === project!.id);
   const link = (p?: Project) => (p ? { slug: p.slug, title: p.title } : null);
 

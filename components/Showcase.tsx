@@ -238,6 +238,8 @@ function SlideMedia({
         muted={muted}
         loop
         playsInline
+        disablePictureInPicture
+        controlsList="nodownload"
         preload={active ? 'auto' : 'metadata'}
         onLoadedMetadata={(e) => {
           const ms = e.currentTarget.duration * 1000;

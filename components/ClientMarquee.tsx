@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import type { Client } from '@/lib/types';
 import styles from './ClientMarquee.module.css';
 
@@ -7,8 +8,9 @@ import styles from './ClientMarquee.module.css';
 const MIN_PER_RUN = 10;
 
 /**
- * Client logos sliding past in an endless row. It stops while the pointer is
- * on it, and under reduced motion it sits still as a wrapped list.
+ * Client logos sliding past in an endless row, in their own colours. Each opens
+ * Our Works filtered to that client. The row stops while the pointer is on it,
+ * and under reduced motion it sits still as a wrapped list.
  * TODO(design-system: no marquee; built with motion tokens).
  */
 export function ClientMarquee({ clients }: { clients: Client[] }) {
@@ -33,7 +35,15 @@ export function ClientMarquee({ clients }: { clients: Client[] }) {
 function Logo({ client, hidden }: { client: Client; hidden: boolean }) {
   return (
     <li className={styles.logo} aria-hidden={hidden || undefined} data-copy={hidden || undefined}>
-      {client.logo_url ? <img src={client.logo_url} alt={hidden ? '' : client.name} /> : <span>{client.name}</span>}
+      <Link
+        href={`/work?client=${encodeURIComponent(client.id)}`}
+        className={styles.link}
+        tabIndex={hidden ? -1 : undefined}
+        aria-label={hidden ? undefined : `${client.name}: see their work`}
+        title={client.name}
+      >
+        {client.logo_url ? <img src={client.logo_url} alt="" draggable={false} /> : <span>{client.name}</span>}
+      </Link>
     </li>
   );
 }

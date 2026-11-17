@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppShell, SidebarNav } from '@collabrium/ui';
 import { FilmSlate, House } from '@phosphor-icons/react';
+import { ContentGuard } from './ContentGuard';
 import styles from './SiteShell.module.css';
 
 export const STUDIO_LOGO = {
@@ -97,6 +98,7 @@ export function SiteShell({
         />
       }
     >
+      <ContentGuard />
       <div className={styles.phoneBar} aria-hidden />
       {children}
     </AppShell>

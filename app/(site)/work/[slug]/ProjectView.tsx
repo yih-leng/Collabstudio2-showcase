@@ -47,6 +47,12 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
           </InfoBanner>
         )}
 
+        {p.status === 'in_progress' && (
+          <InfoBanner tone="info">
+            This work is in progress. What you see here is subject to change before it’s final.
+          </InfoBanner>
+        )}
+
         <header className={styles.intro}>
           <div className={styles.introMain}>
             <div className={styles.badges}>

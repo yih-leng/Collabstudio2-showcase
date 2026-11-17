@@ -5,6 +5,24 @@
   margin-top: var(--spacing-4);
 }
 
+/* Work still in progress: a note over the cover. */
+.wip {
+  position: absolute;
+  top: var(--spacing-8);
+  left: var(--spacing-8);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  padding: var(--spacing-4) var(--spacing-8);
+  border-radius: var(--radius-pill);
+  background: var(--color-gold-bg-strong);
+  color: var(--color-neutral-9);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  box-shadow: var(--shadow-2);
+}
+
 .client {
   font-size: var(--text-caption-size);
   font-weight: var(--weight-bold);
@@ -22,6 +40,7 @@
 
 /* The cover leans in when the card is hovered. */
 .media {
+  position: relative;
   overflow: hidden;
   border-radius: var(--radius-md);
 }

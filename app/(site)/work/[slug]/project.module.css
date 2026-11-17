@@ -77,17 +77,13 @@
   gap: var(--spacing-8);
 }
 
-/* Every client gets the same box, logo or not. */
+/* Every client gets the same space, logo or not, with no box around it. */
 .logo {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: calc(var(--spacing-120) + var(--spacing-12));
-  height: var(--spacing-60);
-  padding: var(--spacing-8) var(--spacing-12);
-  border-radius: var(--radius-sm);
-  background: var(--color-canvas-warm);
-  border: var(--border-width-sm) solid var(--color-neutral-3);
+  height: var(--spacing-48);
   overflow: hidden;
 }
 
