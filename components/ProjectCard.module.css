@@ -1,8 +1,99 @@
+/* Project tile: cover edge to edge, text below. Matches Card's look, tokens only.
+   TODO(design-system: Card with a full-bleed media slot). */
+
+/* Our wrapper: fills its grid cell and rises in as it scrolls into view. */
+.reveal {
+  display: flex;
+}
+
+.reveal > * {
+  flex: 1;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--color-neutral-1);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  font-family: var(--font-primary);
+  transition: box-shadow var(--duration-base) var(--ease-settle);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-2);
+}
+
+.card:has(.link:focus-visible) {
+  box-shadow: var(--shadow-focus);
+}
+
+/* The cover: no inset, no rounding of its own (the card clips it). */
+.media {
+  position: relative;
+  overflow: hidden;
+}
+
+.media > * {
+  border-radius: 0;
+}
+
+.media img,
+.media video {
+  transition: transform var(--duration-slow) var(--ease-settle);
+}
+
+.card:hover .media img,
+.card:hover .media video {
+  transform: scale(1.06);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-12) var(--spacing-16) var(--spacing-16);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-h5-size);
+  font-weight: var(--text-h5-weight);
+  line-height: var(--text-h5-lh);
+  color: var(--color-neutral-9);
+}
+
+/* The title's link covers the whole card, so it's clickable anywhere. */
+.link {
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: var(--radius-lg);
+}
+
+.client {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+}
+
 .meta {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-4);
-  margin-top: var(--spacing-4);
+  margin-top: var(--spacing-8);
 }
 
 /* Work still in progress: a note over the cover. */
@@ -23,36 +114,11 @@
   box-shadow: var(--shadow-2);
 }
 
-.client {
-  font-size: var(--text-caption-size);
-  font-weight: var(--weight-bold);
-  color: var(--color-neutral-5);
-}
-
-/* Our wrapper around the Card: fills its grid cell and rises in as it scrolls into view. */
-.reveal {
-  display: flex;
-}
-
-.reveal > * {
-  flex: 1;
-}
-
-/* The cover leans in when the card is hovered. */
-.media {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--radius-md);
-}
-
-.media img,
-.media video {
-  transition: transform var(--duration-slow) var(--ease-settle);
-}
-
-.reveal:hover .media img,
-.reveal:hover .media video {
-  transform: scale(1.06);
+@media (forced-colors: active) {
+  .card:has(.link:focus-visible) {
+    outline: var(--focus-ring-width) solid Highlight;
+    outline-offset: var(--focus-ring-offset);
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -66,8 +132,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reveal:hover .media img,
-  .reveal:hover .media video {
+  .card:hover .media img,
+  .card:hover .media video {
     transform: none;
   }
 }

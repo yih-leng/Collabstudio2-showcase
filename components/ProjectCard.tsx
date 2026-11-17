@@ -1,67 +1,65 @@
-"use client";
+'use client';
 
-import { useRouter } from "next/navigation";
-import { Badge, Card, CardTitle, Tag } from "@collabrium/ui";
-import { Info, Star } from "@phosphor-icons/react";
-import type { ProjectCardData } from "@/lib/types";
-import { MediaFrame } from "./MediaFrame";
-import styles from "./ProjectCard.module.css";
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Badge, Tag } from '@collabrium/ui';
+import { Info, Star } from '@phosphor-icons/react';
+import type { ProjectCardData } from '@/lib/types';
+import { MediaFrame } from './MediaFrame';
+import styles from './ProjectCard.module.css';
 
-export function ProjectCard({
-  project,
-  headingLevel = 3,
-}: {
-  project: ProjectCardData;
-  headingLevel?: 2 | 3 | 4;
-}) {
+/**
+ * A project tile: the cover runs to the card's edges, with the title, client
+ * and tags below. Our own card (the design system's Card has no edge-to-edge
+ * option), matching its border, radius, shadow, hover and focus halo; the
+ * title's link stretches over the whole card.
+ * TODO(design-system: Card with a full-bleed media slot).
+ */
+export function ProjectCard({ project, headingLevel = 3 }: { project: ProjectCardData; headingLevel?: 2 | 3 | 4 }) {
   const router = useRouter();
   const href = `/work/${project.slug}`;
-  const clientNames = project.clients.map((c) => c.name).join(", ");
+  const clientNames = project.clients.map((c) => c.name).join(', ');
+  const Heading = `h${headingLevel}` as const;
+
   return (
-    // The card's title is a plain link (the design system's), which would reload the
-    // whole site. Hand plain clicks to the app router instead, and start loading the
-    // page as soon as the pointer or focus arrives, so it opens at once.
-    <div
-      className={styles.reveal}
-      onPointerEnter={() => router.prefetch(href)}
-      onFocus={() => router.prefetch(href)}
-      onClick={(e) => {
-        const a = (e.target as HTMLElement).closest("a[href]");
-        if (!a || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-        e.preventDefault();
-        router.push(href);
-      }}
-    >
-      <Card>
+    <div className={styles.reveal}>
+      <article className={styles.card}>
         <div className={styles.media}>
           <MediaFrame media={project.cover} aspect="16:9" mode="thumb" />
-          {project.status === "in_progress" && (
+          {project.status === 'in_progress' && (
             <span className={styles.wip}>
               <Info weight="fill" aria-hidden />
               In progress · subject to change
             </span>
           )}
         </div>
-        <CardTitle href={href} headingLevel={headingLevel}>
-          {project.title}
-        </CardTitle>
-        <div className={styles.client}>
-          {clientNames}
-          {project.year ? ` · ${project.year}` : ""}
-        </div>
-        <div className={styles.meta}>
-          {project.featured && (
-            <Badge variant="selected" icon={Star}>
-              Featured
-            </Badge>
+        <div className={styles.body}>
+          <Heading className={styles.title}>
+            {/* Starts loading the page as soon as the pointer or focus arrives. */}
+            <Link href={href} className={styles.link} onPointerEnter={() => router.prefetch(href)}>
+              {project.title}
+            </Link>
+          </Heading>
+          <div className={styles.client}>
+            {clientNames}
+            {project.year ? ` · ${project.year}` : ''}
+          </div>
+          {(project.featured || project.categories.length > 0) && (
+            <div className={styles.meta}>
+              {project.featured && (
+                <Badge variant="selected" icon={Star}>
+                  Featured
+                </Badge>
+              )}
+              {project.categories.map((c) => (
+                <Tag key={c.id} variant="neutral">
+                  {c.name}
+                </Tag>
+              ))}
+            </div>
           )}
-          {project.categories.map((c) => (
-            <Tag key={c.id} variant="neutral">
-              {c.name}
-            </Tag>
-          ))}
         </div>
-      </Card>
+      </article>
     </div>
   );
 }
