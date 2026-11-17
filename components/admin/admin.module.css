@@ -1,0 +1,176 @@
+/* Shared layout for admin screens: our own wrappers, tokens only. */
+
+.center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-neutral-5);
+  font-size: var(--text-body2-size);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+}
+
+.stackSm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--spacing-12);
+}
+
+.row > * {
+  flex: 1 1 calc(var(--spacing-120) * 2);
+  min-width: 0;
+}
+
+.row > .fit {
+  flex: 0 0 auto;
+}
+
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, calc(var(--spacing-120) * 2)), 1fr));
+  gap: var(--spacing-16);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--text-body2-size);
+  color: var(--color-neutral-5);
+}
+
+.thumb {
+  width: calc(var(--spacing-60) + var(--spacing-20));
+  flex: none;
+}
+
+.titleCell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  min-width: 0;
+}
+
+.titleCell a {
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+}
+
+.titleCell a:hover {
+  text-decoration: underline;
+  text-underline-offset: var(--spacing-4);
+}
+
+.titleText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.titleSub {
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+}
+
+/* Sortable rows (drag to reorder). TODO(design-system: no sortable list; rows follow List's look). */
+.sortList {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sortRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12) var(--spacing-16);
+  background: var(--color-neutral-1);
+  border-bottom: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.sortRow:last-child {
+  border-bottom: 0;
+}
+
+.sortRow[data-dragging] {
+  position: relative;
+  z-index: var(--z-float);
+  box-shadow: var(--shadow-3);
+  border-radius: var(--radius-sm);
+}
+
+.handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  flex: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--color-neutral-5);
+  font-size: var(--icon-base);
+  cursor: grab;
+  touch-action: none;
+}
+
+.handle:hover {
+  background: var(--color-neutral-2);
+  color: var(--color-neutral-9);
+}
+
+.handle:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset-inset);
+}
+
+.sortBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.position {
+  width: var(--spacing-24);
+  flex: none;
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+  font-variant-numeric: tabular-nums;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}

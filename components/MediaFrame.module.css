@@ -1,0 +1,110 @@
+.frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-9);
+}
+
+.frame > img,
+.frame > video,
+.frame > iframe,
+.frame > .audio,
+.frame > .embedFallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+}
+
+.frame[data-fit='contain'] > img,
+.frame[data-fit='contain'] > video {
+  object-fit: contain;
+}
+
+.placeholder,
+.embedFallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-8);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+}
+
+.placeholder {
+  width: 100%;
+  border-radius: var(--radius-md);
+  background: var(--color-canvas-warm-card);
+  border: var(--border-width-sm) dashed var(--color-neutral-3);
+  color: var(--color-neutral-5);
+}
+
+.placeholder svg,
+.embedFallback svg {
+  font-size: var(--icon-lg);
+  color: var(--color-neutral-4);
+}
+
+.embedFallback {
+  color: var(--color-neutral-4);
+}
+
+.playBadge {
+  position: absolute;
+  left: var(--spacing-12);
+  bottom: var(--spacing-12);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-height-md);
+  height: var(--control-height-md);
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-1);
+  color: var(--color-neutral-9);
+  box-shadow: var(--shadow-2);
+  font-size: var(--icon-sm);
+}
+
+/* Audio sleeve: a dark tile with a glow, the track name and the player. */
+.audio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16);
+  background:
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--color-fire-pastel) 45%, transparent), transparent 60%),
+    radial-gradient(circle at 75% 80%, color-mix(in srgb, var(--color-water-pastel) 40%, transparent), transparent 60%),
+    var(--color-neutral-9);
+  color: var(--color-neutral-1);
+  text-align: center;
+}
+
+.audioDisc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--spacing-60) + var(--spacing-12));
+  height: calc(var(--spacing-60) + var(--spacing-12));
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-neutral-1) 14%, transparent);
+  font-size: var(--icon-lg);
+}
+
+.audioTitle {
+  max-width: 100%;
+  overflow: hidden;
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body2-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.audioPlayer {
+  width: min(100%, calc(var(--spacing-120) * 4));
+}

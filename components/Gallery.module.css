@@ -1,0 +1,153 @@
+/* Gallery grid and viewer. Our own wrappers, tokens only.
+   TODO(design-system: no Lightbox component). */
+
+/* Equal tiles, whatever the shape of the piece: each is cropped to fill. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 1.8)), 1fr));
+  gap: var(--spacing-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  min-width: 0;
+}
+
+.open {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: none;
+  border-radius: var(--radius-md);
+  cursor: zoom-in;
+  transition:
+    box-shadow var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-settle);
+}
+
+.open img,
+.open video {
+  transition: transform var(--duration-slow) var(--ease-settle);
+}
+
+.open:hover {
+  box-shadow: var(--shadow-3);
+}
+
+.open:hover img,
+.open:hover video {
+  transform: scale(1.05);
+}
+
+.open:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.caption {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The viewer: dark, and the same size for every piece. */
+.dialog {
+  width: min(calc(100vw - var(--spacing-32)), var(--content-max-width));
+  max-width: none;
+  max-height: none;
+  padding: var(--spacing-16);
+  border: 0;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-9);
+  color: var(--color-neutral-1);
+  box-shadow: var(--shadow-modal);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--color-neutral-9) 92%, transparent);
+  backdrop-filter: blur(var(--spacing-8));
+}
+
+.viewer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.counter {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-4);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fixed stage: the piece is fitted inside, so the height never changes. */
+.stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  height: min(70vh, calc(var(--spacing-120) * 6));
+}
+
+.media {
+  flex: 1;
+  height: 100%;
+  min-width: 0;
+}
+
+.media > * {
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-8);
+}
+
+.prev,
+.next {
+  flex: none;
+  z-index: 1;
+}
+
+.viewerCaption {
+  min-height: var(--text-body2-lh);
+  margin: 0;
+  font-size: var(--text-body2-size);
+  line-height: var(--text-body2-lh);
+  color: var(--color-neutral-4);
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .stage {
+    height: 60vh;
+  }
+
+  /* On phones the arrows sit over the picture's edges. */
+  .prev,
+  .next {
+    position: absolute;
+  }
+
+  .prev {
+    left: var(--spacing-8);
+  }
+
+  .next {
+    right: var(--spacing-8);
+  }
+}

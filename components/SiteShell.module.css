@@ -1,0 +1,21 @@
+/* Phones: the nav is a floating tile over the content. This band sits behind it
+   so content scrolls under a solid edge instead of colliding with the tile. */
+.phoneBar {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .phoneBar {
+    position: fixed;
+    inset: 0 0 auto;
+    z-index: calc(var(--z-float) - 1);
+    display: block;
+    height: calc(var(--spacing-120) - var(--spacing-20));
+    background: linear-gradient(
+      to bottom,
+      var(--color-canvas-warm) 75%,
+      color-mix(in srgb, var(--color-canvas-warm) 0%, transparent)
+    );
+    pointer-events: none;
+  }
+}

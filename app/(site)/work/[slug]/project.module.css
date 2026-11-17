@@ -1,0 +1,410 @@
+.article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+  max-width: var(--content-max-width);
+}
+
+/* Title and facts */
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--spacing-32) var(--spacing-48);
+  align-items: start;
+}
+
+.introMain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-8);
+}
+
+/* Brand moment: the one-liner in Source Serif 4. */
+.lede {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-secondary);
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-lh);
+  color: var(--color-neutral-7);
+  text-wrap: pretty;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-20) var(--spacing-16);
+  margin: 0;
+  padding: var(--spacing-20);
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-1);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+}
+
+.fact dt {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
+}
+
+.fact dd {
+  margin: 0;
+  font-weight: var(--weight-bold);
+}
+
+.factWide {
+  grid-column: 1 / -1;
+}
+
+.logos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+}
+
+/* Every client gets the same box, logo or not. */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--spacing-120) + var(--spacing-12));
+  height: var(--spacing-60);
+  padding: var(--spacing-8) var(--spacing-12);
+  border-radius: var(--radius-sm);
+  background: var(--color-canvas-warm);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  overflow: hidden;
+}
+
+.logo img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.logo span {
+  overflow: hidden;
+  font-size: var(--text-body2-size);
+  font-weight: var(--weight-extrabold);
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* On this page: sticks flush to the top of the scrolling area. The shell pads
+   its content (section gap; 120px on phones), so the sticky offset cancels
+   that padding exactly. */
+.toc {
+  position: sticky;
+  top: calc(var(--section-gap) * -1);
+  z-index: var(--z-float);
+  display: flex;
+  gap: var(--spacing-8);
+  margin: calc(var(--section-gap) / -2) 0;
+  padding: var(--spacing-12) 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--color-canvas-warm);
+  border-bottom: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.toc::-webkit-scrollbar {
+  display: none;
+}
+
+.tocLink {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--spacing-8);
+  padding: var(--spacing-8) var(--spacing-12);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-body2-size);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+/* The section on screen gets the same quiet fill as hover. */
+.tocLink:hover,
+.tocLink[aria-current] {
+  background: var(--color-neutral-1);
+}
+
+.tocLink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset-inset);
+}
+
+.tocNum {
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Each section: number and title on the left, content on the right. */
+.section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+  gap: var(--spacing-16) var(--spacing-48);
+  padding-top: var(--spacing-32);
+  border-top: var(--border-width-sm) solid var(--color-neutral-9);
+  scroll-margin-top: calc(var(--spacing-60) + var(--spacing-20));
+}
+
+/* The first section follows the bar directly: no rule above it. */
+.toc + .section {
+  border-top: 0;
+  padding-top: var(--spacing-16);
+}
+
+.sectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  align-self: start;
+  position: sticky;
+  /* Under the bar: its height, less the shell padding it cancels, plus a gap. */
+  top: calc(var(--spacing-60) + var(--spacing-24) - var(--section-gap));
+}
+
+.sectionNum {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+  font-variant-numeric: tabular-nums;
+}
+
+.h2 {
+  margin: 0;
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-lh);
+}
+
+.sectionBody {
+  min-width: 0;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+}
+
+.stackSm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+.about {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+  font-weight: var(--weight-medium);
+  text-wrap: pretty;
+}
+
+.summary {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-size: var(--text-body1-size);
+  line-height: var(--text-body1-lh);
+  font-weight: var(--weight-bold);
+}
+
+.deliverables {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 2.2)), 1fr));
+  gap: var(--spacing-12);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.deliverables li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-1);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  font-size: var(--text-body2-size);
+  line-height: var(--text-body2-lh-lg);
+}
+
+.deliverableNum {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Card's own p is body2 Neutral-5; project copy reads at Neutral-9. */
+.article .body {
+  color: var(--color-neutral-9);
+  line-height: var(--text-body2-lh-lg);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+}
+
+.steps {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  list-style: none;
+  counter-reset: step;
+  font-size: var(--text-body2-size);
+  line-height: var(--text-body2-lh-lg);
+}
+
+.steps li {
+  position: relative;
+  padding-left: var(--spacing-40);
+  counter-increment: step;
+}
+
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-24);
+  height: var(--spacing-24);
+  border-radius: var(--radius-pill);
+  background: var(--color-fire-bg-strong);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+}
+
+.tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  margin-top: var(--spacing-8);
+  padding-top: var(--spacing-12);
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.toolsLabel {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
+}
+
+.pager {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-16);
+  padding-top: var(--spacing-24);
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.pagerLink {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  transition: background-color var(--duration-fast) var(--ease-standard);
+}
+
+.pagerLink:hover {
+  background: var(--color-neutral-1);
+}
+
+.pagerLink:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.pagerNext {
+  grid-column: 2;
+  text-align: right;
+  align-items: flex-end;
+}
+
+.pagerHint {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+}
+
+.pagerTitle {
+  font-weight: var(--weight-extrabold);
+  font-size: var(--text-h5-size);
+}
+
+@media (max-width: 768px) {
+  /* Stick just under the phone bar behind the floating nav (100px), cancelling the 120px padding. */
+  .toc {
+    top: calc(var(--spacing-20) * -1);
+  }
+}
+
+@media (max-width: 900px) {
+  .intro,
+  .section {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .sectionHead {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .facts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .lede {
+    font-size: var(--text-h4-size);
+    line-height: var(--text-h4-lh);
+  }
+
+  .hero[data-vertical] {
+    padding: var(--spacing-16);
+  }
+
+  .pager {
+    grid-template-columns: 1fr;
+  }
+
+  .pagerNext {
+    grid-column: 1;
+  }
+}

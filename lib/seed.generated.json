@@ -1,0 +1,979 @@
+{
+  "clients": [
+    {
+      "id": "3f70f0dc-9bdf-5380-af65-58531f0b5e20",
+      "name": "Skechers",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 0
+    },
+    {
+      "id": "2ed221dc-fd4d-57fd-a49d-910a6d56ee81",
+      "name": "Cloakwork",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 1
+    },
+    {
+      "id": "218c15ca-e51d-5193-a98b-b23155146d88",
+      "name": "U Mobile",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 2
+    },
+    {
+      "id": "b1ec86dd-26ff-5c89-aa49-2729a3ebb12c",
+      "name": "ShopeePay",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 3
+    },
+    {
+      "id": "95d20bca-5b28-5872-a6fa-c62b7ac360e8",
+      "name": "CelcomDigi",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 4
+    },
+    {
+      "id": "2c7f37f1-419f-5d6f-a614-cf02b4dee70c",
+      "name": "Astro",
+      "logo_url": null,
+      "logo_path": null,
+      "sort_order": 5
+    }
+  ],
+  "categories": [
+    {
+      "id": "4ded96a4-3528-5400-a957-972e26697ab8",
+      "name": "Film",
+      "sort_order": 0
+    },
+    {
+      "id": "43e188ba-b37c-5e92-aa3d-5bf73f77a848",
+      "name": "Key Visual",
+      "sort_order": 1
+    },
+    {
+      "id": "c3656672-6a31-5f0b-aab8-f398bad84b7e",
+      "name": "Microdrama",
+      "sort_order": 2
+    },
+    {
+      "id": "3f802b4d-6ec8-5af7-ae32-4581643173d7",
+      "name": "Brand Campaign",
+      "sort_order": 3
+    },
+    {
+      "id": "665a2c58-bea8-5622-ab17-c6aa1ccbfc02",
+      "name": "Storyboard",
+      "sort_order": 4
+    }
+  ],
+  "tags": [
+    {
+      "id": "be7a5398-f74c-5f08-add6-acc1324c6e9b",
+      "name": "AI film",
+      "type": "capability",
+      "sort_order": 0
+    },
+    {
+      "id": "999f6272-3926-5671-aed5-9ade5e584d1d",
+      "name": "AI characters & talent",
+      "type": "capability",
+      "sort_order": 1
+    },
+    {
+      "id": "9b7403c2-f889-53e4-a873-e391b1937c6d",
+      "name": "Microdrama",
+      "type": "capability",
+      "sort_order": 2
+    },
+    {
+      "id": "85fb6f58-7a85-563e-aa77-16308e826e32",
+      "name": "Key visuals",
+      "type": "capability",
+      "sort_order": 3
+    },
+    {
+      "id": "138c57ce-e6b2-5889-a10d-f040ed5e9b6c",
+      "name": "Brand strategy",
+      "type": "capability",
+      "sort_order": 4
+    },
+    {
+      "id": "9566df68-754b-5542-ac0f-0a09241c928f",
+      "name": "Music & voice",
+      "type": "capability",
+      "sort_order": 5
+    },
+    {
+      "id": "5b6813f2-6392-5ef4-ac27-9631e762522d",
+      "name": "Multi-language versions",
+      "type": "capability",
+      "sort_order": 6
+    },
+    {
+      "id": "0e1dfe3c-b997-5ef0-a969-1db079640557",
+      "name": "Veo 3.1",
+      "type": "tool",
+      "sort_order": 0
+    },
+    {
+      "id": "e4e4c154-74b4-5254-a221-ca5b9be7b4b3",
+      "name": "Suno",
+      "type": "tool",
+      "sort_order": 1
+    },
+    {
+      "id": "526313b5-fa3b-5fa6-a780-d4129b1ae451",
+      "name": "Topaz",
+      "type": "tool",
+      "sort_order": 2
+    },
+    {
+      "id": "0abb8b12-5a92-5800-abc0-4817c7647e2e",
+      "name": "Higgsfield",
+      "type": "tool",
+      "sort_order": 3
+    }
+  ],
+  "projects": [
+    {
+      "id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "slug": "skechers-cloakwork-merch-film",
+      "title": "Skechers × Cloakwork Merch Film",
+      "client_ids": [
+        "3f70f0dc-9bdf-5380-af65-58531f0b5e20",
+        "2ed221dc-fd4d-57fd-a49d-910a6d56ee81"
+      ],
+      "category_ids": [
+        "4ded96a4-3528-5400-a957-972e26697ab8"
+      ],
+      "tag_ids": [
+        "be7a5398-f74c-5f08-add6-acc1324c6e9b",
+        "999f6272-3926-5671-aed5-9ade5e584d1d",
+        "85fb6f58-7a85-563e-aa77-16308e826e32",
+        "9566df68-754b-5542-ac0f-0a09241c928f"
+      ],
+      "year": 2026,
+      "status": "live",
+      "status_note": null,
+      "one_liner": "A four-part character film where T-shirt art comes alive in 2D animation.",
+      "about": "Hero and teaser videos for the SKECHERS SKECHVIBE × Cloakwork launch.",
+      "output_summary": "60s hero film, 3 teasers, key visual, 24 product stills",
+      "capabilities_summary": "Four-part character story, live-action look mixed with 2D animation, print and social assets",
+      "workflow_label": null,
+      "featured": true,
+      "featured_order": 0,
+      "sort_order": 0,
+      "visibility": "published",
+      "is_internal": false,
+      "cover_media_id": "2df7c2f3-079d-5fe9-a448-d37e63a64ebc",
+      "hero_media_id": "2df7c2f3-079d-5fe9-a448-d37e63a64ebc",
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "slug": "umobile-prepaid-ultra-superhero-5g",
+      "title": "UMobile Prepaid ULTRA Superhero 5G",
+      "client_ids": [
+        "218c15ca-e51d-5193-a98b-b23155146d88"
+      ],
+      "category_ids": [
+        "4ded96a4-3528-5400-a957-972e26697ab8"
+      ],
+      "tag_ids": [
+        "be7a5398-f74c-5f08-add6-acc1324c6e9b",
+        "999f6272-3926-5671-aed5-9ade5e584d1d",
+        "9566df68-754b-5542-ac0f-0a09241c928f",
+        "5b6813f2-6392-5ef4-ac27-9631e762522d"
+      ],
+      "year": 2026,
+      "status": "live",
+      "status_note": null,
+      "one_liner": "Three AI superheroes launch Prepaid ULTRA across TV, OOH and retail.",
+      "about": "Announce the launch of Prepaid ULTRA in April with an AI-generated launch video for TVC, addressable TV, OOH and retail displays.",
+      "output_summary": "30s launch video and cutdowns, English and BM, 4K",
+      "capabilities_summary": "AI characters and world-building, custom soundtrack, multi-language and multi-format versions",
+      "workflow_label": null,
+      "featured": true,
+      "featured_order": 1,
+      "sort_order": 1,
+      "visibility": "published",
+      "is_internal": false,
+      "cover_media_id": "440fd1e5-306c-53ba-a241-09cf76ed8f02",
+      "hero_media_id": "440fd1e5-306c-53ba-a241-09cf76ed8f02",
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "slug": "umobile-family-first-airplane",
+      "title": "UMobile Family 1st (Airplane)",
+      "client_ids": [
+        "218c15ca-e51d-5193-a98b-b23155146d88"
+      ],
+      "category_ids": [
+        "43e188ba-b37c-5e92-aa3d-5bf73f77a848"
+      ],
+      "tag_ids": [
+        "be7a5398-f74c-5f08-add6-acc1324c6e9b",
+        "999f6272-3926-5671-aed5-9ade5e584d1d",
+        "85fb6f58-7a85-563e-aa77-16308e826e32",
+        "9566df68-754b-5542-ac0f-0a09241c928f",
+        "5b6813f2-6392-5ef4-ac27-9631e762522d",
+        "0e1dfe3c-b997-5ef0-a969-1db079640557",
+        "e4e4c154-74b4-5254-a221-ca5b9be7b4b3",
+        "526313b5-fa3b-5fa6-a780-d4129b1ae451",
+        "0abb8b12-5a92-5800-abc0-4817c7647e2e"
+      ],
+      "year": 2026,
+      "status": "live",
+      "status_note": null,
+      "one_liner": "A mother and son in business class, cast and filmed entirely with AI.",
+      "about": "Main key visual in two versions plus a 30s video, set on a business class flight, warm and cosy.",
+      "output_summary": "Key visuals for West and East Coast, 30s film, music and voice-over options",
+      "capabilities_summary": "AI-generated pan-Asian talent, culturally tailored versions, film with music, VO and SFX",
+      "workflow_label": null,
+      "featured": true,
+      "featured_order": 2,
+      "sort_order": 2,
+      "visibility": "published",
+      "is_internal": false,
+      "cover_media_id": "193658a3-ec21-59f9-a4ed-f5e4c4f30863",
+      "hero_media_id": "193658a3-ec21-59f9-a4ed-f5e4c4f30863",
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "slug": "shopeepay-master-brand-campaign",
+      "title": "ShopeePay Master Brand Campaign",
+      "client_ids": [
+        "b1ec86dd-26ff-5c89-aa49-2729a3ebb12c"
+      ],
+      "category_ids": [
+        "3f802b4d-6ec8-5af7-ae32-4581643173d7"
+      ],
+      "tag_ids": [
+        "138c57ce-e6b2-5889-a10d-f040ed5e9b6c",
+        "85fb6f58-7a85-563e-aa77-16308e826e32",
+        "5b6813f2-6392-5ef4-ac27-9631e762522d"
+      ],
+      "year": 2026,
+      "status": "in_progress",
+      "status_note": null,
+      "one_liner": "One masterline, \"More Value in Every Way\", in two key visual directions.",
+      "about": "Two distinct key visual directions, each with a moodboard, palette, typography and keywords. Keep Shopee's generosity but lose the sale-event look: more trust than playfulness.",
+      "output_summary": "Brand strategy, masterline and 2 key visual directions",
+      "capabilities_summary": "Positioning, two visual directions, masterline in English, BM and Chinese",
+      "workflow_label": "How it was built",
+      "featured": false,
+      "featured_order": 0,
+      "sort_order": 3,
+      "visibility": "published",
+      "is_internal": false,
+      "cover_media_id": null,
+      "hero_media_id": null,
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "slug": "celcomdigi-scam-call-protection",
+      "title": "CelcomDigi Scam Call Protection",
+      "client_ids": [
+        "95d20bca-5b28-5872-a6fa-c62b7ac360e8"
+      ],
+      "category_ids": [
+        "c3656672-6a31-5f0b-aab8-f398bad84b7e"
+      ],
+      "tag_ids": [
+        "9b7403c2-f889-53e4-a873-e391b1937c6d",
+        "999f6272-3926-5671-aed5-9ade5e584d1d",
+        "be7a5398-f74c-5f08-add6-acc1324c6e9b"
+      ],
+      "year": 2026,
+      "status": "approved",
+      "status_note": "Episode 1",
+      "one_liner": "A vertical microdrama series where every episode is a scam to pause on.",
+      "about": "A friendly reminder, not a hard sell: scam-protection stories from real scenarios, with CelcomDigi as the network that has your back.",
+      "output_summary": "Vertical drama series concept, Episode 1 film (60s) horizontal and vertical",
+      "capabilities_summary": "AI microdrama with character motion and lip-sync, built to client brand rules",
+      "workflow_label": null,
+      "featured": false,
+      "featured_order": 0,
+      "sort_order": 4,
+      "visibility": "published",
+      "is_internal": false,
+      "cover_media_id": null,
+      "hero_media_id": null,
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    },
+    {
+      "id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "slug": "astro-whats-next",
+      "title": "Astro What's Next (Internal)",
+      "client_ids": [
+        "2c7f37f1-419f-5d6f-a614-cf02b4dee70c"
+      ],
+      "category_ids": [
+        "665a2c58-bea8-5622-ab17-c6aa1ccbfc02"
+      ],
+      "tag_ids": [
+        "be7a5398-f74c-5f08-add6-acc1324c6e9b"
+      ],
+      "year": 2026,
+      "status": "concept",
+      "status_note": null,
+      "one_liner": "A day in the life of Adam, told in 23 Wes Anderson-style frames.",
+      "about": "A first-person day of \"Adam\", 6:30 AM to 10:30 PM, with a cheeky narrator commenting on his phone habits.",
+      "output_summary": "23-frame storyboard for a day-in-the-life film",
+      "capabilities_summary": "First-person storytelling, Wes Anderson-style look, brand placement inside scenes",
+      "workflow_label": "How it was built",
+      "featured": false,
+      "featured_order": 0,
+      "sort_order": 5,
+      "visibility": "published",
+      "is_internal": true,
+      "cover_media_id": null,
+      "hero_media_id": null,
+      "created_at": "2026-11-17T00:00:00.000Z",
+      "updated_at": "2026-11-17T00:00:00.000Z",
+      "deleted_at": null
+    }
+  ],
+  "overview_blocks": [
+    {
+      "id": "ace36152-53e4-5e1d-a6e4-e7da55f761af",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "label": "Big idea",
+      "body": "\"Skech Your Vibe\": creative freedom found anywhere, from city alleys to the beach to street music. Tagline: \"Skech in style, feel the vibe.\"",
+      "sort_order": 0
+    },
+    {
+      "id": "f705cefe-0cb7-557f-ad0a-f1e87be5a06d",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "label": "Story",
+      "body": "One character's journey in four parts: alley, beach, busking band and night city. His T-shirt artwork turns into 2D animation at each stop.",
+      "sort_order": 1
+    },
+    {
+      "id": "de84ce4b-9748-51a9-a443-ff61ad3f83aa",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "label": "Look and cast",
+      "body": "Stylised cinematic realism, with a live-action look mixed with animated 2D Cloakwork artwork. 8 characters: 6 male, 2 female.",
+      "sort_order": 2
+    },
+    {
+      "id": "c04043c5-3ff6-5ced-adb6-78f81e4f2ca5",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "label": "Timeline",
+      "body": "Storyboard 10 Jun to final approval 23 Jun 2026; client review rounds to 10 Jul 2026.",
+      "sort_order": 3
+    },
+    {
+      "id": "0eb696ce-4c10-5ca3-a408-85df8a583701",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "label": "Audience",
+      "body": "Young generation: rural mass on the East Coast, and urban households in the Klang Valley.",
+      "sort_order": 0
+    },
+    {
+      "id": "05ae3225-3949-5e00-a6d7-3efbbcc27d28",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "label": "Big idea",
+      "body": "Superhero-film energy with human-like characters in forward-futuristic fashion, training their abilities. Pillars: Fashion, Action, Attitude.",
+      "sort_order": 1
+    },
+    {
+      "id": "8fe412d8-12e3-539d-ab96-e89f70b7094c",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "label": "Look and cast",
+      "body": "Stylised reality in a bright orange-sky metropolis, never dark or dystopian. 3 AI characters: The Charger, The Breaker, The Mover.",
+      "sort_order": 2
+    },
+    {
+      "id": "be676130-96ff-5269-ad34-3d117202f33d",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "label": "Timeline",
+      "body": "Brief 25 Mar 2026, final approval 10 Apr, live 13 Apr; language and format submissions to 13 May 2026.",
+      "sort_order": 3
+    },
+    {
+      "id": "a43b31af-4c84-5559-af16-42743f041327",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "label": "Big idea",
+      "body": "\"Because family comes first, we made priority shareable.\" UMobile ULTRA sits alongside premium choices like flying business class.",
+      "sort_order": 0
+    },
+    {
+      "id": "4d1c37f1-aef3-58ac-a4d7-275ff40794dc",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "label": "Cast",
+      "body": "A mother in her late 20s and her 2-year-old son, with a pan-Asian look for Malay and Chinese audiences.",
+      "sort_order": 1
+    },
+    {
+      "id": "f1920ae9-6b61-56b3-adc2-7f8e41fe7670",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "label": "Versions",
+      "body": "West Coast: the approved key visual. East Coast: a modern tudung or hijab look for the T20 audience.",
+      "sort_order": 2
+    },
+    {
+      "id": "eca38df9-27fd-51db-a152-1cfc6ffcb10a",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "label": "Timeline",
+      "body": "Hi-res key visual due 12 Mar 2026, launch 7 Apr 2026. One year in Malaysia across BTL, digital, web, social and on-ground.",
+      "sort_order": 3
+    },
+    {
+      "id": "6686ff1d-c871-5bf3-a4cb-a92b1935997b",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "label": "Big idea",
+      "body": "\"More Value in Every Way\" across more rewards (QR Pay), more flexibility (SPayLater) and more potential returns (Money+).",
+      "sort_order": 0
+    },
+    {
+      "id": "47442940-6510-51fc-a23f-2c3c8ba02c09",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "label": "Two directions",
+      "body": "Say \"More\" Boldly: big type with lifestyle photography. The Infinite \"More\": a flowing wave headline with warm everyday moments.",
+      "sort_order": 1
+    },
+    {
+      "id": "e0c74bcb-5b4b-56cc-a872-fe557c957ccd",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "label": "Big idea",
+      "body": "\"When Life Gives You Twists\": vertical dramas inspired by Chinese and Korean TikTok dramas. Melodramatic, humorous and fast-paced.",
+      "sort_order": 0
+    },
+    {
+      "id": "42d525fd-bfc9-5796-a645-041d13889b77",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "label": "Series",
+      "body": "4 episodes, one scam each: fake job, lucky draw, investment and love scam. The message: scams prey on emotions, so pause.",
+      "sort_order": 1
+    },
+    {
+      "id": "b3e8d112-6596-5e08-adbd-bf14da240436",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "label": "Second concept",
+      "body": "\"Shadow Lines\", a Black Mirror-inspired suspense series around phone screens and SMS threads.",
+      "sort_order": 2
+    },
+    {
+      "id": "036f087d-882e-59b3-ac36-d2a822a17cdd",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "label": "Timeline",
+      "body": "Reviews 28 Aug to 14 Sep 2026; vertical version 28 Sep 2026.",
+      "sort_order": 3
+    },
+    {
+      "id": "88ca2933-9986-5e26-ab0d-267655f252b6",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "label": "Astro touchpoints",
+      "body": "Stadium Astro, Syok podcast, Sooka, KULT Offside, Awani and AstroGO's Ikatan Terlarang.",
+      "sort_order": 0
+    },
+    {
+      "id": "c6a91a99-27f0-5cc2-a912-ecdfd060a332",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "label": "Story arc",
+      "body": "It starts and ends in bed on his phone; a watch timelapse from Casio to Rolex shows career growth.",
+      "sort_order": 1
+    },
+    {
+      "id": "286e5bce-5fe9-57a3-a4f2-18e6e2082742",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "label": "Look and sound",
+      "body": "Wes Anderson cinematography and palettes, with ASMR cues: clock flips, shower, train doors.",
+      "sort_order": 2
+    },
+    {
+      "id": "2d897aab-23d3-551e-a364-3d76e0b617bb",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "label": "Brand placement",
+      "body": "A U Mobile billboard seen from the train, and Mamee cup noodles at lunch.",
+      "sort_order": 3
+    }
+  ],
+  "list_items": [
+    {
+      "id": "18c23e4d-b672-5d44-a589-557025225cad",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "deliverable",
+      "text": "60s hero film built from four 15s parts, in 4K horizontal and vertical (1080 × 1920)",
+      "sort_order": 0
+    },
+    {
+      "id": "859e0cd3-ff29-5d28-ac27-a1eed33105a2",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "deliverable",
+      "text": "3 teaser videos, 15s each",
+      "sort_order": 1
+    },
+    {
+      "id": "69a64d17-dca9-55f5-afe9-6dc4196c79a8",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "deliverable",
+      "text": "4K key visual adapted from the hero film end frame",
+      "sort_order": 2
+    },
+    {
+      "id": "85162091-06c1-5af9-a200-673bcc68a2a6",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "deliverable",
+      "text": "24 product stills: 6 angles × 4 formats (IG 1080 × 1350, 1:1, A1 vertical, A1 horizontal)",
+      "sort_order": 3
+    },
+    {
+      "id": "42239e9a-b9a4-5318-a337-0bb909812dea",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "deliverable",
+      "text": "Animated (6s) and static campaign mastheads",
+      "sort_order": 4
+    },
+    {
+      "id": "5d8f4af9-5de5-5b34-a2ff-e8aff615bedc",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "ai_workflow",
+      "text": "Brief to script with LLM grounding, then an AI storyboard",
+      "sort_order": 0
+    },
+    {
+      "id": "c7340c28-24d9-5084-a9e4-bacd847514ba",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "ai_workflow",
+      "text": "AI video generation, AI editing, AI voice and music",
+      "sort_order": 1
+    },
+    {
+      "id": "53ac6d27-d4e3-5958-a592-66e8e93e8f82",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "ai_workflow",
+      "text": "Client sign-off on the storyboard before generation starts",
+      "sort_order": 2
+    },
+    {
+      "id": "52ed7cfa-7274-5d6d-abb7-bbfaff8d8e41",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "ai_workflow",
+      "text": "Part-by-part reviews as each 15s section is ready",
+      "sort_order": 3
+    },
+    {
+      "id": "b6602bdc-a386-5918-a73a-695eabed0ae8",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "type": "ai_workflow",
+      "text": "Changes made by re-prompting, not reshooting",
+      "sort_order": 4
+    },
+    {
+      "id": "6e567417-1ad0-5c11-aeac-246a9bee00a9",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "deliverable",
+      "text": "30s main video with 20s and 15s cutdowns",
+      "sort_order": 0
+    },
+    {
+      "id": "8fbad097-2494-56e1-a31a-3142ab494ab8",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "deliverable",
+      "text": "English and Bahasa Malaysia versions of every cut",
+      "sort_order": 1
+    },
+    {
+      "id": "96777723-6b2a-5fbd-a35e-91d1a42c05d5",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "deliverable",
+      "text": "4K, 25 fps, TVC-ready, in horizontal and vertical",
+      "sort_order": 2
+    },
+    {
+      "id": "c163ca92-ce9a-5633-ab26-5591d49fc26e",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "deliverable",
+      "text": "Custom AI soundtrack with English and BM lyrics",
+      "sort_order": 3
+    },
+    {
+      "id": "99f77e65-c23f-52b0-a931-c889a034e91f",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "deliverable",
+      "text": "Character prompts documented for LPF submission",
+      "sort_order": 4
+    },
+    {
+      "id": "8836b801-8ccf-54f8-a478-970d8f410382",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "ai_workflow",
+      "text": "Three AI characters designed, with outfit and face options",
+      "sort_order": 0
+    },
+    {
+      "id": "9c280bae-3216-567a-a0fd-6820194a6f6c",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "ai_workflow",
+      "text": "Two city worlds explored",
+      "sort_order": 1
+    },
+    {
+      "id": "fa7476f9-f519-553b-af4f-57791244e018",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "ai_workflow",
+      "text": "Music options reviewed, from cinematic trailer to electronic rock",
+      "sort_order": 2
+    },
+    {
+      "id": "e8603b0f-ae6f-561d-a421-35b94386dc64",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "ai_workflow",
+      "text": "Storyboard, then 10s sections for approval, then the full 30s",
+      "sort_order": 3
+    },
+    {
+      "id": "ed69d941-f18e-5401-ad0b-4dff29328544",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "type": "ai_workflow",
+      "text": "Language and format versions in the final rounds",
+      "sort_order": 4
+    },
+    {
+      "id": "afd711bd-cfcc-555b-af4c-bdf93d9e5d18",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "deliverable",
+      "text": "Key visual in West Coast and East Coast versions",
+      "sort_order": 0
+    },
+    {
+      "id": "c78d071f-a8cb-56d2-a000-3f20dd948c6d",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "deliverable",
+      "text": "Key visual in 16:9, 4:5 and 9:16",
+      "sort_order": 1
+    },
+    {
+      "id": "f794ee45-6cd3-51fb-a82f-dc39751ad057",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "deliverable",
+      "text": "30s film in 6 shot blocks, ending on a sunrise call-to-action",
+      "sort_order": 2
+    },
+    {
+      "id": "6fb47941-cdd2-5171-a605-c2aeb52be6b1",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "deliverable",
+      "text": "3 music options",
+      "sort_order": 3
+    },
+    {
+      "id": "2f75fc61-4c4e-5be3-ae10-7b88cf8c3632",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "deliverable",
+      "text": "Voice-over in English, BM and Chinese, plus sound effects",
+      "sort_order": 4
+    },
+    {
+      "id": "440eec4a-71c9-5f3f-aae8-acf243628c75",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "ai_workflow",
+      "text": "Persona sheets for Maya (mother) and Danial (son)",
+      "sort_order": 0
+    },
+    {
+      "id": "6bd0d122-a5bb-5b99-a290-182e3b5afdd4",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "ai_workflow",
+      "text": "Storyboard stills with alternate angles to keep faces consistent",
+      "sort_order": 1
+    },
+    {
+      "id": "d44262eb-8c5b-5b76-ad19-f30b7cb72b97",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "ai_workflow",
+      "text": "Video in Veo 3.1 for 4K, or upscaled with Topaz in Higgsfield",
+      "sort_order": 2
+    },
+    {
+      "id": "70419f37-2ede-5772-a6a9-6f52485e29a5",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "ai_workflow",
+      "text": "Music made in Suno",
+      "sort_order": 3
+    },
+    {
+      "id": "40fc69bb-bd26-5e60-aa3a-d45ab63444d8",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "type": "ai_workflow",
+      "text": "Shot-by-shot plan with camera moves and timing",
+      "sort_order": 4
+    },
+    {
+      "id": "187fd5f6-2f66-56c3-abe6-c1206b083f99",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "deliverable",
+      "text": "Master brand strategy",
+      "sort_order": 0
+    },
+    {
+      "id": "891ed909-f2b4-51ab-a815-242faeb4a1b5",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "deliverable",
+      "text": "Masterline in English, BM and Chinese",
+      "sort_order": 1
+    },
+    {
+      "id": "694b03e8-5f6e-50a1-adee-6ebf7377a94f",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "deliverable",
+      "text": "Direction 1, Say \"More\" Boldly, in 4 options",
+      "sort_order": 2
+    },
+    {
+      "id": "cb7fbbf6-4aab-5c53-ad30-16ad759eda5b",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "deliverable",
+      "text": "Direction 2, The Infinite \"More\", with its own tone and palette",
+      "sort_order": 3
+    },
+    {
+      "id": "119f4fa0-f30b-5af3-ac2e-4db16f5f7c33",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "deliverable",
+      "text": "Palette, typography and tone for each direction",
+      "sort_order": 4
+    },
+    {
+      "id": "e1085351-c872-5d2b-ab59-5b0df201aefd",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "ai_workflow",
+      "text": "Market context from Ipsos Malaysia (Aug 2026)",
+      "sort_order": 0
+    },
+    {
+      "id": "b5fdca5d-31c3-5113-a4fd-9bca9ba5988a",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "ai_workflow",
+      "text": "Competitor read of Touch 'n Go, MAE and GrabPay",
+      "sort_order": 1
+    },
+    {
+      "id": "0b063e27-74f9-5974-af39-9d48b906729a",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "ai_workflow",
+      "text": "Shopee and ShopeePay set as two identities with the same DNA",
+      "sort_order": 2
+    },
+    {
+      "id": "2646b912-0327-59d7-a625-4df1129ded36",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "ai_workflow",
+      "text": "A shift to one idea: More",
+      "sort_order": 3
+    },
+    {
+      "id": "664c52d3-79c5-5d21-ab4b-8e23d5485a3c",
+      "project_id": "d772ee24-5b88-5877-aa2c-7d9f7b25c0b1",
+      "type": "ai_workflow",
+      "text": "Lifestyle photography with large type",
+      "sort_order": 4
+    },
+    {
+      "id": "f6c45e96-ccfd-5cf7-a41b-2100d6c5a8be",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "deliverable",
+      "text": "Episode 1, \"The Ominous Offer\": 22-frame storyboard and a 60s film",
+      "sort_order": 0
+    },
+    {
+      "id": "9de3a2db-8d76-5bac-accb-77a392476794",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "deliverable",
+      "text": "Horizontal (1920 × 1080) and vertical (1080 × 1920) versions",
+      "sort_order": 1
+    },
+    {
+      "id": "2eb9ad80-3ae6-5e0a-a8ac-34acdc7aae13",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "deliverable",
+      "text": "Client end screen, logo lockup and scam statistic",
+      "sort_order": 2
+    },
+    {
+      "id": "d1d5edcf-adcd-549e-a82a-c950ba7ac16a",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "deliverable",
+      "text": "Storylines for episodes 2 to 4",
+      "sort_order": 3
+    },
+    {
+      "id": "46285dc0-8270-536f-a6c6-298deb50bad5",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "deliverable",
+      "text": "Cinematic look, warm daylight turning cooler as the scam unfolds",
+      "sort_order": 4
+    },
+    {
+      "id": "1dfb9e88-d8e9-5cf6-acd5-9862d2c8781a",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "ai_workflow",
+      "text": "Phase 1, sign-off: storyboard and frame lock",
+      "sort_order": 0
+    },
+    {
+      "id": "d994d0bf-f235-5278-ad70-905c7b44f145",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "ai_workflow",
+      "text": "Phase 2, execution: AI image and video, character motion and consistency",
+      "sort_order": 1
+    },
+    {
+      "id": "1dc5f2cc-bf47-5d33-a348-9c5eee07639a",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "ai_workflow",
+      "text": "Phase 3, delivery: edit, grade, audio, lip-sync and masters",
+      "sort_order": 2
+    },
+    {
+      "id": "9b7de2bd-5add-5dfc-a159-4fafb816f7a2",
+      "project_id": "5e29e069-00ae-527b-a8b6-64bb6db68e46",
+      "type": "ai_workflow",
+      "text": "Characters, lighting and composition locked early",
+      "sort_order": 3
+    },
+    {
+      "id": "63d5d417-1c7b-5759-ac5a-db749326afe2",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "deliverable",
+      "text": "23-frame storyboard with script, camera note and sound cue per frame",
+      "sort_order": 0
+    },
+    {
+      "id": "0d5f3d14-38bd-5dad-a3e4-09c4f3fd5905",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "deliverable",
+      "text": "Style reference board",
+      "sort_order": 1
+    },
+    {
+      "id": "1ca54735-34df-5621-aa03-c06f34a20510",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "deliverable",
+      "text": "Alternate stills: bedroom, office lunch, train and kitchen",
+      "sort_order": 2
+    },
+    {
+      "id": "f37c06fb-bc44-53ab-abbf-e374b2313596",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "deliverable",
+      "text": "Final video length and format to be confirmed",
+      "sort_order": 3
+    },
+    {
+      "id": "de67e75e-37de-5c2b-ae25-ce8e6f4fdc08",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "ai_workflow",
+      "text": "Style reference set first",
+      "sort_order": 0
+    },
+    {
+      "id": "9fbcd835-5352-5839-a2be-e58737f461c0",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "ai_workflow",
+      "text": "POV shots: phone, laptop, train window, car",
+      "sort_order": 1
+    },
+    {
+      "id": "342b34b3-6388-54a8-a35a-e0f636776b3f",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "ai_workflow",
+      "text": "Scene replacements noted per frame",
+      "sort_order": 2
+    },
+    {
+      "id": "fea64f44-60b4-52b6-abdf-265969560dcf",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "ai_workflow",
+      "text": "Time-of-day markers tie the frames into one day",
+      "sort_order": 3
+    },
+    {
+      "id": "7de34f7d-2c89-505c-a0c2-492be3685383",
+      "project_id": "f6e59981-235c-51ee-a383-9034aede7f2c",
+      "type": "ai_workflow",
+      "text": "Review comments marked on frames",
+      "sort_order": 4
+    }
+  ],
+  "media": [
+    {
+      "id": "2df7c2f3-079d-5fe9-a448-d37e63a64ebc",
+      "project_id": "db27acde-e638-5f6e-a4e1-b36501661b91",
+      "kind": "image",
+      "url": "/seed/skechers-cloakwork.jpg",
+      "storage_path": null,
+      "aspect": "16:9",
+      "caption": null,
+      "sort_order": 0,
+      "created_at": "2026-11-17T00:00:00.000Z"
+    },
+    {
+      "id": "440fd1e5-306c-53ba-a241-09cf76ed8f02",
+      "project_id": "eae963eb-14a8-5e6e-a711-cc63ec75c51c",
+      "kind": "image",
+      "url": "/seed/umobile-ultra.jpg",
+      "storage_path": null,
+      "aspect": "16:9",
+      "caption": null,
+      "sort_order": 0,
+      "created_at": "2026-11-17T00:00:00.000Z"
+    },
+    {
+      "id": "193658a3-ec21-59f9-a4ed-f5e4c4f30863",
+      "project_id": "3838ffd4-2370-528e-a0a0-bb85caa7a0e5",
+      "kind": "image",
+      "url": "/seed/umobile-family-first.jpg",
+      "storage_path": null,
+      "aspect": "16:9",
+      "caption": null,
+      "sort_order": 0,
+      "created_at": "2026-11-17T00:00:00.000Z"
+    }
+  ],
+  "settings": [
+    {
+      "key": "hero_title",
+      "value": "AI Creative Showcase"
+    },
+    {
+      "key": "hero_intro",
+      "value": "KULT makes films, characters, key visuals and brand campaigns with AI, from the first brief to the final master."
+    },
+    {
+      "key": "showreel",
+      "value": null
+    },
+    {
+      "key": "contact_email",
+      "value": "hello@kult.studio"
+    },
+    {
+      "key": "contact_phone",
+      "value": ""
+    },
+    {
+      "key": "contact_address",
+      "value": "Kuala Lumpur, Malaysia"
+    }
+  ]
+}

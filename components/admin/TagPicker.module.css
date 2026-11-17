@@ -1,0 +1,150 @@
+/* Pick-or-add field. Matches Input field's box and Dropdown's panel, tokens only.
+   TODO(design-system: no creatable combobox). */
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  min-width: 0;
+}
+
+.label {
+  font-size: var(--text-label1-size);
+  font-weight: var(--text-label1-weight);
+  color: var(--color-neutral-9);
+}
+
+.required {
+  margin-left: var(--spacing-4);
+  font-weight: var(--weight-bold);
+  color: var(--color-red);
+}
+
+.box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-height-md);
+  padding: 0 var(--spacing-40);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-1);
+  font: inherit;
+  font-size: var(--text-body2-size);
+  color: var(--color-neutral-9);
+}
+
+.input::placeholder {
+  color: var(--color-neutral-5);
+  opacity: 1;
+}
+
+/* A single pick shows its value as the placeholder until you type. */
+.box[data-filled] .input::placeholder {
+  color: var(--color-neutral-9);
+}
+
+.input:focus {
+  outline: none;
+  border-width: var(--border-width-md);
+  border-color: var(--color-obsidian);
+  padding: 0 calc(var(--spacing-40) - var(--border-width-sm));
+}
+
+.field[data-error] .input {
+  border-color: var(--color-red);
+}
+
+.icon,
+.caret {
+  position: absolute;
+  font-size: var(--icon-sm);
+  color: var(--color-neutral-5);
+  pointer-events: none;
+}
+
+.icon {
+  left: var(--spacing-12);
+}
+
+.caret {
+  right: var(--spacing-12);
+  transition: transform var(--duration-fast) var(--ease-standard);
+}
+
+.box[data-open] .caret {
+  transform: rotate(180deg);
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + var(--spacing-4));
+  left: 0;
+  right: 0;
+  z-index: var(--z-menu);
+  max-height: calc(var(--spacing-120) * 2.4);
+  margin: 0;
+  padding: var(--spacing-4);
+  overflow-y: auto;
+  list-style: none;
+  background: var(--color-neutral-1);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-3);
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  min-height: var(--control-height-md);
+  padding: 0 var(--spacing-12);
+  border-radius: var(--radius-xs);
+  font-size: var(--text-body2-size);
+  cursor: pointer;
+}
+
+.option[data-active] {
+  background: var(--color-neutral-2);
+}
+
+.option[aria-selected='true'] {
+  font-weight: var(--weight-bold);
+}
+
+.check {
+  display: inline-flex;
+  width: var(--icon-sm);
+  font-size: var(--icon-sm);
+}
+
+.create {
+  margin-top: var(--spacing-4);
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+  border-radius: 0 0 var(--radius-xs) var(--radius-xs);
+  font-weight: var(--weight-bold);
+}
+
+.empty {
+  padding: var(--spacing-12);
+  font-size: var(--text-body2-size);
+  color: var(--color-neutral-5);
+}
+
+.helper {
+  margin: 0;
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+}
+
+.field[data-error] .helper {
+  font-weight: var(--weight-bold);
+  color: var(--color-red);
+}

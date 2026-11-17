@@ -1,0 +1,72 @@
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  align-items: end;
+  gap: var(--spacing-40);
+  margin-top: var(--section-gap);
+}
+
+/* Brand moment: the one place Source Serif 4 appears. */
+.statement {
+  margin: 0;
+  max-width: var(--measure-prose);
+  font-family: var(--font-secondary);
+  font-size: var(--text-h1-size-lg);
+  line-height: var(--text-h1-lh-lg);
+  font-weight: var(--weight-regular);
+  color: var(--color-neutral-9);
+  text-wrap: balance;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-24) var(--spacing-16);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding-top: var(--spacing-16);
+  border-top: var(--border-width-sm) solid var(--color-neutral-9);
+}
+
+.figure {
+  font-size: var(--text-display-size-lg);
+  line-height: var(--text-display-lh);
+  font-weight: var(--weight-black);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  font-size: var(--text-body2-size);
+  color: var(--color-neutral-5);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+  margin-top: var(--section-gap);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
+}
+
+@media (max-width: 767px) {
+  .intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .statement {
+    font-size: var(--text-h2-size);
+    line-height: var(--text-h2-lh);
+  }
+}

@@ -1,0 +1,61 @@
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.client {
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-5);
+}
+
+/* Our wrapper around the Card: fills its grid cell and rises in as it scrolls into view. */
+.reveal {
+  display: flex;
+}
+
+.reveal > * {
+  flex: 1;
+}
+
+/* The cover leans in when the card is hovered. */
+.media {
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.media img,
+.media video {
+  transition: transform var(--duration-slow) var(--ease-settle);
+}
+
+.reveal:hover .media img,
+.reveal:hover .media video {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 60%;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal:hover .media img,
+  .reveal:hover .media video {
+    transform: none;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--spacing-24)) scale(0.98);
+  }
+}

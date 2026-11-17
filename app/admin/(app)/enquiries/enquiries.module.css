@@ -1,0 +1,40 @@
+.unread {
+  font-weight: var(--weight-extrabold);
+}
+
+.snippet {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-width: calc(var(--spacing-120) * 3);
+  color: var(--color-neutral-5);
+}
+
+.detail {
+  display: grid;
+  gap: var(--spacing-4);
+  margin: 0;
+}
+
+.detail dt {
+  margin-top: var(--spacing-12);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
+}
+
+.detail dt:first-child {
+  margin-top: 0;
+}
+
+.detail dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.message {
+  white-space: pre-wrap;
+}
