@@ -275,13 +275,13 @@ export default function ProjectsPage() {
               count: featured.length,
               content: (
                 <div className={styles.stackSm}>
-                  <p className={styles.muted}>The home page shows featured projects in this order. Drag to change it.</p>
+                  <p className={styles.muted}>Only featured projects play in the home page banner, in this order. Drag to change it.</p>
                   {featured.length ? (
                     <Card padding="list">
                       <SortableList items={featured} label={(r) => r.title} showPosition onReorder={(n) => reorder(n, 'featured_order')} renderItem={orderRow} />
                     </Card>
                   ) : (
-                    <InfoBanner tone="info">Nothing is featured yet. Turn on Featured for a project in All projects.</InfoBanner>
+                    <InfoBanner tone="info">Nothing is featured yet, so the home page banner shows all published work. Turn on Featured for a project in All projects.</InfoBanner>
                   )}
                 </div>
               ),

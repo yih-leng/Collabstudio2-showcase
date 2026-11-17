@@ -372,7 +372,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
               value={p.visibility}
               onValueChange={(v) => set('visibility', v as Visibility)}
             />
-            <Switch label="Featured" description="Show it first in the home page banner" checked={p.featured} onChange={(e) => set('featured', e.target.checked)} />
+            <Switch label="Featured" description="Show it in the home page banner" checked={p.featured} onChange={(e) => set('featured', e.target.checked)} />
             <Switch
               label="Internal or confidential"
               description="Only signed-in team members can see it, even when published"

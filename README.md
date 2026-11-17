@@ -125,9 +125,9 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
    show to signed-in admins).
 4. Set Visibility to **Published** and **Save**. It's live.
 
-**Ordering.** Projects → **Featured order** sets which work plays first in
-the home page banner (featured work leads, then everything else in site
-order); **Site order** sets the Our Works page and next/previous links. Drag the
+**Ordering.** Projects → **Featured order** sets the order of the home page
+banner, which plays featured projects only (if nothing is featured, it shows
+all published work); **Site order** sets the Our Works page and next/previous links. Drag the
 handle, or focus it and use Space and the arrow keys.
 
 **Deleting.** **Trash** takes a project off the site but keeps everything;

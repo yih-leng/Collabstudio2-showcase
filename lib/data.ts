@@ -93,11 +93,10 @@ export async function getHomeData() {
   const [projects, lists, settings] = await Promise.all([getVisibleProjects(), getLists(), getSettings()]);
   const published = projects.filter((p) => p.visibility === 'published');
 
-  // Banner order: featured work first (in featured order), then everything else in site order.
-  const ordered = [
-    ...published.filter((p) => p.featured).sort((a, b) => a.featured_order - b.featured_order),
-    ...published.filter((p) => !p.featured),
-  ];
+  // The banner plays featured work only, in featured order. With nothing featured yet it
+  // falls back to all published work in site order, so the home page never opens empty.
+  const featured = published.filter((p) => p.featured).sort((a, b) => a.featured_order - b.featured_order);
+  const ordered = featured.length ? featured : published;
   const mediaIds = ordered.flatMap((p) => [p.hero_media_id, p.cover_media_id]).filter(Boolean) as string[];
   const media = await getMediaByIds([...new Set(mediaIds)]);
   const byId = (id: string | null) => (id ? (media.find((m) => m.id === id) ?? null) : null);
