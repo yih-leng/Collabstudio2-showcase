@@ -10,6 +10,7 @@ import { isDemoMode } from '@/lib/demo/config';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import type { Lists } from '@/lib/types';
 import styles from './admin.module.css';
+import { FileDropFix } from './FileDropFix';
 
 interface AdminCtx {
   sb: SupabaseClient;
@@ -117,6 +118,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <Ctx.Provider value={{ sb: sb!, user: user!, lists, refreshLists, unread, refreshUnread, signOut }}>
+      <FileDropFix />
       {children}
     </Ctx.Provider>
   );

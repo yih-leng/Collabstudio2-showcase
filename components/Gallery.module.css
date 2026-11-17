@@ -60,50 +60,48 @@
   white-space: nowrap;
 }
 
-/* The viewer: dark, and the same size for every piece. */
+/* The viewer: the whole screen in black, no box. */
 .dialog {
-  width: min(calc(100vw - var(--spacing-32)), var(--content-max-width));
+  width: 100vw;
+  height: 100dvh;
   max-width: none;
   max-height: none;
-  padding: var(--spacing-16);
+  margin: 0;
+  padding: 0;
   border: 0;
-  border-radius: var(--radius-lg);
   background: var(--color-neutral-9);
   color: var(--color-neutral-1);
-  box-shadow: var(--shadow-modal);
 }
 
 .dialog::backdrop {
-  background: color-mix(in srgb, var(--color-neutral-9) 92%, transparent);
-  backdrop-filter: blur(var(--spacing-8));
+  background: var(--color-neutral-9);
 }
 
 .viewer {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-12);
+  height: 100%;
+  padding: var(--spacing-24);
+  box-sizing: border-box;
 }
 
-.bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.counter {
-  font-size: var(--text-caption-size);
-  font-weight: var(--weight-bold);
-  color: var(--color-neutral-4);
-  font-variant-numeric: tabular-nums;
+.close {
+  position: absolute;
+  top: var(--spacing-16);
+  right: var(--spacing-16);
+  z-index: 2;
 }
 
 /* Fixed stage: the piece is fitted inside, so the height never changes. */
 .stage {
   position: relative;
   display: flex;
+  flex: 1;
   align-items: center;
-  gap: var(--spacing-12);
-  height: min(70vh, calc(var(--spacing-120) * 6));
+  gap: var(--spacing-16);
+  min-height: 0;
+  padding: var(--spacing-32) 0 var(--spacing-16);
 }
 
 .media {
@@ -113,8 +111,8 @@
 }
 
 .media > * {
-  border-radius: var(--radius-md);
-  background: var(--color-neutral-8);
+  border-radius: 0;
+  background: transparent;
 }
 
 .prev,
@@ -123,8 +121,15 @@
   z-index: 1;
 }
 
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-8);
+  min-height: calc(var(--spacing-48) + var(--spacing-8));
+}
+
 .viewerCaption {
-  min-height: var(--text-body2-lh);
   margin: 0;
   font-size: var(--text-body2-size);
   line-height: var(--text-body2-lh);
@@ -132,9 +137,18 @@
   text-align: center;
 }
 
+.counter {
+  padding: var(--spacing-4) var(--spacing-12);
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-7);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 640px) {
-  .stage {
-    height: 60vh;
+  .viewer {
+    padding: var(--spacing-12);
   }
 
   /* On phones the arrows sit over the picture's edges. */

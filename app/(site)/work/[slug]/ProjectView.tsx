@@ -55,13 +55,12 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
 
         <header className={styles.intro}>
           <div className={styles.introMain}>
+            <PageHeader title={p.title} />
+            {p.one_liner && <p className={styles.lede}>{p.one_liner}</p>}
             <div className={styles.badges}>
               {type && <Tag variant="fire">{type}</Tag>}
               <Badge variant={STATUS_BADGE[p.status]}>{statusText(p.status, p.status_note)}</Badge>
-              {p.featured && <Badge variant="selected">Featured</Badge>}
             </div>
-            <PageHeader title={p.title} />
-            {p.one_liner && <p className={styles.lede}>{p.one_liner}</p>}
           </div>
           <dl className={styles.facts}>
             {p.clients.length > 0 && (
@@ -84,7 +83,21 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
         {sections.length > 0 && (
           <nav aria-label="On this page" className={styles.toc}>
             {sections.map((s, i) => (
-              <a key={s.id} href={`#${s.id}`} className={styles.tocLink} aria-current={current === s.id ? 'location' : undefined}>
+              <a
+                key={s.id}
+                href={`#${s.id}`}
+                className={styles.tocLink}
+                aria-current={current === s.id ? 'location' : undefined}
+                onClick={(e) => {
+                  // The page scrolls inside the shell, so glide there ourselves (or jump, under reduced motion).
+                  const el = document.getElementById(s.id);
+                  if (!el) return;
+                  e.preventDefault();
+                  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+                  el.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+                  history.replaceState(null, '', `#${s.id}`);
+                }}
+              >
                 <span className={styles.tocNum}>{String(i + 1).padStart(2, '0')}</span>
                 {s.title}
               </a>

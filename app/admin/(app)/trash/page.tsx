@@ -51,9 +51,9 @@ export default function TrashPage() {
   };
 
   const columns: TableColumn<Project>[] = [
-    { key: 'title', header: 'Project' },
-    { key: 'visibility', header: 'Was', sortable: false, render: (p) => VISIBILITY_LABEL[p.visibility] },
-    { key: 'deleted_at', header: 'Moved to Trash', type: 'date', render: (p) => formatDate(p.deleted_at!) },
+    { key: 'title', header: 'Project', sortable: true, sortValue: (p) => p.title.toLowerCase() },
+    { key: 'visibility', header: 'Was', sortable: true, sortValue: (p) => p.visibility, render: (p) => VISIBILITY_LABEL[p.visibility] },
+    { key: 'deleted_at', header: 'Moved to Trash', type: 'date', sortable: true, sortValue: (p) => p.deleted_at ?? '', render: (p) => formatDate(p.deleted_at!) },
   ];
 
   return (

@@ -11,8 +11,8 @@ const KIND_LABEL: Record<Media['kind'], string> = { image: 'image', video: 'vide
 
 /**
  * Gallery: equal tiles in a grid (images, videos and audio alike). A tile
- * opens a dark viewer whose stage keeps one fixed size, with each piece fitted
- * inside it, so stepping through never makes the viewer jump.
+ * opens the piece on a full-screen black overlay, fitted inside one fixed
+ * stage so stepping through never makes it jump; the count sits bottom centre.
  * TODO(design-system: no Lightbox component; built on a native <dialog> with tokens and DS Buttons.)
  */
 export function Gallery({ items }: { items: Media[] }) {
@@ -84,12 +84,9 @@ export function Gallery({ items }: { items: Media[] }) {
       >
         {current && (
           <div className={styles.viewer}>
-            <div className={styles.bar}>
-              <span className={styles.counter}>
-                {index! + 1} / {items.length}
-              </span>
+            <span className={styles.close}>
               <Button variant="secondary" size="sm" iconOnly icon={X} aria-label="Close viewer" onClick={close} />
-            </div>
+            </span>
             <div className={styles.stage}>
               {items.length > 1 && (
                 <span className={styles.prev}>
@@ -105,7 +102,14 @@ export function Gallery({ items }: { items: Media[] }) {
                 </span>
               )}
             </div>
-            <p className={styles.viewerCaption}>{current.caption ?? ''}</p>
+            <div className={styles.footer}>
+              {current.caption && <p className={styles.viewerCaption}>{current.caption}</p>}
+              {items.length > 1 && (
+                <span className={styles.counter}>
+                  {index! + 1} / {items.length}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </dialog>

@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { Badge, Button, EmptyState, Modal, PageHeader, Table, useToast, type TableColumn } from '@collabrium/ui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Badge, Button, EmptyState, Filters, Modal, PageHeader, Table, useToast, type FilterValue, type TableColumn } from '@collabrium/ui';
 import { EnvelopeOpen, EnvelopeSimple, Tray, TrashSimple } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { useAdmin } from '@/components/admin/AdminContext';
@@ -15,6 +15,8 @@ export default function EnquiriesPage() {
   const [rows, setRows] = useState<Enquiry[] | null>(null);
   const [open, setOpen] = useState<Enquiry | null>(null);
   const [deleting, setDeleting] = useState<Enquiry | null>(null);
+  const [filter, setFilter] = useState<FilterValue>({});
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     const { data } = await sb.from('enquiries').select('*').order('created_at', { ascending: false });
@@ -60,20 +62,41 @@ export default function EnquiriesPage() {
           {e.company ? ` · ${e.company}` : ''}
         </span>
       ),
-      sortValue: (e) => e.name,
+      sortable: true,
+      sortValue: (e) => e.name.toLowerCase(),
     },
-    { key: 'email', header: 'Email', priority: 'medium' },
+    { key: 'email', header: 'Email', priority: 'medium', sortable: true, sortValue: (e) => e.email.toLowerCase() },
     { key: 'message', header: 'Message', sortable: false, priority: 'low', render: (e) => <span className={styles.snippet}>{e.message}</span> },
-    { key: 'is_read', header: 'Status', type: 'status', sortValue: (e) => Number(e.is_read), render: (e) => (e.is_read ? <Badge variant="neutral">Read</Badge> : <Badge variant="info">New</Badge>) },
-    { key: 'created_at', header: 'Received', type: 'date', render: (e) => formatDate(e.created_at) },
+    { key: 'is_read', header: 'Status', type: 'status', sortable: true, sortValue: (e) => Number(e.is_read), render: (e) => (e.is_read ? <Badge variant="neutral">Read</Badge> : <Badge variant="info">New</Badge>) },
+    { key: 'created_at', header: 'Received', type: 'date', sortable: true, sortValue: (e) => e.created_at, render: (e) => formatDate(e.created_at) },
   ];
 
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const status = filter.status ?? [];
+    return (rows ?? []).filter(
+      (e) =>
+        (!status.length || status.includes(e.is_read ? 'read' : 'new')) &&
+        (!q || [e.name, e.company ?? '', e.email, e.message].some((t) => t.toLowerCase().includes(q))),
+    );
+  }, [rows, filter, search]);
+
   return (
-    <AdminShell header={<PageHeader title="Enquiries" subtitle="Messages sent from the Work with us form." />}>
+    <AdminShell header={<PageHeader title="Enquiries" subtitle="Messages sent from the contact form (/contact)." />}>
+      <Filters
+        aria-label="Filter enquiries"
+        dimensions={[{ key: 'status', label: 'Status', options: [{ value: 'new', label: 'New' }, { value: 'read', label: 'Read' }] }]}
+        value={filter}
+        onValueChange={setFilter}
+        search
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search by name, company, email or message"
+      />
       <Table
         label="Enquiries"
         columns={columns}
-        rows={rows ?? []}
+        rows={shown}
         loading={rows === null}
         getRowKey={(e) => e.id}
         getRowLabel={(e) => `${e.name}, ${formatDate(e.created_at)}`}

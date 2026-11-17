@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Badge, Tag } from '@collabrium/ui';
-import { Info, Star } from '@phosphor-icons/react';
+import { STATUS_BADGE, STATUS_LABEL } from '@/lib/format';
 import type { ProjectCardData } from '@/lib/types';
 import { MediaFrame } from './MediaFrame';
 import styles from './ProjectCard.module.css';
@@ -20,18 +20,13 @@ export function ProjectCard({ project, headingLevel = 3 }: { project: ProjectCar
   const href = `/work/${project.slug}`;
   const clientNames = project.clients.map((c) => c.name).join(', ');
   const Heading = `h${headingLevel}` as const;
+  const inProgress = project.status === 'in_progress';
 
   return (
     <div className={styles.reveal}>
       <article className={styles.card}>
         <div className={styles.media}>
           <MediaFrame media={project.cover} aspect="16:9" mode="thumb" />
-          {project.status === 'in_progress' && (
-            <span className={styles.wip}>
-              <Info weight="fill" aria-hidden />
-              In progress · subject to change
-            </span>
-          )}
         </div>
         <div className={styles.body}>
           <Heading className={styles.title}>
@@ -44,18 +39,14 @@ export function ProjectCard({ project, headingLevel = 3 }: { project: ProjectCar
             {clientNames}
             {project.year ? ` · ${project.year}` : ''}
           </div>
-          {(project.featured || project.categories.length > 0) && (
+          {(project.categories.length > 0 || inProgress) && (
             <div className={styles.meta}>
-              {project.featured && (
-                <Badge variant="selected" icon={Star}>
-                  Featured
-                </Badge>
-              )}
               {project.categories.map((c) => (
                 <Tag key={c.id} variant="neutral">
                   {c.name}
                 </Tag>
               ))}
+              {inProgress && <Badge variant={STATUS_BADGE.in_progress}>{STATUS_LABEL.in_progress}</Badge>}
             </div>
           )}
         </div>

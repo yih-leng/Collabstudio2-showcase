@@ -12,6 +12,7 @@ import {
   type FilterValue,
 } from '@collabrium/ui';
 import { ProjectCard } from '@/components/ProjectCard';
+import { STATUS_LABEL } from '@/lib/format';
 import { SiteShell } from '@/components/SiteShell';
 import type { Lists, ProjectCardData } from '@/lib/types';
 import styles from './work.module.css';
@@ -71,7 +72,12 @@ export function WorkView({
         has('category', p.categories.map((c) => c.id)) &&
         has('capability', p.capabilities.map((c) => c.id)) &&
         has('year', p.year ? [String(p.year)] : []) &&
-        (!q || p.title.toLowerCase().includes(q) || p.clients.some((c) => c.name.toLowerCase().includes(q))),
+        (!q ||
+          // Search reads everything on the card and its tags: title, clients,
+          // project type, capabilities, tools, status and year.
+          [p.title, p.one_liner, ...p.clients.map((c) => c.name), ...p.categories.map((c) => c.name), ...p.capabilities.map((c) => c.name), ...p.tools.map((c) => c.name), STATUS_LABEL[p.status], p.year ? String(p.year) : '']
+            .filter(Boolean)
+            .some((t) => t!.toLowerCase().includes(q))),
     );
   }, [projects, value, search]);
 
@@ -98,7 +104,7 @@ export function WorkView({
           search
           searchValue={search}
           onSearchChange={onSearch}
-          searchPlaceholder="Search by title or client"
+          searchPlaceholder="Search by title, client or tag"
           searchLabel="Search projects"
         />
         <p className={styles.count} aria-live="polite">

@@ -9,6 +9,7 @@ import {
   Card,
   Dropdown,
   EmptyState,
+  Filters,
   InfoBanner,
   Modal,
   PageHeader,
@@ -16,6 +17,7 @@ import {
   Table,
   Tabs,
   useToast,
+  type FilterValue,
   type TableColumn,
 } from '@collabrium/ui';
 import { Eye, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
@@ -25,8 +27,8 @@ import { SortableList } from '@/components/admin/SortableList';
 import styles from '@/components/admin/admin.module.css';
 import { MediaFrame } from '@/components/MediaFrame';
 import { saveOrder } from '@/lib/admin-api';
-import { STATUS_BADGE, VISIBILITY_LABEL, formatDate, statusText } from '@/lib/format';
-import type { Media, Project, Visibility } from '@/lib/types';
+import { STATUS_BADGE, STATUS_LABEL, VISIBILITY_LABEL, formatDate, statusText } from '@/lib/format';
+import type { Media, Project, ProjectStatus, Visibility } from '@/lib/types';
 
 type Row = Project & { cover: Media | null };
 
@@ -38,6 +40,8 @@ export default function ProjectsPage() {
   const [loadError, setLoadError] = useState(false);
   const [trashing, setTrashing] = useState<Row | null>(null);
   const [creating, setCreating] = useState(false);
+  const [filter, setFilter] = useState<FilterValue>({});
+  const [search, setSearch] = useState('');
 
   const load = useCallback(async () => {
     const { data, error } = await sb.from('projects').select('*').is('deleted_at', null).order('sort_order');
@@ -126,6 +130,10 @@ export default function ProjectsPage() {
     }
   };
 
+  const typeName = (ids: string[]) => lists.categories.find((c) => c.id === ids[0])?.name ?? '';
+  const STATUS_RANK: Record<ProjectStatus, number> = { live: 0, approved: 1, in_progress: 2, concept: 3 };
+  const VIS_RANK: Record<Visibility, number> = { published: 0, draft: 1, hidden: 2 };
+
   const clientNames = (ids: string[]) =>
     ids.map((id) => lists.clients.find((c) => c.id === id)?.name).filter(Boolean).join(', ');
 
@@ -134,7 +142,8 @@ export default function ProjectsPage() {
       {
         key: 'title',
         header: 'Project',
-        sortValue: (r) => r.title,
+        sortable: true,
+        sortValue: (r) => r.title.toLowerCase(),
         render: (r) => (
           <div className={styles.titleCell}>
             <div className={styles.thumb}>
@@ -150,17 +159,27 @@ export default function ProjectsPage() {
         ),
       },
       {
+        key: 'type',
+        header: 'Type',
+        sortable: true,
+        priority: 'medium',
+        sortValue: (r) => typeName(r.category_ids).toLowerCase(),
+        render: (r) => typeName(r.category_ids) || '—',
+      },
+      {
         key: 'status',
         header: 'Status',
         type: 'status',
-        sortable: false,
+        sortable: true,
+        sortValue: (r) => STATUS_RANK[r.status],
         priority: 'medium',
         render: (r) => <Badge variant={STATUS_BADGE[r.status]}>{statusText(r.status)}</Badge>,
       },
       {
         key: 'visibility',
         header: 'Visibility',
-        sortable: false,
+        sortable: true,
+        sortValue: (r) => VIS_RANK[r.visibility],
         render: (r) => (
           <div className={styles.badges}>
             <Dropdown
@@ -178,7 +197,8 @@ export default function ProjectsPage() {
       {
         key: 'featured',
         header: 'Featured',
-        sortable: false,
+        sortable: true,
+        sortValue: (r) => (r.featured ? 0 : 1),
         render: (r) => (
           <Switch aria-label={`Feature ${r.title} on the home page`} checked={r.featured} onChange={(e) => toggleFeatured(r, e.target.checked)} />
         ),
@@ -188,6 +208,7 @@ export default function ProjectsPage() {
         header: 'Last updated',
         type: 'date',
         priority: 'low',
+        sortable: true,
         sortValue: (r) => r.updated_at,
         render: (r) => formatDate(r.updated_at),
       },
@@ -195,6 +216,30 @@ export default function ProjectsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [lists, rows],
   );
+
+  // Search and filters for the All projects table.
+  const dimensions = [
+    { key: 'status', label: 'Status', options: (Object.keys(STATUS_LABEL) as ProjectStatus[]).map((v) => ({ value: v, label: STATUS_LABEL[v] })) },
+    { key: 'visibility', label: 'Visibility', options: (['published', 'draft', 'hidden'] as Visibility[]).map((v) => ({ value: v, label: VISIBILITY_LABEL[v] })) },
+    { key: 'type', label: 'Type', options: lists.categories.map((c) => ({ value: c.id, label: c.name })) },
+    { key: 'client', label: 'Client', options: lists.clients.map((c) => ({ value: c.id, label: c.name })) },
+    { key: 'featured', label: 'Featured', options: [{ value: 'yes', label: 'Featured' }, { value: 'no', label: 'Not featured' }] },
+  ];
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const has = (key: string, vals: string[]) => !filter[key]?.length || filter[key].some((v) => vals.includes(v));
+    return (rows ?? []).filter(
+      (r) =>
+        has('status', [r.status]) &&
+        has('visibility', [r.visibility]) &&
+        has('type', r.category_ids) &&
+        has('client', r.client_ids) &&
+        has('featured', [r.featured ? 'yes' : 'no']) &&
+        (!q || [r.title, r.slug, clientNames(r.client_ids), typeName(r.category_ids), r.year ? String(r.year) : ''].some((t) => t.toLowerCase().includes(q))),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, filter, search, lists]);
+  const filtering = Boolean(search.trim()) || Object.values(filter).some((v) => v?.length);
 
   const featured = (rows ?? []).filter((r) => r.featured).sort((a, b) => a.featured_order - b.featured_order);
   const all = [...(rows ?? [])].sort((a, b) => a.sort_order - b.sort_order);
@@ -243,10 +288,20 @@ export default function ProjectsPage() {
               count: rows?.length,
               content: (
                 <div className={styles.stackSm}>
+                  <Filters
+                    aria-label="Filter projects"
+                    dimensions={dimensions}
+                    value={filter}
+                    onValueChange={setFilter}
+                    search
+                    searchValue={search}
+                    onSearchChange={setSearch}
+                    searchPlaceholder="Search by title, client, type or year"
+                  />
                   <Table
                     label="Projects"
                     columns={columns}
-                    rows={rows ?? []}
+                    rows={shown}
                     loading={rows === null}
                     getRowKey={(r) => r.id}
                     getRowLabel={(r) => r.title}
@@ -256,14 +311,31 @@ export default function ProjectsPage() {
                       { label: 'Move to Trash', icon: Trash, onClick: (r) => setTrashing(r) },
                     ]}
                     empty={
-                      <EmptyState
-                        variant="section"
-                        icon={FilmSlate}
-                        heading="No projects yet"
-                        primaryAction={{ label: 'New project', icon: Plus, onClick: createProject }}
-                      >
-                        Add your first piece of work and it can go live in minutes.
-                      </EmptyState>
+                      filtering ? (
+                        <EmptyState
+                          variant="section"
+                          icon={FilmSlate}
+                          heading="No projects match"
+                          primaryAction={{
+                            label: 'Clear filters',
+                            onClick: () => {
+                              setFilter({});
+                              setSearch('');
+                            },
+                          }}
+                        >
+                          Try fewer filters or a different search.
+                        </EmptyState>
+                      ) : (
+                        <EmptyState
+                          variant="section"
+                          icon={FilmSlate}
+                          heading="No projects yet"
+                          primaryAction={{ label: 'New project', icon: Plus, onClick: createProject }}
+                        >
+                          Add your first piece of work and it can go live in minutes.
+                        </EmptyState>
+                      )
                     }
                   />
                 </div>
