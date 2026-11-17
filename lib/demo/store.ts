@@ -70,8 +70,11 @@ function load(): Db {
     if (cache && mtime === cachedAt) return cache;
     cache = JSON.parse(readFileSync(DB_FILE, 'utf8')) as Db;
     cachedAt = mtime;
-    // Columns added after the file was made.
-    for (const p of cache.projects ?? []) if (!('about' in p)) p.about = null;
+    // Columns added after the file was made, and the old "internal" flag, which is now Hidden.
+    for (const p of cache.projects ?? []) {
+      if (!('about' in p)) p.about = null;
+      if (p.is_internal) Object.assign(p, { is_internal: false, visibility: 'hidden' });
+    }
   } else if (!cache) {
     cache = initial();
   }

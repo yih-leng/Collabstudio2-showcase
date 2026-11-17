@@ -25,7 +25,7 @@ import {
   saveOrder,
   uploadToStorage,
 } from '@/lib/admin-api';
-import { MAX_ORIGINAL_BYTES, compressMedia, needsCompression } from '@/lib/compress-media';
+import { MAX_ORIGINAL_BYTES, compressImage, compressMedia, needsCompression } from '@/lib/compress-media';
 import { ASPECTS, ASPECT_LABEL, embedProvider, toEmbedUrl } from '@/lib/format';
 import type { Aspect, Media } from '@/lib/types';
 import { MediaFrame } from '../MediaFrame';
@@ -84,7 +84,7 @@ export function MediaManager({
   const { toast } = useToast();
   const [files, setFiles] = useState<FileUploaderItem[]>([]);
   const [link, setLink] = useState('');
-  const [linkAspect, setLinkAspect] = useState<Aspect>('16:9');
+  const [linkBusy, setLinkBusy] = useState(false);
   const [linkError, setLinkError] = useState<string | undefined>();
   const [deleting, setDeleting] = useState<Media | null>(null);
 
@@ -113,6 +113,7 @@ export function MediaManager({
     try {
       // Big videos and lossless audio: make a web preview first (the bar's first 90%).
       let send = file;
+      if (kind === 'image') send = await compressImage(file);
       if (needsCompression(file)) {
         send = await compressMedia(file, (p) => setFileState(file, { status: 'uploading', progress: p * 0.9 }));
         toast({
@@ -142,13 +143,25 @@ export function MediaManager({
       setLinkError('Paste a YouTube, Vimeo or Google Drive link');
       return;
     }
+    setLinkBusy(true);
     try {
-      await addRow({ project_id: projectId, kind: 'embed', url: link.trim(), storage_path: null, aspect: linkAspect, caption: null });
+      // The shape comes from the video itself (YouTube/Vimeo report it; Drive's thumbnail shows it).
+      const found = await fetch('/api/embed-aspect', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: link }) })
+        .then((res) => (res.ok ? res.json() : { aspect: null }))
+        .catch(() => ({ aspect: null }));
+      const aspect: Aspect = found.aspect ?? '16:9';
+      await addRow({ project_id: projectId, kind: 'embed', url: link.trim(), storage_path: null, aspect, caption: null });
       setLink('');
       setLinkError(undefined);
-      toast({ tone: 'success', title: `${embedProvider(link)} video added` });
+      toast({
+        tone: 'success',
+        title: `${embedProvider(link)} video added`,
+        message: found.aspect ? `Shape: ${ASPECT_LABEL[aspect]}` : 'Shape set to 16:9. Change it in the list if it’s different.',
+      });
     } catch (e) {
       toast({ tone: 'danger', title: "That link didn't save", message: (e as Error).message });
+    } finally {
+      setLinkBusy(false);
     }
   };
 
@@ -222,14 +235,13 @@ export function MediaManager({
             }
           }}
         />
-        <Dropdown label="Shape" options={aspectOptions} value={linkAspect} onValueChange={(v) => setLinkAspect(v as Aspect)} />
         <span className={shared.fit}>
-          <Button variant="secondary" onClick={addLink} disabled={!link.trim()}>
+          <Button variant="secondary" onClick={addLink} loading={linkBusy} disabled={!link.trim()}>
             Add link
           </Button>
         </span>
       </div>
-      <p className={shared.muted}>YouTube, Vimeo or Google Drive. Best for long or large videos.</p>
+      <p className={shared.muted}>YouTube, Vimeo or Google Drive. Its shape (16:9, 9:16…) is picked up from the video.</p>
 
       {sorted.length === 0 ? (
         <InfoBanner tone="neutral">No media yet. The project shows placeholders until you add some.</InfoBanner>
@@ -241,8 +253,9 @@ export function MediaManager({
             label={(m) => m.caption || `${m.kind} ${sorted.indexOf(m) + 1}`}
             renderItem={(m, i) => (
               <div className={styles.item}>
-                <div className={styles.preview} data-vertical={m.aspect === '9:16' || m.aspect === '4:5' || undefined}>
-                  <MediaFrame media={m} mode="thumb" />
+                {/* Every thumbnail is the same square, whatever the piece's shape. */}
+                <div className={styles.preview}>
+                  <MediaFrame media={m} aspect="1:1" mode="thumb" />
                 </div>
                 <div className={styles.fields}>
                   <div className={shared.badges}>

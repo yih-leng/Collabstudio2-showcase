@@ -39,7 +39,7 @@ deck, and the admin works too.
 2. **Create the tables.** In Supabase, open **SQL Editor → New query**, paste
    all of `supabase/migrations/0001_init.sql`, and press **Run**.
    Then do the same with `supabase/migrations/0002_about.sql` and
-   `supabase/migrations/0003_audio.sql`.
+   `supabase/migrations/0003_audio.sql` and `0004_hide_internal.sql`.
 3. **Add the sample projects.** New query again, paste all of
    `supabase/seed.sql`, and **Run**. (Both files are safe to run twice.)
 4. **Turn off public sign-up.** **Authentication → Sign In / Providers →
@@ -113,9 +113,9 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
    - **Basics**: title, web address, one-liner (the card text), clients,
      **project type** (required: Film, Key Visual, Microdrama, Brand Campaign,
      Storyboard; add more under Clients and tags), year, status.
-   - **Visibility**: Published, Draft or Hidden; **Featured** puts it on the
-     home page; **Internal or confidential** keeps it to signed-in team
-     members even when published.
+   - **Visibility**: Published, Draft or Hidden (Hidden is for confidential
+     work: only signed-in admins see it); **Featured** puts it in the home
+     page banner.
    - **Media**: drag in images, videos (MP4, MOV, WebM) and audio (MP3, WAV,
      M4A, AIFF, FLAC), or paste a YouTube, Vimeo or Google Drive link. Videos
      over 20 MB and WAV/AIFF/FLAC audio are turned into a smaller web preview

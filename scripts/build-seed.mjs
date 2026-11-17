@@ -65,7 +65,7 @@ src.projects.forEach((p, i) => {
     featured: p.featured,
     featured_order: p.featured ? featuredOrder++ : 0,
     sort_order: i,
-    visibility: 'published',
+    visibility: p.visibility ?? 'published',
     is_internal: p.is_internal,
     cover_media_id: coverId,
     hero_media_id: heroId,

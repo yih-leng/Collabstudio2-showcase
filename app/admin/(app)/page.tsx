@@ -190,7 +190,6 @@ export default function ProjectsPage() {
               options={(['published', 'draft', 'hidden'] as Visibility[]).map((v) => ({ value: v, label: VISIBILITY_LABEL[v] }))}
               onValueChange={(v) => v && v !== r.visibility && patch(r.id, { visibility: v as Visibility }, `Now ${VISIBILITY_LABEL[v as Visibility].toLowerCase()}`)}
             />
-            {r.is_internal && <Badge variant="neutral">Internal</Badge>}
           </div>
         ),
       },
@@ -253,7 +252,6 @@ export default function ProjectsPage() {
         <strong>{r.title}</strong>
         <span className={styles.titleSub}>
           {VISIBILITY_LABEL[r.visibility]}
-          {r.is_internal ? ' · Internal' : ''}
         </span>
       </div>
     </div>

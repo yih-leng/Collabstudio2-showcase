@@ -139,7 +139,7 @@ export async function getHomeData() {
   }
 
   // Client strip: every client on public, published work.
-  const clientIds = new Set(published.filter((p) => !p.is_internal).flatMap((p) => p.client_ids));
+  const clientIds = new Set(published.flatMap((p) => p.client_ids));
   const clients = lists.clients.filter((c) => clientIds.has(c.id));
 
   return { settings, slides, clients, projectCount: published.length };

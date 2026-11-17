@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, Tabs, Tag } from '@collabrium/ui';
 import { ScrollReveal } from '@collabrium/ui/motion';
-import { ArrowLeft, ArrowRight, LockSimple } from '@phosphor-icons/react';
+import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { Gallery } from '@/components/Gallery';
 import { HeroCarousel } from '@/components/HeroCarousel';
 import { SiteShell } from '@/components/SiteShell';
@@ -39,11 +39,9 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
   return (
     <SiteShell header={<BackButton label="Our Works" href="/work" />}>
       <article className={styles.article}>
-        {(isPreview || p.is_internal) && (
-          <InfoBanner tone={isPreview ? 'warning' : 'neutral'} icon={isPreview ? undefined : LockSimple}>
-            {isPreview
-              ? `Preview: this project is ${VISIBILITY_LABEL[p.visibility].toLowerCase()}, so only signed-in admins can see it.`
-              : 'Internal: only signed-in team members can see this project.'}
+        {isPreview && (
+          <InfoBanner tone="warning">
+            {`Preview: this project is ${VISIBILITY_LABEL[p.visibility].toLowerCase()}, so only signed-in admins can see it.`}
           </InfoBanner>
         )}
 

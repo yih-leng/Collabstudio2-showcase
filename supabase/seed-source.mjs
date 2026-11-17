@@ -346,7 +346,9 @@ export const projects = [
     year: 2026,
     status: 'concept',
     featured: false,
-    is_internal: true,
+    // Confidential: hidden from the public site, visible to signed-in admins.
+    visibility: 'hidden',
+    is_internal: false,
     one_liner: 'A day in the life of Adam, told first person, with Astro woven through every hour.',
     about:
       'A first-person day in the life of “Adam”, from 6:30 AM wake-up to 10:30 PM sleep, with a cheeky narrator commenting on his phone habits.',

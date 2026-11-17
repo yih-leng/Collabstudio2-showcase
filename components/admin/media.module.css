@@ -12,13 +12,10 @@
 }
 
 .preview {
-  width: calc(var(--spacing-120) + var(--spacing-40));
   flex: none;
+  width: calc(var(--spacing-120) + var(--spacing-12));
 }
 
-.preview[data-vertical] {
-  width: var(--spacing-60);
-}
 
 .fields {
   flex: 1;

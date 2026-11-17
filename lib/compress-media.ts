@@ -77,3 +77,37 @@ export async function compressMedia(file: File, onProgress?: (p: number) => void
     ? new File([buffer], rename(file, 'mp4'), { type: 'video/mp4' })
     : new File([buffer], rename(file, 'm4a'), { type: 'audio/mp4' });
 }
+
+/** Images bigger than this, or wider/taller than IMAGE_MAX_EDGE, are shrunk before upload. */
+const IMAGE_COMPRESS_ABOVE = 1.5 * MB;
+const IMAGE_MAX_EDGE = 2400;
+
+/**
+ * Shrinks a big photo or PNG in the browser: at most 2400 px on the long edge,
+ * WebP at high quality (keeps transparency), or JPEG where the browser can't
+ * write WebP. GIFs (may be animated) and SVGs are left alone, and so is
+ * anything the result wouldn't make smaller.
+ */
+export async function compressImage(file: File): Promise<File> {
+  if (!/^image\/(jpeg|png|webp|avif|heic|heif)$/.test(file.type)) return file;
+  const bitmap = await createImageBitmap(file).catch(() => null);
+  if (!bitmap) return file;
+  const long = Math.max(bitmap.width, bitmap.height);
+  if (file.size <= IMAGE_COMPRESS_ABOVE && long <= IMAGE_MAX_EDGE) {
+    bitmap.close();
+    return file;
+  }
+  const scale = Math.min(1, IMAGE_MAX_EDGE / long);
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext('2d')!.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const toBlob = (type: string, q: number) => new Promise<Blob | null>((res) => canvas.toBlob(res, type, q));
+  let blob = await toBlob('image/webp', 0.86);
+  // Safari writes PNG when asked for WebP; use JPEG there unless the image needs transparency.
+  if (!blob || blob.type !== 'image/webp') blob = file.type === 'image/png' ? await toBlob('image/png', 1) : await toBlob('image/jpeg', 0.86);
+  if (!blob || blob.size >= file.size) return file;
+  const ext = blob.type.split('/')[1].replace('jpeg', 'jpg');
+  return new File([blob], file.name.replace(/\.[^.]+$/, '') + `.${ext}`, { type: blob.type });
+}

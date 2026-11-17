@@ -187,24 +187,60 @@
 .editorMain {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-24);
+  gap: var(--spacing-32);
   min-width: 0;
 }
 
-/* Section cards land just below the top when jumped to. */
-.editorMain > * {
-  scroll-margin-top: var(--spacing-24);
-}
-
 .editorAside {
-  position: sticky;
-  top: 0;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-16);
-  max-height: calc(100dvh - var(--section-gap) - var(--spacing-32));
-  overflow-y: auto;
-  scrollbar-width: thin;
+  min-width: 0;
+}
+
+/* The rail's own heading, level with the first section title. */
+.railTitle {
+  margin: 0;
+  min-height: calc(var(--text-h4-lh) + var(--text-body2-lh) + var(--spacing-4));
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+}
+
+/* A main section: its number and title above the card, then the card. */
+.editorSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+  scroll-margin-top: var(--spacing-24);
+}
+
+.editorSectionHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.editorSectionTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-8);
+  margin: 0;
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+}
+
+.editorSectionNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-24);
+  height: var(--spacing-24);
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-9);
+  color: var(--color-neutral-1);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums;
 }
 
 .asideActions {
@@ -221,49 +257,13 @@
   font-weight: var(--weight-bold);
 }
 
-/* Jump list to the sections on the left. */
-.jump {
-  display: flex;
-  flex-direction: column;
-  padding: var(--spacing-8);
-  border-radius: var(--radius-md);
-  background: var(--color-neutral-1);
-  border: var(--border-width-sm) solid var(--color-neutral-3);
-}
-
-.jump a {
-  padding: var(--spacing-8) var(--spacing-12);
-  border-radius: var(--radius-sm);
-  font-size: var(--text-body2-size);
-  font-weight: var(--weight-bold);
-  text-decoration: none;
-  color: var(--color-neutral-7);
-}
-
-.jump a:hover {
-  background: var(--color-neutral-2);
-  color: var(--color-neutral-9);
-}
-
-.jump a:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: var(--focus-ring-offset-inset);
-}
-
 @media (max-width: 1100px) {
   .editor {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  /* One column: publishing and details come first, the jump list isn't needed. */
+  /* One column: the settings rail comes first. */
   .editorAside {
-    position: static;
     order: -1;
-    max-height: none;
-    overflow: visible;
-  }
-
-  .jump {
-    display: none;
   }
 }

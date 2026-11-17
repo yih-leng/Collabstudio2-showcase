@@ -6,7 +6,7 @@ import {
   BackButton,
   Button,
   Card,
-  CardHeader,
+  CardTitle,
   Dropdown,
   EmptyState,
   InputField,
@@ -19,13 +19,7 @@ import {
 import {
   Eye,
   FilmSlate,
-  ImagesSquare,
-  Info,
-  ListChecks,
   Plus,
-  Rows,
-  Sparkle,
-  TextAa,
   Trash,
   X,
 } from '@phosphor-icons/react';
@@ -194,7 +188,6 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           workflow_label: q.workflow_label?.trim() || null,
           featured: q.featured,
           visibility: q.visibility,
-          is_internal: q.is_internal,
           ...featuredOrder,
         })
         .eq('id', q.id);
@@ -276,14 +269,6 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
   const primaryLabel = p.visibility === 'published' ? 'Save changes' : 'Publish';
   const cover = media.find((m) => m.id === p.cover_media_id) ?? null;
-  const sectionLinks = [
-    ['sec-basics', '1 · Basics'],
-    ['sec-media', '2 · Hero and gallery'],
-    ['sec-about', '3 · About this project'],
-    ['sec-output', '4 · Output'],
-    ['sec-overview', '5 · Overview'],
-    ['sec-capabilities', '6 · Capabilities'],
-  ];
 
   return (
     <AdminShell
@@ -293,7 +278,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <BackButton label="Projects" href="/admin" />
           <PageHeader
             title={p.title || 'Untitled project'}
-            subtitle={dirty ? 'You have unsaved changes.' : `${VISIBILITY_LABEL[p.visibility]}${p.is_internal ? ' · Internal' : ''}${p.featured ? ' · Featured' : ''}`}
+            subtitle={dirty ? 'You have unsaved changes.' : `${VISIBILITY_LABEL[p.visibility]}${p.featured ? ' · Featured' : ''}`}
             actions={
               <>
                 <Button variant="ghost" onClick={() => (dirty ? setConfirmCancel(true) : router.push('/admin'))}>
@@ -312,47 +297,56 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       }
     >
       {/* Two columns: the page's content on the left, in the order it shows on the site;
-          publishing, details and a card preview on the right, always in view. */}
+          project settings on the right (card preview, details, publishing). */}
       <div className={styles.editor}>
         <div className={styles.editorMain}>
-          <Card id="sec-basics">
-            <CardHeader icon={TextAa} element="fire" title="1 · Basics" subtitle="What it's called and the line on its card" headingLevel={2} />
-            <div className={styles.cardBody}>
-              <InputField id="field-title" label="Title" required value={p.title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
+          <section id="sec-basics" className={styles.editorSection} aria-labelledby="sec-basics-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-basics-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>1</span>
+                Basics
+              </h2>
+              <p className={styles.muted}>What it&apos;s called and the line on its card</p>
+            </header>
+            <Card>
+              <div className={styles.cardBody}>
+                <InputField id="field-title" label="Title" required value={p.title} error={errors.title} onChange={(e) => setTitle(e.target.value)} />
 
-              <InputField
-                label="One-liner"
-                helper="Shown on the project card and under the project title"
-                maxLength={140}
-                showCount
-                value={p.one_liner ?? ''}
-                onChange={(e) => set('one_liner', e.target.value)}
-              />
+                <InputField
+                  label="One-liner"
+                  helper="Shown on the project card and under the project title"
+                  maxLength={140}
+                  showCount
+                  value={p.one_liner ?? ''}
+                  onChange={(e) => set('one_liner', e.target.value)}
+                />
 
-              <InputField
-                id="field-slug"
-                label="Web address"
-                required
-                value={p.slug}
-                error={errors.slug}
-                helper={`The page lives at /work/${p.slug || '…'}. Changing it breaks links people already have.`}
-                onChange={(e) => {
-                  setSlugTouched(true);
-                  set('slug', e.target.value.toLowerCase().replace(/\s+/g, '-'));
-                }}
-              />
+                <InputField
+                  id="field-slug"
+                  label="Web address"
+                  required
+                  value={p.slug}
+                  error={errors.slug}
+                  helper={`The page lives at /work/${p.slug || '…'}. Changing it breaks links people already have.`}
+                  onChange={(e) => {
+                    setSlugTouched(true);
+                    set('slug', e.target.value.toLowerCase().replace(/\s+/g, '-'));
+                  }}
+                />
 
-            </div>
-          </Card>
+              </div>
+            </Card>
+          </section>
 
-            <Card id="sec-media">
-              <CardHeader
-                icon={ImagesSquare}
-                element="fire"
-                title="2 · Hero and gallery"
-                subtitle="Saves as you go. The hero (a video if you have one) opens the project page; everything else fills the Gallery."
-                headingLevel={2}
-              />
+          <section id="sec-media" className={styles.editorSection} aria-labelledby="sec-media-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-media-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>2</span>
+                Hero and gallery
+              </h2>
+              <p className={styles.muted}>Saves as you go. The hero (a video if you have one) opens the project page; everything else fills the Gallery.</p>
+            </header>
+            <Card>
               <MediaManager
                 projectId={p.id}
                 media={media}
@@ -362,9 +356,17 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 setCoverHero={setCoverHero}
               />
             </Card>
+          </section>
 
-            <Card id="sec-about">
-              <CardHeader icon={Info} element="fire" title="3 · About this project" subtitle="The brief and the challenge, in a short paragraph" headingLevel={2} />
+          <section id="sec-about" className={styles.editorSection} aria-labelledby="sec-about-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-about-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>3</span>
+                About this project
+              </h2>
+              <p className={styles.muted}>The brief and the challenge, in a short paragraph</p>
+            </header>
+            <Card>
               <div className={styles.cardBody}>
                 <Textarea
                   label="About this project"
@@ -378,17 +380,33 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             </Card>
+          </section>
 
-            <Card id="sec-output">
-              <CardHeader icon={ListChecks} element="fire" title="4 · Output" subtitle="What we delivered" headingLevel={2} />
+          <section id="sec-output" className={styles.editorSection} aria-labelledby="sec-output-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-output-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>4</span>
+                Output
+              </h2>
+              <p className={styles.muted}>What we delivered</p>
+            </header>
+            <Card>
               <div className={styles.cardBody}>
                 <Textarea label="Summary" helper="What was made, in one line" rows={2} value={p.output_summary ?? ''} onChange={(e) => set('output_summary', e.target.value)} />
               </div>
               <TextListEditor items={deliverables} onChange={dirtyWrap(setDeliverables)} itemLabel="Deliverable" addLabel="Add deliverable" placeholder="e.g. 30s film in 16:9 and 9:16" />
             </Card>
+          </section>
 
-            <Card id="sec-overview">
-              <CardHeader icon={Rows} element="fire" title="5 · Overview" subtitle="The thinking behind the work: add, rename, reorder or remove blocks" headingLevel={2} />
+          <section id="sec-overview" className={styles.editorSection} aria-labelledby="sec-overview-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-overview-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>5</span>
+                Overview
+              </h2>
+              <p className={styles.muted}>The thinking behind the work: add, rename, reorder or remove blocks</p>
+            </header>
+            <Card>
               <div className={styles.cardBody}>
                 {blocks.length > 0 && (
                   <SortableList
@@ -429,9 +447,17 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
             </Card>
+          </section>
 
-            <Card id="sec-capabilities">
-              <CardHeader icon={Sparkle} element="fire" title="6 · Capabilities" subtitle="The type of work, and how AI made it" headingLevel={2} />
+          <section id="sec-capabilities" className={styles.editorSection} aria-labelledby="sec-capabilities-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-capabilities-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>6</span>
+                Capabilities
+              </h2>
+              <p className={styles.muted}>The type of work, and how AI made it</p>
+            </header>
+            <Card>
               <div className={styles.cardBody}>
                 <Textarea
                   label="Capabilities shown"
@@ -464,39 +490,28 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 />
               </div>
             </Card>
+          </section>
         </div>
 
-        <aside className={styles.editorAside}>
+        <aside className={styles.editorAside} aria-labelledby="rail-title">
+          <h2 id="rail-title" className={styles.railTitle}>
+            Project settings
+          </h2>
           <Card>
-            <CardHeader icon={Eye} element="fire" title="Publishing" subtitle="Who sees it, and where" headingLevel={2} />
+            <CardTitle headingLevel={3}>Card preview</CardTitle>
+            <p className={styles.muted}>How it shows on Our Works</p>
             <div className={styles.cardBody}>
-            <Dropdown
-              label="Visibility"
-              helper="Published shows on the site. Draft and Hidden only show to admins (Preview)."
-              options={(['published', 'draft', 'hidden'] as Visibility[]).map((v) => ({ value: v, label: VISIBILITY_LABEL[v] }))}
-              value={p.visibility}
-              onValueChange={(v) => set('visibility', v as Visibility)}
-            />
-            <Switch label="Featured" description="Show it in the home page banner" checked={p.featured} onChange={(e) => set('featured', e.target.checked)} />
-            <Switch
-              label="Internal or confidential"
-              description="Only signed-in team members can see it, even when published"
-              checked={p.is_internal}
-              onChange={(e) => set('is_internal', e.target.checked)}
-            />
-              <div className={styles.asideActions}>
-                <Button variant="secondary" size="sm" leadingIcon={Eye} onClick={preview}>
-                  Preview
-                </Button>
-                <Button variant="ghost" size="sm" leadingIcon={Trash} onClick={() => setConfirmTrash(true)}>
-                  Move to Trash
-                </Button>
+              <MediaFrame media={cover} aspect="16:9" mode="thumb" placeholderLabel="Pick a cover under Hero and gallery" />
+              <div>
+                <p className={styles.previewTitle}>{p.title || 'Untitled project'}</p>
+                <p className={styles.muted}>{p.one_liner || 'Add a one-liner under Basics'}</p>
               </div>
             </div>
           </Card>
 
           <Card>
-            <CardHeader icon={Info} element="fire" title="Details" subtitle="Client, type, year and status" headingLevel={2} />
+            <CardTitle headingLevel={3}>Details</CardTitle>
+            <p className={styles.muted}>Client, type, year and status</p>
             <div className={styles.cardBody}>
               <TagPicker label="Clients" options={lists.clients} value={p.client_ids} onChange={(v) => set('client_ids', v)} create={{ table: 'clients', noun: 'client' }} />
 
@@ -545,30 +560,27 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           </Card>
 
           <Card>
-            <CardHeader icon={ImagesSquare} element="fire" title="Card preview" subtitle="How it shows on Our Works" headingLevel={2} />
+            <CardTitle headingLevel={3}>Publishing</CardTitle>
+            <p className={styles.muted}>Who sees it, and where</p>
             <div className={styles.cardBody}>
-              <MediaFrame media={cover} aspect="16:9" mode="thumb" placeholderLabel="Pick a cover under Hero and gallery" />
-              <div>
-                <p className={styles.previewTitle}>{p.title || 'Untitled project'}</p>
-                <p className={styles.muted}>{p.one_liner || 'Add a one-liner under Basics'}</p>
+              <Dropdown
+                label="Visibility"
+                helper="Published shows on the site. Draft and Hidden (for confidential work) only show to signed-in admins."
+                options={(['published', 'draft', 'hidden'] as Visibility[]).map((v) => ({ value: v, label: VISIBILITY_LABEL[v] }))}
+                value={p.visibility}
+                onValueChange={(v) => set('visibility', v as Visibility)}
+              />
+              <Switch label="Featured" description="Show it in the home page banner" checked={p.featured} onChange={(e) => set('featured', e.target.checked)} />
+              <div className={styles.asideActions}>
+                <Button variant="secondary" size="sm" leadingIcon={Eye} onClick={preview}>
+                  Preview
+                </Button>
+                <Button variant="ghost" size="sm" leadingIcon={Trash} onClick={() => setConfirmTrash(true)}>
+                  Move to Trash
+                </Button>
               </div>
             </div>
           </Card>
-
-          <nav aria-label="Sections of this project" className={styles.jump}>
-            {sectionLinks.map(([id, label]) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }}
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
         </aside>
       </div>
 
