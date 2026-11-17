@@ -1,4 +1,5 @@
 import 'server-only';
+import { embedProvider } from './format';
 import { getServerClient } from './supabase/server';
 import type {
   ListItemRow,
@@ -103,12 +104,14 @@ export async function getHomeData() {
 
   const slides: ShowcaseSlide[] = ordered.map((p) => {
     const card = resolveCard(p, lists, media);
-    // Prefer moving pictures: the hero if it's a video, else the cover. Audio has no picture to show.
+    // Prefer moving pictures that autoplay; otherwise a still. Audio has no picture to show.
     const hero = byId(p.hero_media_id);
     const cover = byId(p.cover_media_id);
-    const moving = (m: Media | null) => m && (m.kind === 'video' || m.kind === 'embed');
-    const visual = (m: Media | null) => m && m.kind !== 'audio';
-    const pick = [hero, cover].find(moving) ?? [hero, cover].find(visual) ?? null;
+    // Only what can play silently by itself: uploads, YouTube, Vimeo. Google Drive can't autoplay.
+    const moving = (m: Media | null) =>
+      m && (m.kind === 'video' || (m.kind === 'embed' && embedProvider(m.url) !== 'Google Drive'));
+    const still = (m: Media | null) => m && m.kind === 'image';
+    const pick = [hero, cover].find(moving) ?? [cover, hero].find(still) ?? null;
     return {
       id: p.id,
       slug: p.slug,

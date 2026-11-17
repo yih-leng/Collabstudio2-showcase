@@ -10,6 +10,7 @@
 .frame > video,
 .frame > iframe,
 .frame > .audio,
+.frame > .poster,
 .frame > .embedFallback {
   position: absolute;
   inset: 0;
@@ -107,4 +108,67 @@
 
 .audioPlayer {
   width: min(100%, calc(var(--spacing-120) * 4));
+}
+
+/* Click-to-play poster for players that can't autoplay (Google Drive). */
+.poster {
+  display: block;
+  padding: 0;
+  border: 0;
+  background:
+    radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--color-fire-pastel) 30%, transparent), transparent 60%),
+    var(--color-neutral-9);
+  cursor: pointer;
+}
+
+.poster > img,
+.poster > .embedFallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.frame[data-fit='cover'] .poster > img {
+  object-fit: cover;
+}
+
+.posterPlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--spacing-60) + var(--spacing-12));
+  height: calc(var(--spacing-60) + var(--spacing-12));
+  border-radius: var(--radius-pill);
+  background: var(--color-neutral-1);
+  color: var(--color-neutral-9);
+  font-size: var(--icon-lg);
+  box-shadow: var(--shadow-4);
+  transform: translate(-50%, -50%);
+  transition: transform var(--duration-base) var(--ease-settle);
+}
+
+.poster:hover .posterPlay {
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.poster:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset-inset);
+}
+
+.posterLabel {
+  position: absolute;
+  left: var(--spacing-16);
+  bottom: var(--spacing-16);
+  padding: var(--spacing-4) var(--spacing-12);
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--color-neutral-9) 70%, transparent);
+  color: var(--color-neutral-1);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
 }

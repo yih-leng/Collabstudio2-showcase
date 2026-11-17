@@ -167,7 +167,9 @@ Project type, Capability tags or Tools field: pick a match, or choose
 | `lib/admin-api.ts` | Uploads and ordering helpers for the admin |
 | `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`) |
 | `lib/demo/` and `app/api/demo/` | The local demo: a stand-in for Supabase that saves to `.demo/` and applies the same row-level rules. Off once Supabase keys are set, and off in production |
-| `supabase/seed-source.mjs` | The deck's six projects. Edit, then `npm run seed:build` to regenerate `seed.sql` and `lib/seed.generated.json` |
+| `supabase/seed-source.mjs` | The deck's projects, with their media. Edit, then `npm run seed:build` to regenerate `seed.sql`, `updates/deck-update.sql` and `lib/seed.generated.json` |
+| `supabase/updates/deck-update.sql` | Brings a database already in use up to date with `seed-source.mjs`: run it in the SQL Editor. It replaces the deck projects' text and sets their cover and hero, and keeps featured/visibility settings and anything added in the admin |
+| `public/projects/` | Images for the deck projects, optimised for the web and served with the site |
 
 **Security model.** Row-level security does the gatekeeping: the public can
 read only published, non-internal, non-deleted projects (and their blocks,

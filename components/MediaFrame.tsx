@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { FilmSlate, MusicNotes, Play } from '@phosphor-icons/react';
 import { aspectRatio, toEmbedUrl } from '@/lib/format';
 import type { Aspect, Media, MediaKind } from '@/lib/types';
@@ -65,11 +66,16 @@ function MediaBody({ media, mode }: { media: FrameMedia; mode: 'player' | 'thumb
 
   const embed = toEmbedUrl(media.url);
   if (!embed) return <EmbedFallback kind={media.kind} />;
+  const drive = embed.match(/drive\.google\.com\/file\/d\/([\w-]+)/)?.[1];
   if (mode === 'thumb') {
     const yt = embed.match(/youtube-nocookie\.com\/embed\/([\w-]+)/);
     if (yt) return <img src={`https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`} alt={alt} loading="lazy" />;
+    if (drive) return <DrivePoster id={drive} alt={alt} />;
     return <EmbedFallback kind={media.kind} />;
   }
+  // Drive's player is a black box until it loads and can't autoplay: show its poster and a
+  // play button, and load the player only when someone asks for it.
+  if (drive) return <ClickToPlay key={embed} id={drive} embed={embed} title={media.caption ?? 'Video'} />;
   return (
     <iframe
       src={embed}
@@ -78,6 +84,31 @@ function MediaBody({ media, mode }: { media: FrameMedia; mode: 'player' | 'thumb
       allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
       allowFullScreen
     />
+  );
+}
+
+/** Google Drive's own thumbnail. It only exists for files shared as "Anyone with the link". */
+const driveThumb = (id: string) => `https://drive.google.com/thumbnail?id=${id}&sz=w1920`;
+
+function DrivePoster({ id, alt }: { id: string; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  if (failed) return <EmbedFallback kind="embed" />;
+  return <img src={driveThumb(id)} alt={alt} loading="lazy" referrerPolicy="no-referrer" onError={() => setFailed(true)} />;
+}
+
+function ClickToPlay({ id, embed, title }: { id: string; embed: string; title: string }) {
+  const [playing, setPlaying] = useState(false);
+  if (playing) {
+    return <iframe src={embed} title={title} allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowFullScreen />;
+  }
+  return (
+    <button type="button" className={styles.poster} onClick={() => setPlaying(true)} aria-label={`Play ${title}`}>
+      <DrivePoster id={id} alt="" />
+      <span className={styles.posterPlay} aria-hidden>
+        <Play weight="fill" />
+      </span>
+      <span className={styles.posterLabel}>{title}</span>
+    </button>
   );
 }
 
