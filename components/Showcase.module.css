@@ -165,25 +165,37 @@
   filter: brightness(1.08);
 }
 
+/* Arrows, pause and sound: bottom right, shown while the pointer is on the banner
+   or a control has keyboard focus. Touch screens have no hover, so they always show. */
 .controls {
   position: absolute;
-  top: var(--spacing-20);
-  right: var(--spacing-20);
+  right: var(--spacing-24);
+  bottom: var(--spacing-24);
   z-index: 4;
   display: flex;
   align-items: center;
   gap: var(--spacing-8);
+  opacity: 0;
+  transform: translateY(var(--spacing-8));
+  pointer-events: none;
+  transition:
+    opacity var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-settle);
 }
 
-.counter {
-  margin-right: var(--spacing-8);
-  font-size: var(--text-body2-size);
-  font-variant-numeric: tabular-nums;
-  color: color-mix(in srgb, var(--color-neutral-1) 70%, transparent);
+.stage:hover .controls,
+.controls:focus-within {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
 }
 
-.counter strong {
-  color: var(--color-neutral-1);
+@media (hover: none) {
+  .controls {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
 }
 
 /* Thumbnail strip */
@@ -411,9 +423,11 @@
     line-height: var(--text-body2-lh);
   }
 
+  /* Phones: the caption fills the bottom, so the controls sit top right. */
   .controls {
     top: var(--spacing-12);
     right: var(--spacing-12);
+    bottom: auto;
   }
 
   .placeholder span {

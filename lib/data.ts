@@ -1,4 +1,5 @@
 import 'server-only';
+import { cache } from 'react';
 import { embedProvider } from './format';
 import { getServerClient } from './supabase/server';
 import type {
@@ -138,25 +139,33 @@ export async function getHomeData() {
   return { settings, slides, clients, projectCount: published.length };
 }
 
-export async function getProjectDetail(slug: string): Promise<ProjectDetailData | null> {
+/**
+ * One project page's data. Wrapped in React's cache, so the page and its metadata
+ * share one set of queries per request; the lists and the next/previous lookup
+ * run alongside the project's own rows rather than after them.
+ */
+export const getProjectDetail = cache(async (slug: string): Promise<ProjectDetailData | null> => {
   const sb = await getServerClient();
+  const listsP = getLists();
+  const visibleP = getVisibleProjects();
   const { data } = await sb.from('projects').select('*').eq('slug', slug).maybeSingle();
   const project = (data as Project) ?? null;
   if (!project) return null;
-  const [b, i, m] = await Promise.all([
+  const [b, i, m, lists, visible] = await Promise.all([
     sb.from('overview_blocks').select('*').eq('project_id', project.id),
     sb.from('list_items').select('*').eq('project_id', project.id),
     sb.from('media').select('*').eq('project_id', project.id),
+    listsP,
+    visibleP,
   ]);
   const blocks = (b.data ?? []) as OverviewBlock[];
   const items = (i.data ?? []) as ListItemRow[];
   const media = (m.data ?? []) as Media[];
 
-  const lists = await getLists();
   const card = resolveCard(project, lists, media);
 
   // Next / previous among published work, in site order.
-  const all = (await getVisibleProjects()).filter((p) => p.visibility === 'published');
+  const all = visible.filter((p) => p.visibility === 'published');
   const idx = all.findIndex((p) => p.id === project!.id);
   const link = (p?: Project) => (p ? { slug: p.slug, title: p.title } : null);
 
@@ -178,4 +187,4 @@ export async function getProjectDetail(slug: string): Promise<ProjectDetailData 
     // A deleted project is only reachable by an admin; treat it like a draft.
     ...(project.deleted_at ? { visibility: 'hidden' as const } : {}),
   };
-}
+});

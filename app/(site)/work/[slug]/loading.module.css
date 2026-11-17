@@ -1,0 +1,75 @@
+/* Project page placeholder. Tokens only. TODO(design-system: no general skeleton). */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--section-gap);
+}
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--spacing-32) var(--spacing-48);
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-12);
+}
+
+.block {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-2);
+}
+
+.chip {
+  width: calc(var(--spacing-120) * 1.2);
+  height: var(--spacing-24);
+  border-radius: var(--radius-pill);
+}
+
+.title {
+  width: 70%;
+  height: var(--text-h1-lh-lg);
+}
+
+.line {
+  width: 90%;
+  height: var(--text-h3-lh);
+}
+
+.lineShort {
+  width: 55%;
+  height: var(--text-h3-lh);
+}
+
+.facts {
+  height: calc(var(--spacing-120) * 1.4);
+  border-radius: var(--radius-lg);
+}
+
+.stage {
+  aspect-ratio: 16 / 9;
+  max-height: 72vh;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-3);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .block {
+    animation: pulse var(--duration-pulse) var(--ease-flow) infinite alternate;
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.55;
+  }
+}
+
+@media (max-width: 900px) {
+  .intro {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

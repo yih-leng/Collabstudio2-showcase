@@ -123,9 +123,6 @@ export function Showcase({ slides }: { slides: ShowcaseSlide[] }) {
         </div>
 
         <div className={styles.controls}>
-          <span className={styles.counter} aria-hidden>
-            <strong>{pad(index + 1)}</strong> / {pad(count)}
-          </span>
           {slide.media?.kind === 'video' && (
             <Button
               variant="secondary"

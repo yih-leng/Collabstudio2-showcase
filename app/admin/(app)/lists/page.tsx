@@ -14,7 +14,7 @@ import {
   useToast,
   type FileUploaderItem,
 } from '@collabrium/ui';
-import { FileImage, ListBullets, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
+import { Check, FileImage, Globe, ListBullets, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { SortableList } from '@/components/admin/SortableList';
@@ -22,6 +22,8 @@ import styles from '@/components/admin/admin.module.css';
 import { MAX_IMAGE_BYTES, extOf, removeFromStorage, saveOrder, uploadToStorage } from '@/lib/admin-api';
 import type { Client, Project, TagType } from '@/lib/types';
 import local from './lists.module.css';
+
+type LogoCandidate = { dataUrl: string; mime: string; bytes: number; source: string; label: string };
 
 type Kind = 'clients' | 'categories' | 'capability' | 'tool';
 type Item = { id: string; name: string; logo_url?: string | null; logo_path?: string | null };
@@ -242,6 +244,38 @@ function EditModal({ kind, item, onClose, onSaved }: { kind: Kind; item: Item; o
   const [files, setFiles] = useState<FileUploaderItem[]>([]);
   const [logo, setLogo] = useState<{ url: string | null; path: string | null }>({ url: item.logo_url ?? null, path: item.logo_path ?? null });
 
+  const [site, setSite] = useState('');
+  const [siteError, setSiteError] = useState<string>();
+  const [finding, setFinding] = useState(false);
+  const [candidates, setCandidates] = useState<LogoCandidate[]>([]);
+  const [picked, setPicked] = useState<number | null>(null);
+
+  // Ask the server for the logo options on a website (or the image at a link).
+  const findLogo = async () => {
+    setFinding(true);
+    setSiteError(undefined);
+    setCandidates([]);
+    setPicked(null);
+    try {
+      const res = await fetch('/api/logo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ url: site }) });
+      const body = (await res.json()) as { candidates?: LogoCandidate[]; error?: string };
+      if (!res.ok || !body.candidates) throw new Error(body.error ?? 'Couldn’t find a logo there.');
+      setCandidates(body.candidates);
+      if (body.candidates.length === 1) await chooseCandidate(body.candidates[0], 0);
+    } catch (e) {
+      setSiteError((e as Error).message);
+    } finally {
+      setFinding(false);
+    }
+  };
+
+  const chooseCandidate = async (c: LogoCandidate, i: number) => {
+    setPicked(i);
+    const blob = await (await fetch(c.dataUrl)).blob();
+    const ext = c.mime === 'image/svg+xml' ? 'svg' : (c.mime.split('/')[1] ?? 'png').replace('x-icon', 'ico').replace('vnd.microsoft.icon', 'ico').replace('jpeg', 'jpg');
+    await uploadLogo(new File([blob], `logo.${ext}`, { type: c.mime }));
+  };
+
   const uploadLogo = async (file: File) => {
     setFiles([{ file, status: 'uploading' }]);
     try {
@@ -303,11 +337,55 @@ function EditModal({ kind, item, onClose, onSaved }: { kind: Kind; item: Item; o
                 </Button>
               </div>
             )}
+            <div className={styles.row}>
+              <InputField
+                label="Get it from a website"
+                leadingIcon={Globe}
+                placeholder="e.g. skechers.com, or a link to the logo image"
+                value={site}
+                error={siteError}
+                onChange={(e) => {
+                  setSite(e.target.value);
+                  setSiteError(undefined);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && site.trim()) {
+                    e.preventDefault();
+                    findLogo();
+                  }
+                }}
+              />
+              <span className={styles.fit}>
+                <Button variant="secondary" loading={finding} disabled={!site.trim()} onClick={findLogo}>
+                  Find logo
+                </Button>
+              </span>
+            </div>
+            {candidates.length > 1 && (
+              <div className={styles.stackSm}>
+                <p className={styles.muted}>Pick the one to use:</p>
+                <ul className={local.candidates}>
+                  {candidates.map((c, i) => (
+                    <li key={c.dataUrl.slice(-40) + i}>
+                      <button type="button" className={local.candidate} aria-pressed={picked === i} onClick={() => chooseCandidate(c, i)}>
+                        <span className={local.candidateImage}>
+                          <img src={c.dataUrl} alt="" />
+                        </span>
+                        <span className={local.candidateLabel}>
+                          {picked === i && <Check weight="bold" aria-hidden />}
+                          {c.label}
+                        </span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <FileUploader
-              title="Drop the client's logo here"
+              title="Or drop the client's logo here"
               touchTitle="Add the client's logo"
               buttonLabel="Choose a file"
-              caption="Shown in the client strip on the home page. A transparent PNG or SVG works best."
+              caption="Shown in the home page client strip and on the client's project pages. A transparent PNG or SVG works best."
               rules={{
                 noun: 'logo',
                 maxBytes: MAX_IMAGE_BYTES,

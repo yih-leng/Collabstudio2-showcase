@@ -15,7 +15,7 @@ import styles from './project.module.css';
 /**
  * The project page template. Every project follows the same order, and a
  * section only shows when it has content:
- *   media carousel (hero, then every deliverable) → title and facts →
+ *   title and facts → media carousel (hero, then every deliverable) →
  *   About this project → Output → Overview →
  *   Capabilities (incl. how AI was used) → Gallery → next/previous.
  */
@@ -47,8 +47,6 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
           </InfoBanner>
         )}
 
-        <HeroCarousel items={[...(p.hero ? [p.hero] : []), ...p.gallery]} title={p.title} />
-
         <header className={styles.intro}>
           <div className={styles.introMain}>
             <div className={styles.badges}>
@@ -72,9 +70,10 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
             )}
             <Fact label="Project type" value={p.categories.map((c) => c.name).join(', ')} />
             <Fact label="Year" value={p.year ? String(p.year) : ''} />
-            <Fact label="Status" value={statusText(p.status, p.status_note)} />
           </dl>
         </header>
+
+        <HeroCarousel items={[...(p.hero ? [p.hero] : []), ...p.gallery]} title={p.title} />
 
         {sections.length > 0 && (
           <nav aria-label="On this page" className={styles.toc}>

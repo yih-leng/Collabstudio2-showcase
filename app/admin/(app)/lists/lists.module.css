@@ -44,3 +44,66 @@
   max-width: calc(var(--spacing-120) * 1.5);
   object-fit: contain;
 }
+
+/* Logo options found on a website. */
+.candidates {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 1.2)), 1fr));
+  gap: var(--spacing-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.candidate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  width: 100%;
+  padding: var(--spacing-8);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-1);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.candidate:hover {
+  border-color: var(--color-neutral-5);
+}
+
+.candidate[aria-pressed='true'] {
+  border-width: var(--border-width-md);
+  border-color: var(--color-obsidian);
+}
+
+.candidate:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* A checkerboard so white and transparent logos still show. */
+.candidateImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--spacing-60);
+  border-radius: var(--radius-xs);
+  background: repeating-conic-gradient(var(--color-neutral-2) 0% 25%, var(--color-neutral-1) 0% 50%) 50% / var(--spacing-16) var(--spacing-16);
+}
+
+.candidateImage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.candidateLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-4);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  color: var(--color-neutral-7);
+}

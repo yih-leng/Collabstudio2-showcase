@@ -83,6 +83,10 @@ and delete the user under **Authentication → Users**.
 4. In Supabase, **Authentication → URL Configuration**: set **Site URL** to
    your Vercel address (for example `https://collabstudio-showcase.vercel.app`).
 
+`vercel.json` runs the site's server in Singapore (`sin1`), next to a Supabase
+project in Singapore, so pages don't wait on trips to the US. If your Supabase
+project is in another region, change it to the matching Vercel region.
+
 The design system ships inside the repo as `vendor/collabrium-ui.tgz`, so
 Vercel installs it like any other package. To take a newer version of the
 design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh

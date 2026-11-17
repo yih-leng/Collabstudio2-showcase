@@ -122,6 +122,35 @@
   outline-offset: var(--focus-ring-offset);
 }
 
+/* Arrows and counter appear while the pointer is on the stage or an arrow has
+   keyboard focus; touch screens have no hover, so there they always show. */
+.prev,
+.next,
+.counter {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.stage:hover .prev,
+.stage:hover .next,
+.stage:hover .counter,
+.prev:focus-within,
+.next:focus-within,
+.stage:focus-within .counter {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) {
+  .prev,
+  .next,
+  .counter {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .media {
     animation: fadeIn var(--duration-slow) var(--ease-standard);
