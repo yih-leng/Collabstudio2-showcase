@@ -20,8 +20,9 @@ import {
   type FilterValue,
   type TableColumn,
 } from '@collabrium/ui';
-import { Eye, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
+import { Archive, Eye, FilmSlate, PencilSimple, Plus } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
+import { ArchivedProjects } from '@/components/admin/ArchivedProjects';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { ImportButton } from '@/components/admin/import/ImportButton';
 import { useImport } from '@/components/admin/import/ImportContext';
@@ -41,6 +42,9 @@ export default function ProjectsPage() {
   const [rows, setRows] = useState<Row[] | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [trashing, setTrashing] = useState<Row | null>(null);
+  const [tab, setTab] = useState('all');
+  const [archived, setArchived] = useState<number | undefined>(undefined);
+  const [archivedKey, setArchivedKey] = useState(0);
   const [creating, setCreating] = useState(false);
   const [filter, setFilter] = useState<FilterValue>({});
   const [search, setSearch] = useState('');
@@ -64,12 +68,13 @@ export default function ProjectsPage() {
     load();
   }, [load, createdAt]);
 
-  // /admin?import=1 (and the old /admin/import address) opens Import from deck.
+  // /admin?import=1 (and the old /admin/import address) opens Import from deck;
+  // /admin?tab=archived (and the old /admin/trash address) opens the Archived tab.
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get('import') !== null) {
-      showImport();
-      router.replace('/admin');
-    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('tab')) setTab(params.get('tab')!);
+    if (params.get('import') !== null) showImport();
+    if (params.size) router.replace('/admin');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -110,19 +115,21 @@ export default function ProjectsPage() {
     setTrashing(null);
     const { error } = await sb.from('projects').update({ deleted_at: new Date().toISOString(), featured: false }).eq('id', row.id);
     if (error) {
-      toast({ tone: 'danger', title: "That didn't move to Trash", message: error.message });
+      toast({ tone: 'danger', title: "That didn't archive", message: error.message });
       return;
     }
     setRows((rs) => rs?.filter((r) => r.id !== row.id) ?? rs);
+    setArchivedKey((k) => k + 1);
     toast({
       tone: 'success',
-      title: 'Moved to Trash',
+      title: 'Archived',
       message: row.title,
       action: {
         label: 'Undo',
         onClick: async () => {
           await sb.from('projects').update({ deleted_at: null }).eq('id', row.id);
           load();
+          setArchivedKey((k) => k + 1);
         },
       },
     });
@@ -295,6 +302,8 @@ export default function ProjectsPage() {
         <Tabs
           aria-label="Project views"
           surface="canvas"
+          value={tab}
+          onValueChange={setTab}
           tabs={[
             {
               id: 'all',
@@ -322,7 +331,7 @@ export default function ProjectsPage() {
                     rowActions={[
                       { label: 'Edit', icon: PencilSimple, onClick: (r) => router.push(`/admin/projects/${r.id}`) },
                       { label: 'Preview', icon: Eye, onClick: (r) => window.open(`/work/${r.slug}`, '_blank', 'noopener') },
-                      { label: 'Move to Trash', icon: Trash, onClick: (r) => setTrashing(r) },
+                      { label: 'Archive', icon: Archive, onClick: (r) => setTrashing(r) },
                     ]}
                     empty={
                       filtering ? (
@@ -384,6 +393,23 @@ export default function ProjectsPage() {
                 </div>
               ),
             },
+            {
+              id: 'archived',
+              label: 'Archived',
+              count: archived,
+              content: (
+                <div className={styles.stackSm}>
+                  <p className={styles.muted}>Archived projects are off the site. Restore them, or delete them for good.</p>
+                  <ArchivedProjects
+                    reloadKey={archivedKey}
+                    onChange={(n, restored) => {
+                      setArchived(n);
+                      if (restored) load();
+                    }}
+                  />
+                </div>
+              ),
+            },
           ]}
         />
       )}
@@ -391,19 +417,19 @@ export default function ProjectsPage() {
       <Modal
         open={!!trashing}
         onClose={() => setTrashing(null)}
-        title="Move this project to Trash?"
+        title="Archive this project?"
         actions={
           <>
             <Button variant="secondary" onClick={() => setTrashing(null)}>
               Cancel
             </Button>
             <Button variant="primary" onClick={moveToTrash}>
-              Move to Trash
+              Archive
             </Button>
           </>
         }
       >
-        {trashing?.title} comes off the site straight away. You can restore it from Trash at any time.
+        {trashing?.title} comes off the site straight away. You can restore it from the Archived tab at any time.
       </Modal>
     </AdminShell>
   );

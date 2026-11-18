@@ -20,7 +20,7 @@ import {
   Eye,
   FilmSlate,
   Plus,
-  Trash,
+  Archive,
   X,
 } from '@phosphor-icons/react';
 import { useAdmin } from '@/components/admin/AdminContext';
@@ -113,7 +113,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     return (
       <AdminShell header={<PageHeader title="Project not found" />}>
         <EmptyState variant="section" icon={FilmSlate} heading="This project isn't here" primaryAction={{ label: 'Back to projects', onClick: () => router.push('/admin') }}>
-          It may have been deleted for good. Check Trash for anything moved there.
+          It may have been deleted for good. Check the Archived tab on Projects for anything archived.
         </EmptyState>
       </AdminShell>
     );
@@ -281,11 +281,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     setConfirmTrash(false);
     const { error } = await sb.from('projects').update({ deleted_at: new Date().toISOString(), featured: false }).eq('id', p.id);
     if (error) {
-      toast({ tone: 'danger', title: "That didn't move to Trash", message: error.message });
+      toast({ tone: 'danger', title: "That didn't archive", message: error.message });
       return;
     }
     setDirty(false);
-    toast({ tone: 'success', title: 'Moved to Trash', message: p.title });
+    toast({ tone: 'success', title: 'Archived', message: p.title });
     router.push('/admin');
   };
 
@@ -674,11 +674,21 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           </section>
         </div>
 
-        <aside className={styles.editorAside} aria-labelledby="rail-title">
-          <h2 id="rail-title" className={styles.railTitle}>
-            Project settings
-          </h2>
+        <aside className={styles.editorAside} aria-label="Project settings">
           <Card>
+            {/* The main actions again, in reach wherever you are on the page. */}
+            <div className={styles.asideSave}>
+              <Button variant="secondary" disabled={saving} onClick={() => save({ visibility: 'draft' })}>
+                Save draft
+              </Button>
+              <Button variant="primary" loading={saving} onClick={() => save(p.visibility === 'published' ? {} : { visibility: 'published' })}>
+                {primaryLabel}
+              </Button>
+            </div>
+            {dirty && <p className={styles.muted}>You have unsaved changes.</p>}
+
+            <div className={styles.cardDivider} role="presentation" />
+
             <CardTitle headingLevel={3}>Card preview</CardTitle>
             <p className={styles.muted}>How it shows on Our Works</p>
             <div className={styles.cardBody}>
@@ -706,8 +716,8 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 <Button variant="secondary" size="sm" leadingIcon={Eye} onClick={preview}>
                   Preview
                 </Button>
-                <Button variant="ghost" size="sm" leadingIcon={Trash} onClick={() => setConfirmTrash(true)}>
-                  Move to Trash
+                <Button variant="ghost" size="sm" leadingIcon={Archive} onClick={() => setConfirmTrash(true)}>
+                  Archive
                 </Button>
               </div>
             </div>
@@ -718,19 +728,19 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       <Modal
         open={confirmTrash}
         onClose={() => setConfirmTrash(false)}
-        title="Move this project to Trash?"
+        title="Archive this project?"
         actions={
           <>
             <Button variant="secondary" onClick={() => setConfirmTrash(false)}>
               Cancel
             </Button>
             <Button variant="primary" onClick={moveToTrash}>
-              Move to Trash
+              Archive
             </Button>
           </>
         }
       >
-        It comes off the site straight away. You can restore it from Trash at any time.
+        It comes off the site straight away. You can restore it from the Archived tab on Projects at any time.
       </Modal>
       <Modal
         open={confirmCancel}

@@ -32,7 +32,7 @@
   background:
     radial-gradient(closest-side at 30% 40%, color-mix(in srgb, var(--color-fire-pastel) 55%, transparent), transparent),
     radial-gradient(closest-side at 70% 60%, color-mix(in srgb, var(--color-water-pastel) 45%, transparent), transparent);
-  filter: blur(var(--spacing-48));
+  /* No blur filter: the gradients are already soft, and a blurred layer this big is costly to redraw. */
   opacity: 0.5;
 }
 
@@ -52,6 +52,26 @@
   z-index: 2;
   opacity: 1;
   transform: scale(1);
+  visibility: visible;
+  transition:
+    opacity var(--duration-ambient) var(--ease-standard),
+    transform var(--duration-ambient) var(--ease-settle),
+    visibility 0s;
+}
+
+/* Once faded out, a slide drops out of rendering altogether. */
+.slide:not([data-active]) {
+  visibility: hidden;
+  transition:
+    opacity var(--duration-ambient) var(--ease-standard),
+    transform var(--duration-ambient) var(--ease-settle),
+    visibility 0s linear var(--duration-ambient);
+}
+
+/* Off screen or in a background tab: the looping motion rests. */
+.showcase[data-resting] .glow,
+.showcase[data-resting] .media[data-kenburns] {
+  animation-play-state: paused;
 }
 
 .media,

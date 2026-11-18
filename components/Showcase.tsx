@@ -9,6 +9,7 @@ import { CaretLeft, CaretRight, FilmSlate, Pause, Play, SpeakerHigh, SpeakerSlas
 import { toBackgroundEmbedUrl } from '@/lib/format';
 import type { ShowcaseSlide } from '@/lib/types';
 import { MediaFrame } from './MediaFrame';
+import { useInView } from './useInView';
 import styles from './Showcase.module.css';
 
 // How long a slide stays up. An uploaded video stays for its own length (within limits).
@@ -33,6 +34,9 @@ export function Showcase({ slides }: { slides: ShowcaseSlide[] }) {
   const [muted, setMuted] = useState(true);
   const [durations, setDurations] = useState<Record<string, number>>({});
   const stripRef = useRef<HTMLOListElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
+  // Off screen, the video, the glow and the timer rest, so scrolling past stays smooth.
+  const visible = useInView(rootRef);
 
   // Under reduced motion nothing moves on by itself; the person steps through.
   useEffect(() => {
@@ -64,12 +68,14 @@ export function Showcase({ slides }: { slides: ShowcaseSlide[] }) {
   const slide = slides[index];
   const durationFor = (s: ShowcaseSlide) =>
     durations[s.id] ?? (!s.media || s.media.kind === 'image' ? IMAGE_MS : EMBED_MS);
-  const running = playing && !held && count > 1;
+  const running = playing && !held && visible && count > 1;
   const open = (s: ShowcaseSlide) => router.push(s.slug ? `/work/${s.slug}` : '/work');
 
   return (
     <section
+      ref={rootRef}
       className={styles.showcase}
+      data-resting={!visible || undefined}
       aria-roledescription="carousel"
       aria-label="Our work"
       onPointerEnter={() => setHeld(true)}
@@ -93,7 +99,7 @@ export function Showcase({ slides }: { slides: ShowcaseSlide[] }) {
             <SlideMedia
               slide={s}
               active={i === index}
-              playing={playing}
+              playing={playing && visible}
               muted={muted}
               onDuration={(ms) =>
                 setDurations((d) => (d[s.id] === ms ? d : { ...d, [s.id]: ms }))

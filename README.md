@@ -140,8 +140,8 @@ banner, which plays featured projects only (if nothing is featured, it shows
 all published work); **Site order** sets the Our Works page and next/previous links. Drag the
 handle, or focus it and use Space and the arrow keys.
 
-**Deleting.** **Trash** takes a project off the site but keeps everything;
-restore it any time from **Trash**, or delete it for good there.
+**Archiving.** **Archive** takes a project off the site but keeps everything;
+restore it any time from the **Archived** tab on Projects, or delete it for good there.
 
 **Large videos.** Big files are compressed to a web preview (at most 1920 px,
 bitrate chosen to land under 40 MB) before upload, because Supabase's free

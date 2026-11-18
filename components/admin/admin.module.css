@@ -196,20 +196,26 @@
   flex-direction: column;
   gap: var(--spacing-16);
   min-width: 0;
-  /* Stays in view while the content scrolls; scrolls itself if the window is short. */
+  /* Stays in view while the content scrolls; scrolls itself if the window is short,
+     with a little room all round so the card's edge and shadow aren't clipped. */
+  /* The page's scroll area already has --section-gap above its content, which counts
+     towards the sticky offset, so the panel sits at that gap and fits the rest of the window. */
   position: sticky;
-  top: var(--spacing-24);
-  max-height: calc(100vh - var(--spacing-48));
+  top: 0;
+  max-height: calc(100vh - var(--section-gap) - var(--spacing-24));
   overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: calc(var(--spacing-4) * -1);
+  padding: var(--spacing-4) var(--spacing-4) var(--spacing-16);
 }
 
-/* The rail's own heading, level with the first section title. */
-.railTitle {
-  margin: 0;
-  min-height: calc(var(--text-h4-lh) + var(--text-body2-lh) + var(--spacing-4));
-  font-size: var(--text-h4-size);
-  line-height: var(--text-h4-lh);
+/* Save draft and Save changes at the top of the settings card, side by side. */
+.asideSave {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-8);
 }
+
 
 /* A main section: its number and title above the card, then the card. */
 .editorSection {

@@ -63,7 +63,8 @@
     animation: scroll calc(var(--items) * var(--duration-ambient) * 3.4) linear infinite;
   }
 
-  .marquee:hover .track {
+  .marquee:hover .track,
+  .marquee[data-resting] .track {
     animation-play-state: paused;
   }
 }

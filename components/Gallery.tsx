@@ -67,7 +67,7 @@ export function Gallery({ items }: { items: Media[] }) {
               onClick={() => open(i)}
               aria-label={`Open ${KIND_LABEL[m.kind]} ${i + 1} of ${items.length}${m.caption ? `: ${m.caption}` : ''}`}
             >
-              <MediaFrame media={m} aspect="4:5" mode="thumb" />
+              <MediaFrame media={m} aspect="1:1" mode="thumb" />
             </button>
             {m.caption && m.kind !== 'audio' && <p className={styles.caption}>{m.caption}</p>}
           </li>

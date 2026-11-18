@@ -4,7 +4,7 @@ export const STATUS_LABEL: Record<ProjectStatus, string> = {
   live: 'Live',
   approved: 'Approved',
   in_progress: 'In progress',
-  concept: 'Concept',
+  concept: 'Pitch',
 };
 
 export const STATUS_BADGE: Record<ProjectStatus, 'success' | 'info' | 'warning' | 'neutral'> = {

@@ -189,9 +189,9 @@ export function describe(g: ActivityGroup): { before: string; name: string | nul
     case 'project.unfeatured':
       return { before: 'Took ', name, after: ' off the home page' };
     case 'project.trashed':
-      return { before: 'Moved ', name, after: ' to Trash' };
+      return { before: 'Archived ', name, after: '' };
     case 'project.restored':
-      return { before: 'Restored ', name, after: ' from Trash' };
+      return { before: 'Restored ', name, after: ' from Archived' };
     case 'project.deleted':
       return { before: 'Deleted ', name, after: ' for good' };
     case 'media.added':
