@@ -297,7 +297,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       }
     >
       {/* Two columns: the page's content on the left, in the order it shows on the site;
-          project settings on the right (card preview, details, publishing). */}
+          project settings on the right (card preview and publishing, in one card). */}
       <div className={styles.editor}>
         <div className={styles.editorMain}>
           <section id="sec-basics" className={styles.editorSection} aria-labelledby="sec-basics-h">
@@ -338,10 +338,67 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
             </Card>
           </section>
 
+          <section id="sec-client" className={styles.editorSection} aria-labelledby="sec-client-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-client-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>2</span>
+                Client details
+              </h2>
+              <p className={styles.muted}>Who it was for, what kind of work, and where it stands</p>
+            </header>
+            <Card>
+            <div className={styles.cardBody}>
+              <TagPicker label="Clients" options={lists.clients} value={p.client_ids} onChange={(v) => set('client_ids', v)} create={{ table: 'clients', noun: 'client' }} />
+
+              <TagPicker
+                id="field-type"
+                label="Project type"
+                multiple={false}
+                required
+                error={errors.type}
+                options={lists.categories}
+                value={p.category_ids.slice(0, 1)}
+                onChange={(v) => {
+                  set('category_ids', v);
+                  setErrors((e) => ({ ...e, type: undefined }));
+                }}
+                create={{ table: 'categories', noun: 'project type' }}
+              />
+
+              <div className={styles.grid2}>
+                <InputField
+                  id="field-year"
+                  label="Year"
+                  type="number"
+                  inputMode="numeric"
+                  value={p.year ?? ''}
+                  error={errors.year}
+                  onChange={(e) => set('year', e.target.value ? Number(e.target.value) : null)}
+                />
+
+                <Dropdown
+                  label="Status"
+                  options={(Object.keys(STATUS_LABEL) as ProjectStatus[]).map((s) => ({ value: s, label: STATUS_LABEL[s] }))}
+                  value={p.status}
+                  onValueChange={(v) => set('status', v as ProjectStatus)}
+                />
+
+              </div>
+              <InputField
+                label="Status note"
+                helper='Optional, e.g. "Episode 1"'
+                value={p.status_note ?? ''}
+                onChange={(e) => set('status_note', e.target.value)}
+              />
+
+            </div>
+            </Card>
+          </section>
+
           <section id="sec-media" className={styles.editorSection} aria-labelledby="sec-media-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-media-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>2</span>
+                <span className={styles.editorSectionNum}>3</span>
                 Hero and gallery
               </h2>
               <p className={styles.muted}>Saves as you go. The hero (a video if you have one) opens the project page; everything else fills the Gallery.</p>
@@ -361,7 +418,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <section id="sec-about" className={styles.editorSection} aria-labelledby="sec-about-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-about-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>3</span>
+                <span className={styles.editorSectionNum}>4</span>
                 About this project
               </h2>
               <p className={styles.muted}>The brief and the challenge, in a short paragraph</p>
@@ -385,7 +442,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <section id="sec-output" className={styles.editorSection} aria-labelledby="sec-output-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-output-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>4</span>
+                <span className={styles.editorSectionNum}>5</span>
                 Output
               </h2>
               <p className={styles.muted}>What we delivered</p>
@@ -401,7 +458,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <section id="sec-overview" className={styles.editorSection} aria-labelledby="sec-overview-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-overview-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>5</span>
+                <span className={styles.editorSectionNum}>6</span>
                 Overview
               </h2>
               <p className={styles.muted}>The thinking behind the work: add, rename, reorder or remove blocks</p>
@@ -452,7 +509,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <section id="sec-capabilities" className={styles.editorSection} aria-labelledby="sec-capabilities-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-capabilities-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>6</span>
+                <span className={styles.editorSectionNum}>7</span>
                 Capabilities
               </h2>
               <p className={styles.muted}>The type of work, and how AI made it</p>
@@ -507,59 +564,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 <p className={styles.muted}>{p.one_liner || 'Add a one-liner under Basics'}</p>
               </div>
             </div>
-          </Card>
 
-          <Card>
-            <CardTitle headingLevel={3}>Details</CardTitle>
-            <p className={styles.muted}>Client, type, year and status</p>
-            <div className={styles.cardBody}>
-              <TagPicker label="Clients" options={lists.clients} value={p.client_ids} onChange={(v) => set('client_ids', v)} create={{ table: 'clients', noun: 'client' }} />
+            <div className={styles.cardDivider} role="presentation" />
 
-              <TagPicker
-                id="field-type"
-                label="Project type"
-                multiple={false}
-                required
-                error={errors.type}
-                options={lists.categories}
-                value={p.category_ids.slice(0, 1)}
-                onChange={(v) => {
-                  set('category_ids', v);
-                  setErrors((e) => ({ ...e, type: undefined }));
-                }}
-                create={{ table: 'categories', noun: 'project type' }}
-              />
-
-              <div className={styles.grid2}>
-                <InputField
-                  id="field-year"
-                  label="Year"
-                  type="number"
-                  inputMode="numeric"
-                  value={p.year ?? ''}
-                  error={errors.year}
-                  onChange={(e) => set('year', e.target.value ? Number(e.target.value) : null)}
-                />
-
-                <Dropdown
-                  label="Status"
-                  options={(Object.keys(STATUS_LABEL) as ProjectStatus[]).map((s) => ({ value: s, label: STATUS_LABEL[s] }))}
-                  value={p.status}
-                  onValueChange={(v) => set('status', v as ProjectStatus)}
-                />
-
-              </div>
-              <InputField
-                label="Status note"
-                helper='Optional, e.g. "Episode 1"'
-                value={p.status_note ?? ''}
-                onChange={(e) => set('status_note', e.target.value)}
-              />
-
-            </div>
-          </Card>
-
-          <Card>
             <CardTitle headingLevel={3}>Publishing</CardTitle>
             <p className={styles.muted}>Who sees it, and where</p>
             <div className={styles.cardBody}>

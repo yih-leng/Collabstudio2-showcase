@@ -7,6 +7,15 @@ import type { ProjectStatus } from '../types';
 export type DeckFormat = 'pptx' | 'pdf' | 'odp';
 export type AssetKind = 'image' | 'video' | 'audio';
 
+/** The draft field a reviewer note is about, so the review can show it under that field. */
+export const NOTE_FIELDS = ['title', 'one_liner', 'clients', 'type', 'year', 'status', 'about', 'output', 'overview', 'capabilities', 'media', 'general'] as const;
+export type NoteField = (typeof NOTE_FIELDS)[number];
+
+export interface ReviewerNote {
+  field: NoteField;
+  note: string;
+}
+
 export interface DeckAsset {
   /** Short and stable within the deck ("a7"), so the drafts can point at it. */
   id: string;
@@ -62,7 +71,7 @@ export interface ProjectDraft {
   asset_ids: string[];
   cover_asset_id: string;
   video_links: string[];
-  reviewer_notes: string[];
+  reviewer_notes: ReviewerNote[];
 }
 
 /** Tokens Claude used for one draft, and what that cost in US$ (null for a model with no known price). */

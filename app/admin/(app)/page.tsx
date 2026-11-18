@@ -20,9 +20,11 @@ import {
   type FilterValue,
   type TableColumn,
 } from '@collabrium/ui';
-import { Eye, FilePpt, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
+import { Eye, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { useAdmin } from '@/components/admin/AdminContext';
+import { ImportButton } from '@/components/admin/import/ImportButton';
+import { useImport } from '@/components/admin/import/ImportContext';
 import { SortableList } from '@/components/admin/SortableList';
 import styles from '@/components/admin/admin.module.css';
 import { MediaFrame } from '@/components/MediaFrame';
@@ -56,9 +58,20 @@ export default function ProjectsPage() {
     setLoadError(false);
   }, [sb]);
 
+  // Reload when Import from deck creates projects.
+  const { createdAt, show: showImport } = useImport();
   useEffect(() => {
     load();
-  }, [load]);
+  }, [load, createdAt]);
+
+  // /admin?import=1 (and the old /admin/import address) opens Import from deck.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('import') !== null) {
+      showImport();
+      router.replace('/admin');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const patch = async (id: string, values: Partial<Project>, done?: string) => {
     setRows((rs) => rs?.map((r) => (r.id === id ? { ...r, ...values } : r)) ?? rs);
@@ -265,9 +278,7 @@ export default function ProjectsPage() {
           subtitle="Add, edit and order the work on the site."
           actions={
             <>
-              <Button variant="secondary" leadingIcon={FilePpt} onClick={() => router.push('/admin/import')}>
-                Import from deck
-              </Button>
+              <ImportButton />
               <Button variant="primary" leadingIcon={Plus} loading={creating} onClick={createProject}>
                 New project
               </Button>

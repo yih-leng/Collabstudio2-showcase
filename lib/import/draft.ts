@@ -1,6 +1,6 @@
 'use client';
 
-import type { DraftEstimate, DraftUsage, ListNames, ParsedDeck, ProjectDraft } from './types';
+import { NOTE_FIELDS, type DraftEstimate, type DraftUsage, type ListNames, type ParsedDeck, type ProjectDraft, type ReviewerNote } from './types';
 
 /** Claude looks at this many pictures per deck at most; the biggest are sent first. */
 const MAX_PREVIEWS = 60;
@@ -76,6 +76,10 @@ function tidy(d: ProjectDraft, deck: ParsedDeck): ProjectDraft {
     asset_ids,
     cover_asset_id: cover || asset_ids.find((id) => deck.assets.find((a) => a.id === id)?.kind === 'image') || '',
     video_links: d.video_links.filter((l) => deck.links.includes(l)),
+    // Older or odd replies may send plain strings; those are about the whole project.
+    reviewer_notes: (d.reviewer_notes as (ReviewerNote | string)[]).map((n) =>
+      typeof n === 'string' ? { field: 'general', note: n } : NOTE_FIELDS.includes(n.field) ? n : { ...n, field: 'general' },
+    ),
   };
 }
 
@@ -113,7 +117,10 @@ function basicDraft(deck: ParsedDeck): ProjectDraft {
     cover_asset_id: biggest?.id ?? '',
     video_links: deck.links,
     reviewer_notes: [
-      'Drafted without AI, so only the title, pictures and a passage of text are filled in. Add an ANTHROPIC_API_KEY to have the fields written for you.',
+      {
+        field: 'general',
+        note: 'Drafted without AI, so only the title, pictures and a passage of text are filled in. Add an ANTHROPIC_API_KEY to have the fields written for you.',
+      },
     ],
   };
 }

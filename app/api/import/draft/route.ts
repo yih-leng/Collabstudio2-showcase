@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { isRequestAdmin } from '@/lib/server-admin';
 import { getServerClient } from '@/lib/supabase/server';
 import { PRICES, costOf, outputRange } from '@/lib/import/pricing';
-import type { DraftEstimate, DraftUsage, ListNames } from '@/lib/import/types';
+import { NOTE_FIELDS, type DraftEstimate, type DraftUsage, type ListNames } from '@/lib/import/types';
 
 // Drafts showcase projects from one deck's slides with Claude. The browser
 // sends the slide text, what's on each slide, small previews of the pictures
@@ -54,7 +54,7 @@ Write each project in the site's fields:
 - asset_ids: the deck's pictures and videos worth showing on the project page, best first. Leave out logos, decorative backgrounds, slide furniture, text-only graphics, and pictures from slides you excluded. Only use ids that appear in the deck.
 - cover_asset_id: the strongest picture for the project's card (a key visual, not a title slide, logo or text). Empty when there is none.
 - video_links: the YouTube, Vimeo or Google Drive links from this project's slides that are the work itself.
-- reviewer_notes: short notes for the person who will check the draft, about anything they must look at before publishing: slides you left out and why, internal notes or confidential brief details, numbers or claims you couldn't verify, placeholder text, missing information.
+- reviewer_notes: short notes for the person who will check the draft, about anything they must look at before publishing: slides you left out and why, internal notes or confidential brief details, numbers or claims you couldn't verify, placeholder text, missing information. Give each note the field it is about ("one_liner" for a claim you put in the one-liner, "media" for pictures or video links, "general" when it is about the whole project).
 
 Keep the deck's facts. Don't invent clients, results, numbers, dates or tools. Write in plain British English, keep the deck's tone, and keep Malay or Chinese lines from the deck as they are where they are quoted. Strip emoji and mis-encoded characters, but keep ordinary punctuation such as hyphens ("No-sell", not "Nosell").`;
 
@@ -111,7 +111,15 @@ const PROJECT_SCHEMA = {
     asset_ids: { type: 'array', items: { type: 'string' } },
     cover_asset_id: { type: 'string' },
     video_links: { type: 'array', items: { type: 'string' } },
-    reviewer_notes: { type: 'array', items: { type: 'string' } },
+    reviewer_notes: {
+      type: 'array',
+      items: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['field', 'note'],
+        properties: { field: { type: 'string', enum: [...NOTE_FIELDS] }, note: { type: 'string' } },
+      },
+    },
   },
 } as const;
 

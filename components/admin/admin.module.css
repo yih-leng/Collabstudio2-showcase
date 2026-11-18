@@ -252,6 +252,13 @@
   border-top: var(--border-width-sm) solid var(--color-neutral-3);
 }
 
+/* Splits one card into parts, edge to edge. */
+.cardDivider {
+  height: var(--border-width-sm);
+  margin: var(--spacing-12) calc(var(--spacing-16) * -1);
+  background: var(--color-neutral-3);
+}
+
 .previewTitle {
   margin: 0 0 var(--spacing-4);
   font-weight: var(--weight-bold);

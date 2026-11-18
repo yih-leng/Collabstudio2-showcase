@@ -149,8 +149,9 @@ Project type, Capability tags or Tools field: pick a match, or choose
 
 ## 5. Import from deck
 
-**Projects → Import from deck** turns pitch and case-study decks into draft
-projects.
+The **Import from deck** button on Projects opens an overlay that turns pitch
+and case-study decks into draft projects, in four steps: Add decks, Draft,
+Review and Done.
 
 1. Drop in one or more decks: PowerPoint (`.pptx`), PDF, or OpenDocument
    (`.odp`). From Google Slides, use **File → Download → Microsoft PowerPoint
@@ -161,9 +162,17 @@ projects.
    hold several): title, clients, type, status, one-liner, About, Output,
    Overview, Capabilities, how AI was used, which pictures to use and the
    cover. It also leaves notes on anything to check, such as slides from
-   another project, internal notes, or brief details marked TBC.
-3. Check each draft. Edit the words, tick the pictures and video links you
-   want, set the cover, and untick drafts that shouldn't be projects.
+   another project, internal notes, or brief details marked TBC; each note
+   shows under the field it's about.
+   You don't have to wait: **Run in background** (or closing the overlay)
+   keeps drafting going while you use the rest of the admin. The button on
+   Projects glows while it works and becomes **Review drafts** when it's done,
+   and a message pops up with a link back. Drafting runs in your browser tab,
+   so closing or reloading the tab stops it; the browser asks first.
+3. Check each draft, one at a time, in the same sections as the project
+   editor. Edit the words, tick the pictures and video links you want, set the
+   cover, and switch off **Create this project** for drafts that shouldn't be
+   projects.
 4. **Create drafts.** Pictures are shrunk and uploaded, big videos become web
    previews, new clients and tags join Clients and tags, and each project is
    saved as a **Draft**. Open it in the editor to finish it, then publish.
@@ -188,7 +197,7 @@ A one-project pitch deck costs about US$0.05 to draft (a showcase deck with
 ten projects, more like US$0.20–0.40). Before drafting, each deck shows an
 estimate (its input is counted exactly, for free; what Claude writes can only
 be a range) and waits for **Draft with AI**. Afterwards it shows what the
-draft actually cost, and the page keeps a running total. Prices live in
+draft actually cost, and the Done step gives the total. Prices live in
 `lib/import/pricing.ts`. For sharper picture choices and reviewer notes at
 about twice the cost, add `IMPORT_MODEL=claude-opus-5-5`. Only the slide text and small
 previews of the pictures are sent to Claude. Without a key, the importer still

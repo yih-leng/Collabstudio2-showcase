@@ -1,65 +1,4 @@
-/* Import from deck: our own layout around design-system parts, tokens only. */
-
-.steps {
-  margin: 0;
-  padding-left: var(--spacing-20);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-  font-size: var(--text-body2-size);
-  line-height: var(--text-body2-lh-lg);
-  color: var(--color-neutral-7);
-}
-
-.deckHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--spacing-8);
-}
-
-.deckName {
-  margin: 0;
-  font-size: var(--text-h4-size);
-  line-height: var(--text-h4-lh);
-  overflow-wrap: anywhere;
-}
-
-.draft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-20);
-}
-
-.draft[data-off] > :not(.draftHead) {
-  opacity: 0.45;
-}
-
-.draftHead {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-12);
-}
-
-.notes {
-  margin: 0;
-  padding-left: var(--spacing-20);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-4);
-}
-
-.label {
-  margin: 0;
-  font-size: var(--text-caption-size);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--color-neutral-5);
-}
+/* Import from deck overlay: our own layout around design-system parts, tokens only. */
 
 /* More details: a plain disclosure, closed by default. */
 .more {
@@ -214,21 +153,20 @@
   gap: var(--spacing-8);
 }
 
-.footer {
-  position: sticky;
-  bottom: 0;
-  z-index: var(--z-float);
+.body {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-12);
-  padding: var(--spacing-16) 0;
-  background: var(--color-canvas-warm);
-  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+  flex-direction: column;
+  gap: var(--spacing-20);
 }
 
-.results {
+/* The AI cost: a footnote, never the headline. */
+.cost {
+  margin: 0;
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+}
+
+.decks {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -237,19 +175,53 @@
   gap: var(--spacing-12);
 }
 
-.result {
+.deck {
   display: flex;
   flex-direction: column;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-md);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.deckHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--spacing-8);
 }
 
-.resultHead {
+.deckName {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.doneTitle {
+  margin: 0;
+  font-size: var(--text-h4-size);
+  line-height: var(--text-h4-lh);
+  font-weight: var(--text-h4-weight);
+}
+
+.reviewFoot {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-8);
-  font-weight: var(--weight-bold);
+}
+
+/* Review: the editor's sections, one column. */
+.review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-20);
+}
+
+.fieldset[data-off] > * {
+  opacity: 0.45;
 }
 
 .fieldset {
@@ -257,36 +229,127 @@
   margin: 0;
   padding: 0;
   border: 0;
-}
-
-/* A deck that's been read and priced, waiting for the go-ahead to draft. */
-.estimate {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-12);
-  padding: var(--spacing-16);
-  border-radius: var(--radius-md);
-  border: var(--border-width-sm) solid var(--color-neutral-3);
-  background: var(--color-neutral-1);
-}
-
-.estimateText {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-4);
-  min-width: 0;
-  font-size: var(--text-body2-size);
+  gap: var(--spacing-24);
 }
 
-.estimateName {
-  font-weight: var(--weight-bold);
-  overflow-wrap: anywhere;
-}
-
-.estimateActions {
+.sectionTitle {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: var(--spacing-8);
+  margin: 0;
+  font-size: var(--text-h5-size);
+  line-height: var(--text-h5-lh);
+}
+
+.reviewCard {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-16);
+}
+
+.cardThumb {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--spacing-120) + var(--spacing-8));
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-2);
+  color: var(--color-neutral-5);
+  font-size: var(--text-h4-size);
+}
+
+.cardThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardText {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* An AI note, under the field it's about. */
+.note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-6);
+  margin: 0;
+  font-size: var(--text-caption-size);
+  line-height: var(--text-footnote-lh);
+  color: var(--color-amber-text);
+  scroll-margin: var(--spacing-60);
+}
+
+.note svg {
+  flex: none;
+  margin-top: var(--spacing-2);
+  color: var(--color-amber);
+}
+
+/* The AI glow around a button: Info Banner tone "ai"'s pastel gradient, moving. */
+.aiGlow {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  border-radius: var(--radius-pill);
+}
+
+.aiGlow::before,
+.aiGlow::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  border-radius: var(--radius-pill);
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-fire-pastel) 0%,
+    var(--color-wood-pastel) 20%,
+    var(--color-earth-pastel) 40%,
+    var(--color-water-pastel) 60%,
+    var(--color-gold-pastel) 80%,
+    var(--color-fire-pastel) 100%
+  );
+  background-size: 200% 100%;
+  animation: ai-glow-move 4s linear infinite;
+}
+
+.aiGlow::before {
+  inset: calc(var(--spacing-4) * -1);
+  filter: blur(var(--spacing-12));
+  opacity: 0.8;
+}
+
+.aiGlow::after {
+  inset: calc(var(--spacing-2) * -1);
+}
+
+@keyframes ai-glow-move {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aiGlow::before,
+  .aiGlow::after {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .aiGlow::before,
+  .aiGlow::after {
+    display: none;
+  }
 }

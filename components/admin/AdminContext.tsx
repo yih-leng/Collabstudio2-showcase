@@ -11,6 +11,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/config';
 import type { Lists } from '@/lib/types';
 import styles from './admin.module.css';
 import { FileDropFix } from './FileDropFix';
+import { ImportProvider } from './import/ImportContext';
 
 interface AdminCtx {
   sb: SupabaseClient;
@@ -119,7 +120,8 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   return (
     <Ctx.Provider value={{ sb: sb!, user: user!, lists, refreshLists, unread, refreshUnread, signOut }}>
       <FileDropFix />
-      {children}
+      {/* Import from deck lives here, so drafting carries on from page to page. */}
+      <ImportProvider>{children}</ImportProvider>
     </Ctx.Provider>
   );
 }
