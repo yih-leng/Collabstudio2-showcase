@@ -1,24 +1,21 @@
 'use client';
 
-import type { ListNames, ParsedDeck, ProjectDraft } from './types';
+import type { DraftEstimate, DraftUsage, ListNames, ParsedDeck, ProjectDraft } from './types';
 
 /** Claude looks at this many pictures per deck at most; the biggest are sent first. */
 const MAX_PREVIEWS = 60;
 
-/**
- * Drafts the projects in a deck. Uses Claude through /api/import/draft; when
- * no AI key is set on the server, falls back to one simple draft per deck.
- */
-export async function draftDeck(deck: ParsedDeck, lists: ListNames): Promise<{ drafts: ProjectDraft[]; basic: boolean }> {
+function post(mode: 'estimate' | 'draft', deck: ParsedDeck, lists: ListNames) {
   const previews = deck.assets
     .filter((a) => a.thumb && !a.decorative)
     .sort((a, b) => b.width * b.height - a.width * a.height)
     .slice(0, MAX_PREVIEWS)
     .map((a) => ({ id: a.id, data: a.thumb! }));
-  const res = await fetch('/api/import/draft', {
+  return fetch('/api/import/draft', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
+      mode,
       fileName: deck.fileName,
       slides: deck.slides.map((s) => ({
         n: s.n,
@@ -34,10 +31,38 @@ export async function draftDeck(deck: ParsedDeck, lists: ListNames): Promise<{ d
       lists,
     }),
   });
-  if (res.status === 501) return { drafts: [basicDraft(deck)], basic: true };
+}
+
+/** Prices a deck's draft without running it. Null when no AI key is set on the server. */
+export async function estimateDeck(deck: ParsedDeck, lists: ListNames): Promise<DraftEstimate | null> {
+  const res = await post('estimate', deck, lists);
+  if (res.status === 501) return null;
   const json = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(json.error || `Drafting failed (${res.status}).`);
-  return { drafts: (json.projects as ProjectDraft[]).map((d) => tidy(d, deck)), basic: false };
+  if (!res.ok) throw new Error(json.error || `The cost couldn't be worked out (${res.status}).`);
+  return json as DraftEstimate;
+}
+
+/** An error from drafting, carrying what the failed attempt cost (it is billed all the same). */
+export class DraftError extends Error {
+  constructor(
+    message: string,
+    readonly usage?: DraftUsage,
+  ) {
+    super(message);
+  }
+}
+
+/** Drafts with Claude through /api/import/draft. */
+export async function draftDeck(deck: ParsedDeck, lists: ListNames): Promise<{ drafts: ProjectDraft[]; usage: DraftUsage }> {
+  const res = await post('draft', deck, lists);
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) throw new DraftError(json.error || `Drafting failed (${res.status}).`, json.usage);
+  return { drafts: (json.projects as ProjectDraft[]).map((d) => tidy(d, deck)), usage: json.usage };
+}
+
+/** Without AI: one simple draft per deck. */
+export function basicDrafts(deck: ParsedDeck) {
+  return [basicDraft(deck)];
 }
 
 /** Keeps a draft to the deck's own assets and links, whatever came back. */

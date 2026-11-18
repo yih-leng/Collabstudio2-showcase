@@ -1,7 +1,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { isRequestAdmin } from '@/lib/server-admin';
-import type { ListNames } from '@/lib/import/types';
+import { PRICES, costOf, outputRange } from '@/lib/import/pricing';
+import type { DraftEstimate, DraftUsage, ListNames } from '@/lib/import/types';
 
 // Drafts showcase projects from one deck's slides with Claude. The browser
 // sends the slide text, what's on each slide, small previews of the pictures
@@ -12,10 +13,13 @@ export const runtime = 'nodejs';
 // A long deck with many pictures can take a minute or two to read.
 export const maxDuration = 300;
 
-const MODEL = 'claude-opus-5-5';
+// Sonnet keeps the cost per deck low. Set IMPORT_MODEL=claude-opus-5-5 for sharper picks and notes at about twice the cost.
+const MODEL = process.env.IMPORT_MODEL || 'claude-sonnet-5-5';
 const MAX_IMAGES = 60;
 
 interface DraftRequest {
+  /** "estimate" counts the tokens and prices the draft without running it. */
+  mode?: 'estimate' | 'draft';
   fileName: string;
   slides: {
     n: number;
@@ -51,7 +55,7 @@ Write each project in the site's fields:
 - video_links: the YouTube, Vimeo or Google Drive links from this project's slides that are the work itself.
 - reviewer_notes: short notes for the person who will check the draft, about anything they must look at before publishing: slides you left out and why, internal notes or confidential brief details, numbers or claims you couldn't verify, placeholder text, missing information.
 
-Keep the deck's facts. Don't invent clients, results, numbers, dates or tools. Write in plain British English, keep the deck's tone, and keep Malay or Chinese lines from the deck as they are where they are quoted. Strip emoji and mis-encoded characters.`;
+Keep the deck's facts. Don't invent clients, results, numbers, dates or tools. Write in plain British English, keep the deck's tone, and keep Malay or Chinese lines from the deck as they are where they are quoted. Strip emoji and mis-encoded characters, but keep ordinary punctuation such as hyphens ("No-sell", not "Nosell").`;
 
 const PROJECT_SCHEMA = {
   type: 'object',
@@ -169,28 +173,58 @@ export async function POST(req: Request) {
   }
   content.push({ type: 'text', text: 'Draft the projects this deck presents.' });
 
+  const request = {
+    model: MODEL,
+    thinking: { type: 'adaptive' },
+    output_config: { effort: 'medium', format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
+    system: SYSTEM,
+    messages: [{ role: 'user', content }],
+  } satisfies Anthropic.Beta.MessageCountTokensParams;
+
   const client = new Anthropic();
   try {
+    if (body.mode === 'estimate') {
+      // Free: counts what would be sent. What comes back can only be a range.
+      const { input_tokens } = await client.beta.messages.countTokens(request);
+      const textTokens = Math.round(deckText.length / 3.5);
+      const [outLow, outHigh] = outputRange(textTokens);
+      const at = (output_tokens: number) => costOf({ model: MODEL, input_tokens, output_tokens }) ?? 0;
+      return NextResponse.json({
+        model: MODEL,
+        model_label: PRICES[MODEL]?.label ?? MODEL,
+        input_tokens,
+        output_tokens: [outLow, outHigh],
+        cost: [at(outLow), at(outHigh)],
+      } satisfies DraftEstimate);
+    }
+
     const stream = client.beta.messages.stream({
-      model: MODEL,
+      ...request,
       max_tokens: 32000,
       betas: ['server-side-fallback-2026-07-01'],
       fallbacks: 'default',
-      thinking: { type: 'adaptive' },
-      output_config: { effort: 'medium', format: { type: 'json_schema', schema: OUTPUT_SCHEMA } },
-      system: SYSTEM,
-      messages: [{ role: 'user', content }],
     });
     const message = await stream.finalMessage();
+    // `model` is the model that answered: a fallback model if the first one declined.
+    const usage: DraftUsage = {
+      model: message.model,
+      model_label: PRICES[message.model]?.label ?? message.model,
+      input_tokens: message.usage.input_tokens,
+      output_tokens: message.usage.output_tokens,
+      cache_creation_input_tokens: message.usage.cache_creation_input_tokens,
+      cache_read_input_tokens: message.usage.cache_read_input_tokens,
+      cost: costOf({ ...message.usage, model: message.model }),
+    };
+    // A failed draft is still billed, so the cost goes back either way.
     if (message.stop_reason === 'refusal') {
-      return NextResponse.json({ error: "Claude couldn't draft from this deck. Try removing sensitive slides, or create the project by hand." }, { status: 422 });
+      return NextResponse.json({ error: "Claude couldn't draft from this deck. Try removing sensitive slides, or create the project by hand.", usage }, { status: 422 });
     }
     if (message.stop_reason === 'max_tokens') {
-      return NextResponse.json({ error: 'This deck is too long to draft in one go. Split it into smaller files.' }, { status: 422 });
+      return NextResponse.json({ error: 'This deck is too long to draft in one go. Split it into smaller files.', usage }, { status: 422 });
     }
     const text = message.content.find((b) => b.type === 'text');
     if (!text || text.type !== 'text') throw new Error('No draft came back.');
-    return NextResponse.json(JSON.parse(text.text));
+    return NextResponse.json({ ...JSON.parse(text.text), usage });
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError) {
       return NextResponse.json({ error: 'The ANTHROPIC_API_KEY on the server was rejected. Check it in your environment settings.' }, { status: 502 });

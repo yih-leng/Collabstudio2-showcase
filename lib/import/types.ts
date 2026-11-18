@@ -65,11 +65,24 @@ export interface ProjectDraft {
   reviewer_notes: string[];
 }
 
-/** What the draft API sends back. */
-export interface DraftResponse {
-  projects: ProjectDraft[];
-  /** True when no AI key is set and the drafts came from simple rules. */
-  basic?: boolean;
+/** Tokens Claude used for one draft, and what that cost in US$ (null for a model with no known price). */
+export interface DraftUsage {
+  model: string;
+  model_label: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number | null;
+  cache_read_input_tokens: number | null;
+  cost: number | null;
+}
+
+/** The price of drafting a deck, before it runs: input is counted exactly, output is a range. */
+export interface DraftEstimate {
+  model: string;
+  model_label: string;
+  input_tokens: number;
+  output_tokens: [number, number];
+  cost: [number, number];
 }
 
 /** The names already in Clients and tags, so drafts reuse them. */

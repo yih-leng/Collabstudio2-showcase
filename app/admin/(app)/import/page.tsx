@@ -20,16 +20,17 @@ import {
   type FileUploaderItem,
   type FileUploaderRules,
 } from '@collabrium/ui';
-import { Check, FilePdf, FilePpt, FileText, FilmSlate, MusicNotes, Plus, X } from '@phosphor-icons/react';
+import { Check, FilePdf, FilePpt, FileText, FilmSlate, MusicNotes, Plus, Sparkle, X } from '@phosphor-icons/react';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { AdminShell } from '@/components/admin/AdminShell';
 import shared from '@/components/admin/admin.module.css';
 import { MB } from '@/lib/admin-api';
 import { STATUS_LABEL, embedProvider } from '@/lib/format';
 import { createFromDraft } from '@/lib/import/create';
-import { draftDeck } from '@/lib/import/draft';
+import { DraftError, basicDrafts, draftDeck, estimateDeck } from '@/lib/import/draft';
 import { parseDeck } from '@/lib/import/parse';
-import type { DeckAsset, ParsedDeck, ProjectDraft } from '@/lib/import/types';
+import { formatTokens, formatUsd } from '@/lib/import/pricing';
+import type { DeckAsset, DraftEstimate, DraftUsage, ParsedDeck, ProjectDraft } from '@/lib/import/types';
 import type { ProjectStatus } from '@/lib/types';
 import styles from './import.module.css';
 
@@ -48,7 +49,17 @@ const RULES: FileUploaderRules = {
   ],
 };
 
-type Job = { file: File; stage: 'reading' | 'drafting' | 'ready' | 'failed'; message?: string; deck?: ParsedDeck; basic?: boolean };
+type Job = {
+  file: File;
+  /** Reading, then pricing, then waiting for the go-ahead, then drafting. */
+  stage: 'reading' | 'estimating' | 'awaiting' | 'drafting' | 'ready' | 'failed';
+  message?: string;
+  deck?: ParsedDeck;
+  basic?: boolean;
+  estimate?: DraftEstimate;
+  /** What Claude actually used, success or not. */
+  usage?: DraftUsage;
+};
 
 type Outcome =
   | { state: 'creating'; label: string; value: number }
@@ -66,7 +77,10 @@ type Review = {
   outcome?: Outcome;
 };
 
-const STAGE_PROGRESS = { reading: 0.25, drafting: 0.6 } as const;
+const STAGE_PROGRESS = { reading: 0.25, estimating: 0.4, drafting: 0.6 } as const;
+
+const usageLine = (u: DraftUsage) =>
+  `${u.cost === null ? 'Cost unknown' : `AI cost ${formatUsd(u.cost)}`} · ${formatTokens(u.input_tokens)} tokens in, ${formatTokens(u.output_tokens)} out · ${u.model_label}`;
 
 export default function ImportPage() {
   const { sb, lists, refreshLists } = useAdmin();
@@ -87,27 +101,51 @@ export default function ImportPage() {
 
   const setJob = (file: File, patch: Partial<Job>) => setJobs((js) => js.map((j) => (j.file === file ? { ...j, ...patch } : j)));
 
+  const addDrafts = (deck: ParsedDeck, drafts: ProjectDraft[]) =>
+    setReviews((rs) => [
+      ...rs.filter((r) => r.deckId !== deck.id),
+      ...drafts.map((draft, i) => ({
+        key: `${deck.id}-${i}`,
+        deckId: deck.id,
+        include: true,
+        draft,
+        picked: draft.asset_ids,
+        links: draft.video_links,
+      })),
+    ]);
+
+  // Read the deck and price the draft; drafting waits for the go-ahead.
   const read = async (file: File) => {
     setJobs((js) => [...js.filter((j) => j.file !== file), { file, stage: 'reading' }]);
     try {
       const deck = await parseDeck(file);
-      setJob(file, { stage: 'drafting', deck });
-      const { drafts, basic } = await draftDeck(deck, names);
-      setJob(file, { stage: 'ready', basic });
-      setReviews((rs) => [
-        ...rs.filter((r) => r.deckId !== deck.id),
-        ...drafts.map((draft, i) => ({
-          key: `${deck.id}-${i}`,
-          deckId: deck.id,
-          include: true,
-          draft,
-          picked: draft.asset_ids,
-          links: draft.video_links,
-        })),
-      ]);
-      if (!drafts.length) setJob(file, { stage: 'failed', message: 'No projects found in this deck.' });
+      setJob(file, { stage: 'estimating', deck });
+      const estimate = await estimateDeck(deck, names);
+      if (!estimate) {
+        // No AI key: simple drafts straight away, at no cost.
+        setJob(file, { stage: 'ready', basic: true });
+        addDrafts(deck, basicDrafts(deck));
+        return;
+      }
+      setJob(file, { stage: 'awaiting', estimate });
     } catch (e) {
       setJob(file, { stage: 'failed', message: (e as Error).message || "This deck couldn't be read." });
+    }
+  };
+
+  const draft = async (job: Job) => {
+    if (!job.deck) return;
+    setJob(job.file, { stage: 'drafting' });
+    try {
+      const { drafts, usage } = await draftDeck(job.deck, names);
+      if (!drafts.length) {
+        setJob(job.file, { stage: 'failed', usage, message: 'No projects found in this deck.' });
+        return;
+      }
+      setJob(job.file, { stage: 'ready', usage });
+      addDrafts(job.deck, drafts);
+    } catch (e) {
+      setJob(job.file, { stage: 'failed', usage: (e as DraftError).usage, message: (e as Error).message || 'Drafting failed.' });
     }
   };
 
@@ -119,13 +157,17 @@ export default function ImportPage() {
 
   const items: FileUploaderItem[] = jobs.map((j) =>
     j.stage === 'failed'
-      ? { file: j.file, status: 'failed', message: j.message }
-      : j.stage === 'ready'
+      ? { file: j.file, status: 'failed', message: j.usage?.cost ? `${j.message} (${formatUsd(j.usage.cost)} was still spent.)` : j.message }
+      : j.stage === 'ready' || j.stage === 'awaiting'
         ? { file: j.file, status: 'done' }
         : { file: j.file, status: 'uploading', progress: STAGE_PROGRESS[j.stage] },
   );
-  const busy = jobs.filter((j) => j.stage === 'reading' || j.stage === 'drafting');
+  const busy = jobs.filter((j) => j.stage === 'reading' || j.stage === 'estimating' || j.stage === 'drafting');
+  const awaiting = jobs.filter((j) => j.stage === 'awaiting');
   const basic = jobs.some((j) => j.basic);
+  const spent = jobs.reduce((sum, j) => sum + (j.usage?.cost ?? 0), 0);
+  const spentOn = jobs.filter((j) => j.usage).length;
+  const sumEstimate = awaiting.reduce<[number, number]>((s, j) => [s[0] + j.estimate!.cost[0], s[1] + j.estimate!.cost[1]], [0, 0]);
 
   const patch = (key: string, p: Partial<Review>) => setReviews((rs) => rs.map((r) => (r.key === key ? { ...r, ...p } : r)));
   const patchDraft = (key: string, p: Partial<ProjectDraft>) =>
@@ -199,9 +241,49 @@ export default function ImportPage() {
               <LoadingState
                 key={j.file.name + j.file.size}
                 variant="dots"
-                label={j.stage === 'reading' ? `Reading ${j.file.name}…` : `Drafting projects from ${j.file.name}…`}
+                label={
+                  j.stage === 'reading'
+                    ? `Reading ${j.file.name}…`
+                    : j.stage === 'estimating'
+                      ? `Working out the cost of ${j.file.name}…`
+                      : `Drafting projects from ${j.file.name}…`
+                }
               />
             ))}
+            {awaiting.map((j) => (
+              <div key={j.file.name + j.file.size} className={styles.estimate}>
+                <div className={styles.estimateText}>
+                  <span className={styles.estimateName}>{j.file.name}</span>
+                  <span className={shared.muted}>
+                    {`${j.deck!.slides.length} slides · ${j.deck!.assets.filter((a) => !a.decorative).length} pictures and videos`}
+                  </span>
+                  <span>
+                    {`Estimated AI cost ${formatUsd(j.estimate!.cost[0])}–${formatUsd(j.estimate!.cost[1]).replace('US$', '')}`}
+                  </span>
+                  <span className={shared.muted}>
+                    {`${formatTokens(j.estimate!.input_tokens)} tokens in (counted), ${formatTokens(j.estimate!.output_tokens[0])}–${formatTokens(j.estimate!.output_tokens[1])} out (estimated) · ${j.estimate!.model_label}`}
+                  </span>
+                </div>
+                <span className={styles.estimateActions}>
+                  <Button variant="ghost" onClick={() => remove(j.file)}>
+                    Remove
+                  </Button>
+                  <Button variant="primary" leadingIcon={Sparkle} onClick={() => draft(j)}>
+                    Draft with AI
+                  </Button>
+                </span>
+              </div>
+            ))}
+            {awaiting.length > 1 && (
+              <span className={styles.estimateActions}>
+                <Button variant="secondary" leadingIcon={Sparkle} onClick={() => awaiting.forEach((j) => draft(j))}>
+                  {`Draft all ${awaiting.length} (about ${formatUsd(sumEstimate[0])}–${formatUsd(sumEstimate[1]).replace('US$', '')})`}
+                </Button>
+              </span>
+            )}
+            {spentOn > 0 && (
+              <p className={shared.muted}>{`AI spent on this page: ${formatUsd(spent)} across ${spentOn} deck${spentOn === 1 ? '' : 's'}.`}</p>
+            )}
             {basic && (
               <InfoBanner tone="warning">
                 AI drafting isn’t set up, so only titles, pictures and a passage of text are filled in. Add ANTHROPIC_API_KEY to the
@@ -218,6 +300,7 @@ export default function ImportPage() {
               <span className={shared.muted}>
                 {j.deck!.slides.length} slides · {j.deck!.assets.filter((a) => !a.decorative).length} pictures and videos
                 {j.deck!.links.length > 0 && ` · ${j.deck!.links.length} video links`}
+                {j.usage && ` · ${usageLine(j.usage)}`}
               </span>
             </div>
             {reviews

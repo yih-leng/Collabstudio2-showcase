@@ -180,11 +180,17 @@ Hidden slides are skipped. Logos and backgrounds that repeat across slides
 are set aside under "More from this deck". Keynote: export to PowerPoint
 first.
 
-**Setting up the AI.** Drafting uses Claude (Claude Opus 5.5). Create a key at
+**Setting up the AI.** Drafting uses Claude Sonnet 5.5. Create a key at
 [platform.claude.com](https://platform.claude.com) → API keys, and add it as
 `ANTHROPIC_API_KEY` in Vercel (**Settings → Environment Variables**), then
 redeploy. For your computer, add it to `.env.local` and restart `npm run dev`.
-A typical deck costs well under US$1 to draft. Only the slide text and small
+A one-project pitch deck costs about US$0.05 to draft (a showcase deck with
+ten projects, more like US$0.20–0.40). Before drafting, each deck shows an
+estimate (its input is counted exactly, for free; what Claude writes can only
+be a range) and waits for **Draft with AI**. Afterwards it shows what the
+draft actually cost, and the page keeps a running total. Prices live in
+`lib/import/pricing.ts`. For sharper picture choices and reviewer notes at
+about twice the cost, add `IMPORT_MODEL=claude-opus-5-5`. Only the slide text and small
 previews of the pictures are sent to Claude. Without a key, the importer still
 works: each deck becomes one draft with its title, pictures and a passage of
 text, and you fill in the rest.

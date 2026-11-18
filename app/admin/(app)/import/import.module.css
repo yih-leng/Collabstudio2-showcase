@@ -258,3 +258,35 @@
   padding: 0;
   border: 0;
 }
+
+/* A deck that's been read and priced, waiting for the go-ahead to draft. */
+.estimate {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-12);
+  padding: var(--spacing-16);
+  border-radius: var(--radius-md);
+  border: var(--border-width-sm) solid var(--color-neutral-3);
+  background: var(--color-neutral-1);
+}
+
+.estimateText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  min-width: 0;
+  font-size: var(--text-body2-size);
+}
+
+.estimateName {
+  font-weight: var(--weight-bold);
+  overflow-wrap: anywhere;
+}
+
+.estimateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-8);
+}
