@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button, PageHeader } from '@collabrium/ui';
+import { Button, PageHeader, StatCard, StatGrid } from '@collabrium/ui';
 import { CountUp, ScrollReveal, WordReveal } from '@collabrium/ui/motion';
 import { ClientMarquee } from '@/components/ClientMarquee';
 import { Showcase } from '@/components/Showcase';
@@ -14,11 +14,13 @@ export function HomeView({
   slides,
   clients,
   projectCount,
+  projectTypes,
 }: {
   settings: SiteSettings;
   slides: ShowcaseSlide[];
   clients: Client[];
   projectCount: number;
+  projectTypes: { id: string; name: string; count: number }[];
 }) {
   const router = useRouter();
   return (
@@ -60,6 +62,27 @@ export function HomeView({
           </div>
         </ScrollReveal>
       </section>
+
+      {projectTypes.length > 0 && (
+        <section aria-labelledby="types-heading" className={styles.section}>
+          <h2 id="types-heading" className={styles.eyebrow}>
+            By project type
+          </h2>
+          <ScrollReveal>
+            <StatGrid>
+              {projectTypes.map((t) => (
+                <StatCard
+                  key={t.id}
+                  label={t.name}
+                  value={t.count}
+                  description={t.count === 1 ? 'Project' : 'Projects'}
+                  href={`/work?category=${encodeURIComponent(t.id)}`}
+                />
+              ))}
+            </StatGrid>
+          </ScrollReveal>
+        </section>
+      )}
 
       {clients.length > 0 && (
         <section aria-labelledby="clients-heading" className={styles.section}>

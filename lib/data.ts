@@ -144,7 +144,14 @@ export async function getHomeData() {
   const clientIds = new Set(published.flatMap((p) => p.client_ids));
   const clients = lists.clients.filter((c) => clientIds.has(c.id));
 
-  return { settings, slides, clients, projectCount: published.length };
+  // Published work per project type, most first (ties keep the types' own order).
+  // A project with several types counts once under each.
+  const projectTypes = lists.categories
+    .map((c) => ({ id: c.id, name: c.name, count: published.filter((p) => p.category_ids.includes(c.id)).length }))
+    .filter((t) => t.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  return { settings, slides, clients, projectCount: published.length, projectTypes };
 }
 
 /**

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppShell, SidebarNav } from '@collabrium/ui';
@@ -14,39 +14,13 @@ export const STUDIO_LOGO = {
   iconSrc: '/brand/fire.svg',
 };
 
-// The nav opens expanded on arrival, then folds to the icon rail after a
-// moment so the work gets the room. Once it has folded, or the visitor has
-// opened or closed it themselves, that state carries across pages (this
-// module lives for the whole visit; a reload starts over).
-const AUTO_COLLAPSE_MS = 3500;
-let navCollapsed: boolean | null = null;
+// The nav starts folded to the icon rail so the work gets the room. If the
+// visitor opens or closes it, that choice carries across pages (this module
+// lives for the whole visit; a reload starts folded again).
+let navCollapsed = true;
 
-function useAutoCollapsingNav() {
-  const [collapsed, setCollapsed] = useState(navCollapsed ?? false);
-
-  useEffect(() => {
-    if (navCollapsed !== null) return;
-    // Narrower windows already start folded (the shell's own rule).
-    if (window.matchMedia('(max-width: 1023px)').matches) {
-      navCollapsed = true;
-      setCollapsed(true);
-      return;
-    }
-    let timer: number;
-    const fold = () => {
-      if (navCollapsed !== null) return;
-      // Not while the pointer is resting on the nav: try again shortly.
-      if (document.querySelector('.cui-app-shell__nav:hover')) {
-        timer = window.setTimeout(fold, 1000);
-        return;
-      }
-      navCollapsed = true;
-      setCollapsed(true);
-    };
-    timer = window.setTimeout(fold, AUTO_COLLAPSE_MS);
-    return () => window.clearTimeout(timer);
-  }, []);
-
+function useNavCollapsed() {
+  const [collapsed, setCollapsed] = useState(navCollapsed);
   const change = (next: boolean) => {
     navCollapsed = next;
     setCollapsed(next);
@@ -70,7 +44,7 @@ export function SiteShell({
   width?: 'full' | 'reading';
 }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useAutoCollapsingNav();
+  const [collapsed, setCollapsed] = useNavCollapsed();
   return (
     <AppShell
       width={width}
