@@ -9,12 +9,18 @@
 
 .track {
   will-change: transform;
+  transition: opacity var(--duration-slow) var(--ease-standard);
   display: flex;
   width: max-content;
   gap: var(--spacing-32);
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+/* Until the logos are decoded the row waits, unseen, so they arrive together. */
+.marquee[data-loading] .track {
+  opacity: 0;
 }
 
 /* Each logo on its own, in its colours, all at one height so the row reads evenly. */

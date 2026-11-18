@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import type { Client } from '@/lib/types';
 import styles from './ClientMarquee.module.css';
@@ -21,9 +21,15 @@ export function ClientMarquee({ clients }: { clients: Client[] }) {
   const ref = useRef<HTMLDivElement>(null);
   // The row only moves while it's on screen.
   const visible = useInView(ref);
+  const ready = useLogosDecoded(clients);
 
   return (
-    <div ref={ref} className={styles.marquee} data-resting={!visible || undefined}>
+    <div
+      ref={ref}
+      className={styles.marquee}
+      data-loading={!ready || undefined}
+      data-resting={!visible || !ready || undefined}
+    >
       {/* The list people and screen readers read: each client once. */}
       <ul className={styles.track} style={{ ['--items' as string]: run.length }}>
         {run.map((c, i) => (
@@ -37,6 +43,42 @@ export function ClientMarquee({ clients }: { clients: Client[] }) {
   );
 }
 
+// Uploaded logos can be large files. Decoding them the first time they scroll
+// into view stalls the page, so fetch and decode each one off the main thread
+// as soon as the page loads, and start the row once they're ready (or after a
+// few seconds, whatever has arrived).
+const DECODE_WAIT_MS = 4000;
+
+function useLogosDecoded(clients: Client[]) {
+  const [ready, setReady] = useState(false);
+  const urls = [...new Set(clients.map((c) => c.logo_url).filter(Boolean) as string[])].join('\n');
+
+  useEffect(() => {
+    let done = false;
+    const finish = () => {
+      if (!done) {
+        done = true;
+        setReady(true);
+      }
+    };
+    const timer = window.setTimeout(finish, DECODE_WAIT_MS);
+    Promise.all(
+      (urls ? urls.split('\n') : []).map((u) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = u;
+        return img.decode().catch(() => {});
+      }),
+    ).then(finish);
+    return () => {
+      done = true;
+      window.clearTimeout(timer);
+    };
+  }, [urls]);
+
+  return ready;
+}
+
 function Logo({ client, hidden }: { client: Client; hidden: boolean }) {
   return (
     <li className={styles.logo} aria-hidden={hidden || undefined} data-copy={hidden || undefined}>
@@ -47,7 +89,7 @@ function Logo({ client, hidden }: { client: Client; hidden: boolean }) {
         aria-label={hidden ? undefined : `${client.name}: see their work`}
         title={client.name}
       >
-        {client.logo_url ? <img src={client.logo_url} alt="" draggable={false} /> : <span>{client.name}</span>}
+        {client.logo_url ? <img src={client.logo_url} alt="" draggable={false} decoding="async" /> : <span>{client.name}</span>}
       </Link>
     </li>
   );

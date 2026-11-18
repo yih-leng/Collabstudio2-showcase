@@ -87,6 +87,22 @@
   overflow: hidden;
 }
 
+.logo {
+  border-radius: var(--radius-sm);
+  color: var(--color-neutral-9);
+  text-decoration: none;
+  transition: transform var(--duration-base) var(--ease-settle);
+}
+
+.logo:hover {
+  transform: scale(1.06);
+}
+
+.logo:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
 .logo img {
   max-width: 100%;
   max-height: 100%;

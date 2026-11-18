@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, StatCard, StatGrid, Tabs, Tag } from '@collabrium/ui';
+import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, StatCard, StatGrid, Tabs, Tag, Tooltip } from '@collabrium/ui';
 import { ScrollReveal } from '@collabrium/ui/motion';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { Gallery } from '@/components/Gallery';
@@ -170,12 +170,18 @@ function useCurrentSection(ids: string[]) {
   return current;
 }
 
-/** A client's logo in a fixed box, or its name in the same box until a logo is uploaded. */
+/**
+ * A client's logo in a fixed box, or its name in the same box until a logo is
+ * uploaded. Hovering shows the name; it opens Our Works filtered to that
+ * client, as the home page's client row does.
+ */
 function ClientLogo({ client }: { client: Client }) {
   return (
-    <span className={styles.logo} title={client.name}>
-      {client.logo_url ? <img src={client.logo_url} alt={client.name} /> : <span>{client.name}</span>}
-    </span>
+    <Tooltip content={client.name}>
+      <Link href={`/work?client=${encodeURIComponent(client.id)}`} className={styles.logo}>
+        {client.logo_url ? <img src={client.logo_url} alt={client.name} decoding="async" /> : <span>{client.name}</span>}
+      </Link>
+    </Tooltip>
   );
 }
 
