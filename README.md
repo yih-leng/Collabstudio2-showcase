@@ -38,8 +38,8 @@ deck, and the admin works too.
    near your audience (Singapore for Malaysia).
 2. **Create the tables.** In Supabase, open **SQL Editor → New query**, paste
    all of `supabase/migrations/0001_init.sql`, and press **Run**.
-   Then do the same with `supabase/migrations/0002_about.sql` and
-   `supabase/migrations/0003_audio.sql` and `0004_hide_internal.sql`.
+   Then do the same with `supabase/migrations/0002_about.sql`,
+   `0003_audio.sql`, `0004_hide_internal.sql` and `0005_activity.sql`.
 3. **Add the sample projects.** New query again, paste all of
    `supabase/seed.sql`, and **Run**. (Both files are safe to run twice.)
 4. **Turn off public sign-up.** **Authentication → Sign In / Providers →
@@ -195,6 +195,23 @@ previews of the pictures are sent to Claude. Without a key, the importer still
 works: each deck becomes one draft with its title, pictures and a passage of
 text, and you fill in the rest.
 
+## 6. Activity log
+
+**Activity** (in the admin menu, under Setup) lists who changed what, and
+when: projects created, edited, published, featured, trashed, restored or
+deleted; pictures and videos added or removed; clients, types and tags added,
+renamed or removed; site settings changed; new enquiries; and every AI draft
+from Import from deck, with its tokens and cost. Changes made together read as
+one line ("Created Blinkie as a draft with 16 pictures"). At the top: AI spend
+this month and all time, and how many projects were drafted with AI. Filter by
+area or search by project, person or file; project names link to the editor.
+
+**Set it up once:** in Supabase → SQL Editor, run
+`supabase/migrations/0005_activity.sql`. Logging starts from then (earlier
+changes aren't in it). The database writes the log itself, so it records
+changes from every screen, and stamps each entry with the signed-in person.
+Entries can't be edited or deleted from the site.
+
 ## Other admin screens
 
 - **Enquiries**: everything sent from the contact form at `/contact` (it's no
@@ -218,7 +235,8 @@ text, and you fill in the rest.
 | `lib/data.ts` | Server reads for public pages (Supabase, or the seed when not configured) |
 | `lib/admin-api.ts` | Uploads and ordering helpers for the admin |
 | `lib/import/` and `app/api/import/draft/` | Import from deck: reading PPTX, ODP and PDF in the browser, drafting with Claude (structured output), and creating the projects |
-| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`) |
+| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`), audio (`0003`), Hidden replaces Internal (`0004`), the activity log and its triggers (`0005`) |
+| `lib/activity.ts` and `lib/demo/activity.ts` | How log entries read and group on the Activity page, and the local demo's copy of the `0005` triggers (keep the two in step) |
 | `lib/demo/` and `app/api/demo/` | The local demo: a stand-in for Supabase that saves to `.demo/` and applies the same row-level rules. Off once Supabase keys are set, and off in production |
 | `supabase/seed-source.mjs` | The deck's projects, with their media. Edit, then `npm run seed:build` to regenerate `seed.sql`, `updates/deck-update.sql` and `lib/seed.generated.json` |
 | `supabase/updates/deck-update.sql` | Brings a database already in use up to date with `seed-source.mjs`: run it in the SQL Editor. It replaces the deck projects' text and sets their cover and hero, and keeps featured/visibility settings and anything added in the admin |

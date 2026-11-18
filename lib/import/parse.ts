@@ -331,7 +331,8 @@ async function parsePdf(file: File): Promise<Omit<ParsedDeck, 'id' | 'fileName' 
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(viewport.width);
     canvas.height = Math.round(viewport.height);
-    await page.render({ canvas, viewport }).promise;
+    // "print" draws without waiting on animation frames, which browsers pause in background tabs.
+    await page.render({ canvas, viewport, intent: 'print' }).promise;
     const blob = await new Promise<Blob | null>((res) => canvas.toBlob(res, 'image/jpeg', 0.88));
     if (blob) {
       const id = `a${assets.length + 1}`;

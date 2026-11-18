@@ -2,6 +2,7 @@ import 'server-only';
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import seed from '../seed.generated.json';
+import { addActivity, logChange } from './activity';
 import { DEMO_USER, isDemoMode } from './config';
 import type { Filter, QueryResult, QuerySpec } from './query';
 
@@ -137,6 +138,8 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
   const publicInsert = t === 'enquiries' && spec.action === 'insert';
 
   if (writes && !admin && !publicInsert) return { data: null, error: denied };
+  // The activity log is append-only, as in the migration.
+  if (t === 'activity' && writes && spec.action !== 'insert') return { data: null, error: denied };
   if (writes && !isDemoMode) return { data: null, error: { message: 'The sample site is read-only. Connect Supabase to edit.' } };
 
   const result = (rows: Row[]): QueryResult => {
@@ -152,12 +155,20 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
     const key = t === 'settings' ? 'key' : t === 'admins' ? 'user_id' : 'id';
     const input = (Array.isArray(spec.payload) ? spec.payload : [spec.payload]) as Row[];
     const out: Row[] = [];
+    if (t === 'activity') {
+      // Stamped with the signed-in person, whatever the insert says (as the migration's trigger does).
+      for (const p of input) addActivity(db, admin, p);
+      save(db);
+      return result([]);
+    }
     for (const p of input) {
       const existing = spec.action === 'upsert' ? db[t].find((x) => p[key] !== undefined && x[key] === p[key]) : undefined;
       if (existing) {
         const next = { ...existing, ...p };
         if (uniqueClash(db, t, next)) return { data: null, error: clash };
+        const before = { ...existing };
         Object.assign(existing, p);
+        logChange(db, admin, t, before, existing);
         out.push(existing);
         continue;
       }
@@ -168,6 +179,7 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
       };
       if (uniqueClash(db, t, row)) return { data: null, error: clash };
       db[t].push(row);
+      logChange(db, admin, t, null, row);
       out.push(row);
     }
     save(db);
@@ -181,8 +193,10 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
       if (uniqueClash(db, t, next)) return { data: null, error: clash };
     }
     for (const r of rows) {
+      const before = { ...r };
       Object.assign(r, spec.payload as Row);
       if (t === 'projects') r.updated_at = new Date().toISOString();
+      logChange(db, admin, t, before, r);
     }
     save(db);
     return result(rows.map((r) => ({ ...r })));
@@ -191,6 +205,7 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
   if (spec.action === 'delete') {
     const gone = db[t].filter(hit);
     db[t] = db[t].filter((r) => !hit(r));
+    for (const r of gone) logChange(db, admin, t, r, null);
     const ids = new Set(gone.map((r) => r.id));
     // The migration's foreign keys: children go with their project; a deleted
     // cover or hero clears the project's pointer to it.

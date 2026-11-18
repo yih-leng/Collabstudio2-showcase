@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NextResponse } from 'next/server';
 import { isRequestAdmin } from '@/lib/server-admin';
+import { getServerClient } from '@/lib/supabase/server';
 import { PRICES, costOf, outputRange } from '@/lib/import/pricing';
 import type { DraftEstimate, DraftUsage, ListNames } from '@/lib/import/types';
 
@@ -121,6 +122,17 @@ const OUTPUT_SCHEMA = {
   properties: { projects: { type: 'array', items: PROJECT_SCHEMA } },
 };
 
+/** Records a billed draft in the activity log. The log is a record, so a failure here never fails the draft. */
+async function logDraft(fileName: string, usage: DraftUsage, extra: { outcome: 'drafted' | 'declined' | 'too_long'; projects?: string[] }) {
+  try {
+    const sb = await getServerClient();
+    const { error } = await sb.from('activity').insert({ action: 'ai.draft', entity_type: 'deck', label: fileName, details: { ...usage, ...extra } });
+    if (error) console.warn('Activity log: AI draft not recorded:', error.message);
+  } catch (e) {
+    console.warn('Activity log: AI draft not recorded:', (e as Error).message);
+  }
+}
+
 export async function POST(req: Request) {
   if (!(await isRequestAdmin())) return NextResponse.json({ error: 'Sign in as an admin first.' }, { status: 401 });
   // Without a key the browser drafts with simple rules instead.
@@ -215,16 +227,20 @@ export async function POST(req: Request) {
       cache_read_input_tokens: message.usage.cache_read_input_tokens,
       cost: costOf({ ...message.usage, model: message.model }),
     };
-    // A failed draft is still billed, so the cost goes back either way.
+    // A failed draft is still billed, so the cost goes back (and into the activity log) either way.
     if (message.stop_reason === 'refusal') {
+      await logDraft(body.fileName, usage, { outcome: 'declined' });
       return NextResponse.json({ error: "Claude couldn't draft from this deck. Try removing sensitive slides, or create the project by hand.", usage }, { status: 422 });
     }
     if (message.stop_reason === 'max_tokens') {
+      await logDraft(body.fileName, usage, { outcome: 'too_long' });
       return NextResponse.json({ error: 'This deck is too long to draft in one go. Split it into smaller files.', usage }, { status: 422 });
     }
     const text = message.content.find((b) => b.type === 'text');
     if (!text || text.type !== 'text') throw new Error('No draft came back.');
-    return NextResponse.json({ ...JSON.parse(text.text), usage });
+    const drafted = JSON.parse(text.text) as { projects: { title: string }[] };
+    await logDraft(body.fileName, usage, { outcome: 'drafted', projects: drafted.projects.map((p) => p.title) });
+    return NextResponse.json({ ...drafted, usage });
   } catch (err) {
     if (err instanceof Anthropic.AuthenticationError) {
       return NextResponse.json({ error: 'The ANTHROPIC_API_KEY on the server was rejected. Check it in your environment settings.' }, { status: 502 });

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppShell, InfoBanner, SidebarNav } from '@collabrium/ui';
-import { ArrowSquareOut, EnvelopeSimple, FilePpt, FilmSlate, GearSix, ListBullets, SignOut, Trash } from '@phosphor-icons/react';
+import { ArrowSquareOut, ClockCounterClockwise, EnvelopeSimple, FilePpt, FilmSlate, GearSix, ListBullets, SignOut, Trash } from '@phosphor-icons/react';
 import { STUDIO_LOGO } from '@/components/SiteShell';
 import { isDemoMode } from '@/lib/demo/config';
 import { useAdmin } from './AdminContext';
@@ -11,6 +11,7 @@ import { useAdmin } from './AdminContext';
 function activeFor(pathname: string) {
   if (pathname.startsWith('/admin/trash')) return 'trash';
   if (pathname.startsWith('/admin/import')) return 'import';
+  if (pathname.startsWith('/admin/activity')) return 'activity';
   if (pathname.startsWith('/admin/enquiries')) return 'enquiries';
   if (pathname.startsWith('/admin/lists')) return 'lists';
   if (pathname.startsWith('/admin/settings')) return 'settings';
@@ -74,6 +75,7 @@ export function AdminShell({
               items: [
                 { id: 'lists', label: 'Clients and tags', icon: ListBullets, href: '/admin/lists' },
                 { id: 'settings', label: 'Site settings', icon: GearSix, href: '/admin/settings' },
+                { id: 'activity', label: 'Activity', icon: ClockCounterClockwise, href: '/admin/activity' },
               ],
             },
           ]}
