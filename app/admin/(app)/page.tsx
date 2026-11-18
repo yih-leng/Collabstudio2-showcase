@@ -143,7 +143,7 @@ export default function ProjectsPage() {
     }
   };
 
-  const typeName = (ids: string[]) => lists.categories.find((c) => c.id === ids[0])?.name ?? '';
+  const typeName = (ids: string[]) => ids.map((id) => lists.categories.find((c) => c.id === id)?.name).filter(Boolean).join(', ');
   const STATUS_RANK: Record<ProjectStatus, number> = { live: 0, approved: 1, in_progress: 2, concept: 3 };
   const VIS_RANK: Record<Visibility, number> = { published: 0, draft: 1, hidden: 2 };
 

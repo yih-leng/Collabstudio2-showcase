@@ -42,7 +42,7 @@ A deck is usually a pitch or a case study for one project, but it can hold sever
 Write each project in the site's fields:
 - title: the project's name as the deck presents it (a campaign, character or film name; not the client alone, and without tags like [KULT][EXT]).
 - client_names: the brand or brands it was made for. Reuse a name from the existing clients list when it is the same client, spelled exactly as listed.
-- type_name: the kind of project. Reuse one of the existing types when one fits; otherwise a short new one in the same style.
+- type_names: the kind of project, one or more (a film that is also a key visual campaign can be both). Reuse existing types when they fit; otherwise a short new one in the same style.
 - year: the year the work was made if the deck shows it, else 0.
 - status: "concept" for pitches and ideas not yet made, "approved" for work signed off but not made, "in_progress" for work being made, "live" for work that has launched. A pitch deck is "concept" unless it says otherwise.
 - one_liner: one sentence that sells the idea, in the deck's own voice.
@@ -68,7 +68,7 @@ const PROJECT_SCHEMA = {
   required: [
     'title',
     'client_names',
-    'type_name',
+    'type_names',
     'year',
     'status',
     'one_liner',
@@ -90,7 +90,7 @@ const PROJECT_SCHEMA = {
   properties: {
     title: { type: 'string' },
     client_names: { type: 'array', items: { type: 'string' } },
-    type_name: { type: 'string' },
+    type_names: { type: 'array', items: { type: 'string' } },
     year: { type: 'integer' },
     status: { type: 'string', enum: ['live', 'approved', 'in_progress', 'concept'] },
     one_liner: { type: 'string' },

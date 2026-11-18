@@ -77,6 +77,7 @@ function tidy(d: ProjectDraft, deck: ParsedDeck): ProjectDraft {
     asset_ids,
     cover_asset_id: cover || asset_ids.find((id) => deck.assets.find((a) => a.id === id)?.kind === 'image') || '',
     video_links: d.video_links.filter((l) => deck.links.includes(l)),
+    type_names: Array.isArray(d.type_names) ? d.type_names : [],
     // One of each kind, from the known list.
     touchpoints: d.touchpoints.filter((t, i, all) => isTouchpointKind(t.kind) && all.findIndex((x) => x.kind === t.kind) === i),
     // Older or odd replies may send plain strings; those are about the whole project.
@@ -102,7 +103,7 @@ function basicDraft(deck: ParsedDeck): ProjectDraft {
   return {
     title: title || 'Untitled project',
     client_names: [],
-    type_name: '',
+    type_names: [],
     year: 0,
     status: 'concept',
     one_liner: '',

@@ -156,7 +156,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     if (!p.title.trim()) e.title = 'Give the project a title';
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug)) e.slug = 'Use lowercase letters, numbers and dashes, like skechers-merch-film';
     if (p.year !== null && (p.year < 1990 || p.year > 2100)) e.year = 'Enter a year like 2026';
-    if (!p.category_ids.length) e.type = 'Pick the type of project';
+    if (!p.category_ids.length) e.type = 'Pick at least one type of project';
     if (touchpoints.some((t) => t.kind === CUSTOM && !t.label.trim())) e.touchpoints = 'Name your touchpoint';
     return e;
   };
@@ -398,11 +398,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
               <TagPicker
                 id="field-type"
                 label="Project type"
-                multiple={false}
+                helper="Pick one or more"
                 required
                 error={errors.type}
                 options={lists.categories}
-                value={p.category_ids.slice(0, 1)}
+                value={p.category_ids}
                 onChange={(v) => {
                   set('category_ids', v);
                   setErrors((e) => ({ ...e, type: undefined }));

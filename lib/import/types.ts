@@ -56,7 +56,8 @@ export interface ParsedDeck {
 export interface ProjectDraft {
   title: string;
   client_names: string[];
-  type_name: string;
+  /** One or more project types. */
+  type_names: string[];
   /** 0 when the deck doesn't say. */
   year: number;
   status: ProjectStatus;

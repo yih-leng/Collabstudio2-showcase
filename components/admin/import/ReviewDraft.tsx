@@ -98,7 +98,13 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
           />
           {noteList('clients')}
           <div className={shared.grid2}>
-            <InputField label="Project type" required value={d.type_name} onChange={(e) => onDraft({ type_name: e.target.value })} />
+            <InputField
+              label="Project type"
+              required
+              helper="One or more, separated with commas"
+              value={commaList(d.type_names)}
+              onChange={(e) => onDraft({ type_names: fromComma(e.target.value) })}
+            />
             <InputField label="Year" type="number" value={d.year ? String(d.year) : ''} onChange={(e) => onDraft({ year: Number(e.target.value) || 0 })} />
             <Dropdown
               label="Status"

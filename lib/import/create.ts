@@ -74,7 +74,7 @@ export async function createFromDraft(
   onProgress({ label: 'Saving the details', value: 0 });
   const [clientIds, categoryIds, capabilityIds, toolIds] = [
     await idsFor(sb, 'clients', lists.clients, draft.client_names),
-    await idsFor(sb, 'categories', lists.categories, draft.type_name ? [draft.type_name] : []),
+    await idsFor(sb, 'categories', lists.categories, draft.type_names),
     await idsFor(sb, 'tags', lists.tags, draft.capability_names, 'capability'),
     await idsFor(sb, 'tags', lists.tags, draft.tool_names, 'tool'),
   ];

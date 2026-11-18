@@ -23,7 +23,6 @@ import styles from './project.module.css';
  */
 export function ProjectView({ project: p }: { project: ProjectDetailData }) {
   const isPreview = p.visibility !== 'published';
-  const type = p.categories[0]?.name;
 
   const sections = [
     (p.summary || p.objective || p.concept) && { id: 'about', title: 'About this project', body: <About p={p} /> },
@@ -54,7 +53,11 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
             <PageHeader title={p.title} />
             {p.one_liner && <p className={styles.lede}>{p.one_liner}</p>}
             <div className={styles.badges}>
-              {type && <Tag variant="fire">{type}</Tag>}
+              {p.categories.map((c) => (
+                <Tag key={c.id} variant="fire">
+                  {c.name}
+                </Tag>
+              ))}
               <Badge variant={STATUS_BADGE[p.status]}>{statusText(p.status, p.status_note)}</Badge>
             </div>
           </div>
@@ -69,7 +72,7 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
                 </dd>
               </div>
             )}
-            <Fact label="Project type" value={p.categories.map((c) => c.name).join(', ')} />
+            <Fact label={p.categories.length > 1 ? 'Project types' : 'Project type'} value={p.categories.map((c) => c.name).join(', ')} />
             <Fact label="Year" value={p.year ? String(p.year) : ''} />
           </dl>
         </header>
