@@ -20,7 +20,7 @@ import {
   type FilterValue,
   type TableColumn,
 } from '@collabrium/ui';
-import { Eye, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
+import { Eye, FilePpt, FilmSlate, PencilSimple, Plus, Trash } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { useAdmin } from '@/components/admin/AdminContext';
 import { SortableList } from '@/components/admin/SortableList';
@@ -264,9 +264,14 @@ export default function ProjectsPage() {
           title="Projects"
           subtitle="Add, edit and order the work on the site."
           actions={
-            <Button variant="primary" leadingIcon={Plus} loading={creating} onClick={createProject}>
-              New project
-            </Button>
+            <>
+              <Button variant="secondary" leadingIcon={FilePpt} onClick={() => router.push('/admin/import')}>
+                Import from deck
+              </Button>
+              <Button variant="primary" leadingIcon={Plus} loading={creating} onClick={createProject}>
+                New project
+              </Button>
+            </>
           }
         />
       }

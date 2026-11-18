@@ -147,6 +147,48 @@ Keep your full-quality masters elsewhere: only the preview is stored here.
 Project type, Capability tags or Tools field: pick a match, or choose
 "Add …" to create it. New items join the lists under Clients and tags.
 
+## 5. Import from deck
+
+**Projects → Import from deck** turns pitch and case-study decks into draft
+projects.
+
+1. Drop in one or more decks: PowerPoint (`.pptx`), PDF, or OpenDocument
+   (`.odp`). From Google Slides, use **File → Download → Microsoft PowerPoint
+   (.pptx)**: that keeps the full-size pictures and any videos stored in the
+   deck. Decks are opened in your browser, not uploaded, so a 100 MB file is
+   fine.
+2. Claude reads each deck and drafts the projects in it (a showcase deck can
+   hold several): title, clients, type, status, one-liner, About, Output,
+   Overview, Capabilities, how AI was used, which pictures to use and the
+   cover. It also leaves notes on anything to check, such as slides from
+   another project, internal notes, or brief details marked TBC.
+3. Check each draft. Edit the words, tick the pictures and video links you
+   want, set the cover, and untick drafts that shouldn't be projects.
+4. **Create drafts.** Pictures are shrunk and uploaded, big videos become web
+   previews, new clients and tags join Clients and tags, and each project is
+   saved as a **Draft**. Open it in the editor to finish it, then publish.
+
+What comes out of each format:
+
+| Format | Text | Pictures | Videos |
+|---|---|---|---|
+| PowerPoint (.pptx) | Every slide, plus speaker notes | Original files, full size | Files stored in the deck, plus YouTube, Vimeo and Drive links |
+| OpenDocument (.odp) | Every slide, plus speaker notes | Original files | YouTube, Vimeo and Drive links |
+| PDF | Every page | One picture per page (the whole page, 1920 px wide) | YouTube, Vimeo and Drive links |
+
+Hidden slides are skipped. Logos and backgrounds that repeat across slides
+are set aside under "More from this deck". Keynote: export to PowerPoint
+first.
+
+**Setting up the AI.** Drafting uses Claude (Claude Opus 5.5). Create a key at
+[platform.claude.com](https://platform.claude.com) → API keys, and add it as
+`ANTHROPIC_API_KEY` in Vercel (**Settings → Environment Variables**), then
+redeploy. For your computer, add it to `.env.local` and restart `npm run dev`.
+A typical deck costs well under US$1 to draft. Only the slide text and small
+previews of the pictures are sent to Claude. Without a key, the importer still
+works: each deck becomes one draft with its title, pictures and a passage of
+text, and you fill in the rest.
+
 ## Other admin screens
 
 - **Enquiries**: everything sent from the contact form at `/contact` (it's no
@@ -169,6 +211,7 @@ Project type, Capability tags or Tools field: pick a match, or choose
 | `components/` | Site shell, project card, media frame, gallery; `admin/` holds the admin pieces |
 | `lib/data.ts` | Server reads for public pages (Supabase, or the seed when not configured) |
 | `lib/admin-api.ts` | Uploads and ordering helpers for the admin |
+| `lib/import/` and `app/api/import/draft/` | Import from deck: reading PPTX, ODP and PDF in the browser, drafting with Claude (structured output), and creating the projects |
 | `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`) |
 | `lib/demo/` and `app/api/demo/` | The local demo: a stand-in for Supabase that saves to `.demo/` and applies the same row-level rules. Off once Supabase keys are set, and off in production |
 | `supabase/seed-source.mjs` | The deck's projects, with their media. Edit, then `npm run seed:build` to regenerate `seed.sql`, `updates/deck-update.sql` and `lib/seed.generated.json` |
