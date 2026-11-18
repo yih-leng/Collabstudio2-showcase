@@ -39,7 +39,7 @@ deck, and the admin works too.
 2. **Create the tables.** In Supabase, open **SQL Editor → New query**, paste
    all of `supabase/migrations/0001_init.sql`, and press **Run**.
    Then do the same with `supabase/migrations/0002_about.sql`,
-   `0003_audio.sql`, `0004_hide_internal.sql`, `0005_activity.sql` and `0006_story.sql`.
+   `0003_audio.sql`, `0004_hide_internal.sql`, `0005_activity.sql`, `0006_story.sql` and `0007_custom_touchpoints.sql`.
 3. **Add the sample projects.** New query again, paste all of
    `supabase/seed.sql`, and **Run**. (Both files are safe to run twice.)
 4. **Turn off public sign-up.** **Authentication → Sign In / Providers →
@@ -104,8 +104,8 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
    |---|---|
    | Title, one-liner, project type, status and facts | **1 · Basics** and **2 · Client details** |
    | Hero video or image | **3 · Hero and gallery**: pick the hero (a video if you have one) |
-   | 01 About this project | **4 · About this project**: Summary (what it is), The objective (1–2 sentences), The concept (2–3 sentences) |
-   | 02 AI touchpoints | **5 · AI touchpoints**: pick 3 or 4 from the list and say what each did on this project; tools used |
+   | 01 About this project | **4 · About this project**: three parts, Summary (what it is), The objective (1–2 sentences) and The concept (2–3 sentences) |
+   | 02 AI touchpoints | **5 · AI touchpoints**: pick 3 or 4 from the list, or choose **Your own…** and name it, and say what each did on this project |
    | 03 Output | **6 · Output**: a one-line summary, then each deliverable |
    | 04 Turnaround / result | **7 · Turnaround / result**: how fast it was made or what it achieved, plus optional key figures ("13 days" · "storyboard to approval") |
    | 05 Gallery | Every other image and video from **3 · Hero and gallery** |
@@ -113,7 +113,8 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
    The touchpoint list lives in `lib/touchpoints.ts`: World building and
    characterisation, Brand placement / product integration, Video generation,
    Image generation, Music and sound, Voice over, Localisation, Script and
-   storyboard, Look development, and Upscaling and finishing.
+   storyboard, Look development, and Upscaling and finishing. Anything else
+   goes in as your own touchpoint.
 
    - **Basics**: title, web address, one-liner (the card text), clients,
      **project type** (required: Film, Key Visual, Microdrama, Brand Campaign,
@@ -249,7 +250,7 @@ Entries can't be edited or deleted from the site.
 | `lib/data.ts` | Server reads for public pages (Supabase, or the seed when not configured) |
 | `lib/admin-api.ts` | Uploads and ordering helpers for the admin |
 | `lib/import/` and `app/api/import/draft/` | Import from deck: reading PPTX, ODP and PDF in the browser, drafting with Claude (structured output), and creating the projects |
-| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`), audio (`0003`), Hidden replaces Internal (`0004`), the activity log and its triggers (`0005`), the four-part story: summary, objective, concept, AI touchpoints, turnaround and key figures (`0006`) |
+| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`), audio (`0003`), Hidden replaces Internal (`0004`), the activity log and its triggers (`0005`), the four-part story: summary, objective, concept, AI touchpoints, turnaround and key figures (`0006`), touchpoints of your own (`0007`) |
 | `lib/activity.ts` and `lib/demo/activity.ts` | How log entries read and group on the Activity page, and the local demo's copy of the `0005` triggers (keep the two in step) |
 | `lib/demo/` and `app/api/demo/` | The local demo: a stand-in for Supabase that saves to `.demo/` and applies the same row-level rules. Off once Supabase keys are set, and off in production |
 | `supabase/seed-source.mjs` | The deck's projects, with their media. Edit, then `npm run seed:build` to regenerate `seed.sql`, `updates/deck-update.sql` and `lib/seed.generated.json` |

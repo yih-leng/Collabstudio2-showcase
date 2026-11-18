@@ -2,7 +2,7 @@ import 'server-only';
 import { cache } from 'react';
 import { embedProvider } from './format';
 import { getServerClient } from './supabase/server';
-import { isTouchpointKind } from './touchpoints';
+import { touchpointLabel } from './touchpoints';
 import type {
   AiTouchpoint,
   ListItemRow,
@@ -167,7 +167,7 @@ export const getProjectDetail = cache(async (slug: string): Promise<ProjectDetai
     listsP,
     visibleP,
   ]);
-  const touchpoints = ((tp.data ?? []) as AiTouchpoint[]).filter((t) => isTouchpointKind(t.kind));
+  const touchpoints = ((tp.data ?? []) as AiTouchpoint[]).filter((t) => touchpointLabel(t));
   const figures = (f.data ?? []) as ResultFigure[];
   const items = (i.data ?? []) as ListItemRow[];
   const media = (m.data ?? []) as Media[];

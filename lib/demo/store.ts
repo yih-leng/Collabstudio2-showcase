@@ -29,7 +29,7 @@ const DEFAULTS: Record<string, () => Row> = {
   media: () => ({ storage_path: null, aspect: '16:9', caption: null, sort_order: 0 }),
   overview_blocks: () => ({ body: '', sort_order: 0 }),
   list_items: () => ({ sort_order: 0 }),
-  ai_touchpoints: () => ({ body: '', sort_order: 0 }),
+  ai_touchpoints: () => ({ label: null, body: '', sort_order: 0 }),
   result_figures: () => ({ label: '', sort_order: 0 }),
   clients: () => ({ logo_url: null, logo_path: null, sort_order: 0 }),
   categories: () => ({ sort_order: 0 }),

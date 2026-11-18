@@ -33,12 +33,12 @@ import { TextListEditor, type TextItem } from '@/components/admin/TextListEditor
 import styles from '@/components/admin/admin.module.css';
 import { newId } from '@/lib/admin-api';
 import { STATUS_LABEL, VISIBILITY_LABEL, slugify } from '@/lib/format';
-import { TOUCHPOINTS, TOUCHPOINT_KINDS, type TouchpointKind } from '@/lib/touchpoints';
+import { CUSTOM, TOUCHPOINTS, TOUCHPOINT_KINDS, isTouchpointKind, touchpointLabel, type AnyTouchpointKind } from '@/lib/touchpoints';
 import type { AiTouchpoint, ListItemRow, Media, Project, ProjectStatus, ResultFigure, Visibility } from '@/lib/types';
 
-type Touch = { id: string; kind: TouchpointKind; body: string };
+type Touch = { id: string; kind: AnyTouchpointKind; label: string; body: string };
 type Figure = { id: string; value: string; label: string };
-type Errors = Partial<Record<'title' | 'slug' | 'year' | 'type', string>>;
+type Errors = Partial<Record<'title' | 'slug' | 'year' | 'type' | 'touchpoints', string>>;
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -84,7 +84,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     setSlugTouched(!(data as Project).slug.startsWith('untitled-'));
     const tps = (t.data ?? []) as AiTouchpoint[];
     const figs = (f.data ?? []) as ResultFigure[];
-    setTouchpoints(tps.map(({ id, kind, body }) => ({ id, kind, body })));
+    setTouchpoints(tps.map(({ id, kind, label, body }) => ({ id, kind, label: label ?? '', body })));
     setFigures(figs.map(({ id, value, label }) => ({ id, value, label })));
     setDeliverables(items.map(({ id, text }) => ({ id, text })));
     setMedia((m.data ?? []) as Media[]);
@@ -157,6 +157,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug)) e.slug = 'Use lowercase letters, numbers and dashes, like skechers-merch-film';
     if (p.year !== null && (p.year < 1990 || p.year > 2100)) e.year = 'Enter a year like 2026';
     if (!p.category_ids.length) e.type = 'Pick the type of project';
+    if (touchpoints.some((t) => t.kind === CUSTOM && !t.label.trim())) e.touchpoints = 'Name your touchpoint';
     return e;
   };
 
@@ -166,7 +167,8 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     const e = validate(q);
     setErrors(e);
     if (Object.keys(e).length) {
-      document.getElementById(`field-${Object.keys(e)[0]}`)?.focus();
+      const unnamed = touchpoints.find((t) => t.kind === CUSTOM && !t.label.trim());
+      document.getElementById(Object.keys(e)[0] === 'touchpoints' && unnamed ? `touch-${unnamed.id}-label` : `field-${Object.keys(e)[0]}`)?.focus();
       if (e.type && Object.keys(e).length === 1) toast({ tone: 'danger', title: 'Pick a project type', message: 'Every project needs one, under Basics.' });
       return false;
     }
@@ -216,7 +218,14 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       }
 
       // Touchpoints, key figures and deliverables: write the current set, drop the removed ones.
-      const touchRows = touchpoints.map((t, i) => ({ id: t.id, project_id: q.id, kind: t.kind, body: t.body.trim(), sort_order: i }));
+      const touchRows = touchpoints.map((t, i) => ({
+        id: t.id,
+        project_id: q.id,
+        kind: t.kind,
+        label: t.kind === CUSTOM ? t.label.trim() : null,
+        body: t.body.trim(),
+        sort_order: i,
+      }));
       const keptFigures = figures.filter((f) => f.value.trim());
       const figureRows = keptFigures.map((f, i) => ({ id: f.id, project_id: q.id, value: f.value.trim(), label: f.label.trim(), sort_order: i }));
       const itemRows = deliverables
@@ -283,13 +292,14 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const unusedKinds = TOUCHPOINT_KINDS.filter((k) => !touchpoints.some((t) => t.kind === k));
   const addTouchpoint = () => {
     const nid = newId();
-    setTouchpoints((ts) => [...ts, { id: nid, kind: unusedKinds[0] ?? 'video', body: '' }]);
+    setTouchpoints((ts) => [...ts, { id: nid, kind: unusedKinds[0] ?? CUSTOM, label: '', body: '' }]);
     setDirty(true);
     requestAnimationFrame(() => document.getElementById(`touch-${nid}-body`)?.focus());
   };
   const updateTouchpoint = (tid: string, values: Partial<Touch>) => {
     setTouchpoints((ts) => ts.map((x) => (x.id === tid ? { ...x, ...values } : x)));
     setDirty(true);
+    if (errors.touchpoints) setErrors((er) => ({ ...er, touchpoints: undefined }));
   };
   const addFigure = () => {
     const nid = newId();
@@ -505,26 +515,29 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                   <SortableList
                     items={touchpoints}
                     onReorder={dirtyWrap(setTouchpoints)}
-                    label={(t) => TOUCHPOINTS[t.kind].label}
+                    label={(t) => touchpointLabel(t) || 'touchpoint'}
                     renderItem={(t, i) => (
                       <div className={styles.stackSm}>
                         <div className={styles.row}>
                           <Dropdown
                             label={`Touchpoint ${i + 1}`}
-                            helper={TOUCHPOINTS[t.kind].description}
-                            options={TOUCHPOINT_KINDS.filter((k) => k === t.kind || !touchpoints.some((x) => x.kind === k)).map((k) => ({
-                              value: k,
-                              label: TOUCHPOINTS[k].label,
-                            }))}
+                            helper={isTouchpointKind(t.kind) ? TOUCHPOINTS[t.kind].description : 'Your own touchpoint: name it below.'}
+                            options={[
+                              ...TOUCHPOINT_KINDS.filter((k) => k === t.kind || !touchpoints.some((x) => x.kind === k)).map((k) => ({
+                                value: k,
+                                label: TOUCHPOINTS[k].label,
+                              })),
+                              { value: CUSTOM, label: 'Your own…' },
+                            ]}
                             value={t.kind}
-                            onValueChange={(v) => updateTouchpoint(t.id, { kind: v as TouchpointKind })}
+                            onValueChange={(v) => updateTouchpoint(t.id, { kind: v as AnyTouchpointKind })}
                           />
                           <span className={styles.fit}>
                             <Button
                               variant="ghost"
                               iconOnly
                               icon={X}
-                              aria-label={`Remove ${TOUCHPOINTS[t.kind].label}`}
+                              aria-label={`Remove ${touchpointLabel(t) || `touchpoint ${i + 1}`}`}
                               onClick={() => {
                                 setTouchpoints((all) => all.filter((x) => x.id !== t.id));
                                 setDirty(true);
@@ -532,9 +545,22 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                             />
                           </span>
                         </div>
+                        {t.kind === CUSTOM && (
+                          <InputField
+                            id={`touch-${t.id}-label`}
+                            label="Touchpoint name"
+                            required
+                            size="sm"
+                            maxLength={60}
+                            placeholder="e.g. Motion capture"
+                            error={errors.touchpoints && !t.label.trim() ? errors.touchpoints : undefined}
+                            value={t.label}
+                            onChange={(e) => updateTouchpoint(t.id, { label: e.target.value })}
+                          />
+                        )}
                         <Textarea
                           id={`touch-${t.id}-body`}
-                          label={`What ${TOUCHPOINTS[t.kind].label.toLowerCase()} did on this project`}
+                          label={`What ${(touchpointLabel(t) || 'this touchpoint').toLowerCase()} did on this project`}
                           hideLabel
                           rows={2}
                           maxLength={240}
@@ -547,18 +573,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                   />
                 )}
                 <div className={styles.actions}>
-                  <Button variant="secondary" size="sm" leadingIcon={Plus} disabled={!unusedKinds.length} onClick={addTouchpoint}>
+                  <Button variant="secondary" size="sm" leadingIcon={Plus} onClick={addTouchpoint}>
                     Add touchpoint
                   </Button>
                   {touchpoints.length > 4 && <span className={styles.muted}>Most projects read best with 3 or 4.</span>}
                 </div>
-                <TagPicker
-                  label="Tools used"
-                  options={lists.tags.filter((t) => t.type === 'tool')}
-                  value={toolIds}
-                  onChange={(v) => set('tag_ids', [...capabilityIds, ...v])}
-                  create={{ table: 'tags', type: 'tool', noun: 'tool' }}
-                />
                 <TagPicker
                   label="Capability tags"
                   helper="Not shown on the project page; used to filter Our Works"

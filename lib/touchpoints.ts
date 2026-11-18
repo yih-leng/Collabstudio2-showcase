@@ -62,3 +62,11 @@ export const TOUCHPOINTS: Record<TouchpointKind, { label: string; description: s
 };
 
 export const isTouchpointKind = (k: string): k is TouchpointKind => (TOUCHPOINT_KINDS as readonly string[]).includes(k);
+
+/** A touchpoint of your own, named in its label (migration 0007). */
+export const CUSTOM = 'custom';
+export type AnyTouchpointKind = TouchpointKind | typeof CUSTOM;
+
+/** The name a touchpoint shows under: the list's, or its own. */
+export const touchpointLabel = (t: { kind: string; label?: string | null }) =>
+  t.kind === CUSTOM ? (t.label ?? '').trim() : isTouchpointKind(t.kind) ? TOUCHPOINTS[t.kind].label : '';

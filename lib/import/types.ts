@@ -1,4 +1,4 @@
-import type { TouchpointKind } from '../touchpoints';
+import type { AnyTouchpointKind } from '../touchpoints';
 import type { ProjectStatus } from '../types';
 
 // Deck import: a PowerPoint, PDF or OpenDocument deck is read in the browser
@@ -65,8 +65,8 @@ export interface ProjectDraft {
   summary: string;
   objective: string;
   concept: string;
-  /** 02 AI touchpoints: a kind from lib/touchpoints.ts and what it did here. */
-  touchpoints: { kind: TouchpointKind; body: string }[];
+  /** 02 AI touchpoints: a kind from lib/touchpoints.ts (or your own, named in label) and what it did here. */
+  touchpoints: { kind: AnyTouchpointKind; label?: string; body: string }[];
   /** 03 Output. */
   output_summary: string;
   deliverables: string[];

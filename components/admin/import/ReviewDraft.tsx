@@ -6,7 +6,7 @@ import shared from '@/components/admin/admin.module.css';
 import { MB } from '@/lib/admin-api';
 import { STATUS_LABEL, embedProvider, slugify } from '@/lib/format';
 import type { DeckAsset, NoteField, ParsedDeck, ProjectDraft } from '@/lib/import/types';
-import { TOUCHPOINTS, TOUCHPOINT_KINDS, type TouchpointKind } from '@/lib/touchpoints';
+import { CUSTOM, TOUCHPOINTS, TOUCHPOINT_KINDS, isTouchpointKind, touchpointLabel, type AnyTouchpointKind } from '@/lib/touchpoints';
 import type { ProjectStatus } from '@/lib/types';
 import { useImport, type Review } from './ImportContext';
 import styles from './import.module.css';
@@ -149,25 +149,40 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
               <div className={shared.row}>
                 <Dropdown
                   label={`Touchpoint ${i + 1}`}
-                  options={TOUCHPOINT_KINDS.filter((k) => k === t.kind || !d.touchpoints.some((x) => x.kind === k)).map((k) => ({
-                    value: k,
-                    label: TOUCHPOINTS[k].label,
-                  }))}
+                  helper={isTouchpointKind(t.kind) ? TOUCHPOINTS[t.kind].description : 'Your own touchpoint: name it below.'}
+                  options={[
+                    ...TOUCHPOINT_KINDS.filter((k) => k === t.kind || !d.touchpoints.some((x) => x.kind === k)).map((k) => ({
+                      value: k,
+                      label: TOUCHPOINTS[k].label,
+                    })),
+                    { value: CUSTOM, label: 'Your own…' },
+                  ]}
                   value={t.kind}
-                  onValueChange={(v) => onDraft({ touchpoints: d.touchpoints.map((x, j) => (j === i ? { ...x, kind: v as TouchpointKind } : x)) })}
+                  onValueChange={(v) => onDraft({ touchpoints: d.touchpoints.map((x, j) => (j === i ? { ...x, kind: v as AnyTouchpointKind } : x)) })}
                 />
                 <span className={shared.fit}>
                   <Button
                     variant="ghost"
                     iconOnly
                     icon={X}
-                    aria-label={`Remove ${TOUCHPOINTS[t.kind].label}`}
+                    aria-label={`Remove ${touchpointLabel(t) || `touchpoint ${i + 1}`}`}
                     onClick={() => onDraft({ touchpoints: d.touchpoints.filter((_, j) => j !== i) })}
                   />
                 </span>
               </div>
+              {t.kind === CUSTOM && (
+                <InputField
+                  label="Touchpoint name"
+                  required
+                  maxLength={60}
+                  placeholder="e.g. Motion capture"
+                  helper="A touchpoint without a name is left out."
+                  value={t.label ?? ''}
+                  onChange={(e) => onDraft({ touchpoints: d.touchpoints.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })}
+                />
+              )}
               <Textarea
-                label={`What ${TOUCHPOINTS[t.kind].label.toLowerCase()} did on this project`}
+                label={`What ${(touchpointLabel(t) || 'this touchpoint').toLowerCase()} did on this project`}
                 hideLabel
                 rows={2}
                 maxLength={240}
@@ -181,8 +196,7 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
               variant="secondary"
               size="sm"
               leadingIcon={Plus}
-              disabled={!unusedKinds.length}
-              onClick={() => onDraft({ touchpoints: [...d.touchpoints, { kind: unusedKinds[0], body: '' }] })}
+              onClick={() => onDraft({ touchpoints: [...d.touchpoints, { kind: unusedKinds[0] ?? CUSTOM, label: '', body: '' }] })}
             >
               Add touchpoint
             </Button>
@@ -205,7 +219,6 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
             {noteList('output')}
             <Textarea label="Turnaround / result" rows={2} maxLength={400} value={d.turnaround} onChange={(e) => onDraft({ turnaround: e.target.value })} />
             {noteList('turnaround')}
-            <InputField label="Tools used" helper="Separate with commas" value={commaList(d.tool_names)} onChange={(e) => onDraft({ tool_names: fromComma(e.target.value) })} />
             <InputField
               label="Capability tags"
               helper="Separate with commas. Used to filter Our Works."

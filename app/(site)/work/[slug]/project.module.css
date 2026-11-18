@@ -217,40 +217,60 @@
   text-wrap: pretty;
 }
 
+/* About this project: Summary, The objective, The concept, one under another. */
+.subs {
+  display: flex;
+  flex-direction: column;
+  max-width: var(--measure-prose);
+}
+
+.sub {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+  padding: var(--spacing-20) 0;
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+.sub:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.subTitle {
+  margin: 0;
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
+}
+
+.subText {
+  margin: 0;
+  font-size: var(--text-body1-size);
+  line-height: var(--text-link1-lh);
+  text-wrap: pretty;
+}
+
+/* Output: the summary, then the deliverables as plain lines. */
+.plainList {
+  margin: 0;
+  padding-left: var(--spacing-20);
+  max-width: var(--measure-prose);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+  font-size: var(--text-body1-size);
+  line-height: var(--text-link1-lh);
+}
+
 .summary {
   margin: 0;
   max-width: var(--measure-prose);
   font-size: var(--text-body1-size);
   line-height: var(--text-body1-lh);
   font-weight: var(--weight-bold);
-}
-
-.deliverables {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 2.2)), 1fr));
-  gap: var(--spacing-12);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.deliverables li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-8);
-  padding: var(--spacing-16);
-  border-radius: var(--radius-md);
-  background: var(--color-neutral-1);
-  border: var(--border-width-sm) solid var(--color-neutral-3);
-  font-size: var(--text-body2-size);
-  line-height: var(--text-body2-lh-lg);
-}
-
-.deliverableNum {
-  font-size: var(--text-caption-size);
-  font-weight: var(--weight-bold);
-  color: var(--color-neutral-5);
-  font-variant-numeric: tabular-nums;
 }
 
 /* Card's own p is body2 Neutral-5; project copy reads at Neutral-9. */
@@ -265,7 +285,6 @@
   gap: var(--spacing-4);
 }
 
-
 /* An AI touchpoint's icon, above its name. */
 .touchIcon {
   display: inline-flex;
@@ -278,20 +297,6 @@
   background: var(--color-fire-bg-strong);
   color: var(--color-neutral-9);
   font-size: var(--text-h4-size);
-}
-
-.tools {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-8);
-}
-
-.toolsLabel {
-  font-size: var(--text-caption-size);
-  font-weight: var(--weight-bold);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--color-neutral-5);
 }
 
 .pager {

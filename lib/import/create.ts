@@ -4,6 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { MAX_IMAGE_BYTES, MAX_VIDEO_BYTES, MB, detectAspect, extOf, newId, uploadToStorage } from '../admin-api';
 import { compressImage, compressMedia, needsCompression } from '../compress-media';
 import { slugify } from '../format';
+import { CUSTOM } from '../touchpoints';
 import type { Aspect, Lists, Media, TagType } from '../types';
 import type { DeckAsset, ProjectDraft } from './types';
 
@@ -100,7 +101,9 @@ export async function createFromDraft(
   });
   if (error) throw new Error(`The project couldn't be created: ${error.message}`);
 
-  const touchpoints = draft.touchpoints.map((t, i) => ({ id: newId(), project_id: id, kind: t.kind, body: t.body.trim(), sort_order: i }));
+  const touchpoints = draft.touchpoints
+    .filter((t) => t.kind !== CUSTOM || t.label?.trim())
+    .map((t, i) => ({ id: newId(), project_id: id, kind: t.kind, label: t.kind === CUSTOM ? t.label!.trim() : null, body: t.body.trim(), sort_order: i }));
   const items = draft.deliverables
     .filter((t) => t.trim())
     .map((text, i) => ({ id: newId(), project_id: id, type: 'deliverable', text: text.trim(), sort_order: i }));

@@ -1,4 +1,4 @@
-import type { TouchpointKind } from './touchpoints';
+import type { AnyTouchpointKind } from './touchpoints';
 
 export type ProjectStatus = 'live' | 'approved' | 'in_progress' | 'concept';
 export type Visibility = 'published' | 'draft' | 'hidden';
@@ -72,11 +72,12 @@ export interface OverviewBlock {
   sort_order: number;
 }
 
-/** 02 AI touchpoints: one of the kinds in lib/touchpoints.ts, with what it did here. */
+/** 02 AI touchpoints: one of the kinds in lib/touchpoints.ts, or your own ("custom", named in label), with what it did here. */
 export interface AiTouchpoint {
   id: string;
   project_id: string;
-  kind: TouchpointKind;
+  kind: AnyTouchpointKind;
+  label: string | null;
   body: string;
   sort_order: number;
 }

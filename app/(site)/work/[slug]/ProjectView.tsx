@@ -10,7 +10,7 @@ import { HeroCarousel } from '@/components/HeroCarousel';
 import { SiteShell } from '@/components/SiteShell';
 import { STATUS_BADGE, VISIBILITY_LABEL, statusText } from '@/lib/format';
 import { TOUCHPOINT_ICONS } from '@/lib/touchpoint-icons';
-import { TOUCHPOINTS } from '@/lib/touchpoints';
+import { touchpointLabel } from '@/lib/touchpoints';
 import type { Client, Media, ProjectDetailData } from '@/lib/types';
 import styles from './project.module.css';
 
@@ -27,7 +27,7 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
 
   const sections = [
     (p.summary || p.objective || p.concept) && { id: 'about', title: 'About this project', body: <About p={p} /> },
-    (p.touchpoints.length > 0 || p.tools.length > 0) && { id: 'ai', title: 'AI touchpoints', body: <Touchpoints p={p} /> },
+    p.touchpoints.length > 0 && { id: 'ai', title: 'AI touchpoints', body: <Touchpoints p={p} /> },
     (p.output_summary || p.deliverables.length > 0) && { id: 'output', title: 'Output', body: <Output p={p} /> },
     (p.turnaround || p.figures.length > 0) && { id: 'result', title: 'Turnaround / result', body: <Result p={p} /> },
     p.gallery.length > 0 && { id: 'gallery', title: 'Gallery', body: <GallerySection items={p.gallery} /> },
@@ -187,42 +187,31 @@ function Fact({ label, value }: { label: string; value: string }) {
 }
 
 function About({ p }: { p: ProjectDetailData }) {
+  const parts = [
+    { title: 'Summary', text: p.summary },
+    { title: 'The objective', text: p.objective },
+    { title: 'The concept', text: p.concept },
+  ].filter((x) => x.text);
   return (
-    <div className={styles.stack}>
-      {p.summary && <p className={styles.about}>{p.summary}</p>}
-      {(p.objective || p.concept) && (
-        <CardGrid columns="functional">
-          {p.objective && (
-            <Card surface="warm">
-              <CardTitle>The objective</CardTitle>
-              <p className={styles.body}>{p.objective}</p>
-            </Card>
-          )}
-          {p.concept && (
-            <Card surface="warm">
-              <CardTitle>The concept</CardTitle>
-              <p className={styles.body}>{p.concept}</p>
-            </Card>
-          )}
-        </CardGrid>
-      )}
+    <div className={styles.subs}>
+      {parts.map((x) => (
+        <div key={x.title} className={styles.sub}>
+          <h3 className={styles.subTitle}>{x.title}</h3>
+          <p className={styles.subText}>{x.text}</p>
+        </div>
+      ))}
     </div>
   );
 }
 
 function Output({ p }: { p: ProjectDetailData }) {
   return (
-    <div className={styles.stack}>
+    <div className={styles.stackSm}>
       {p.output_summary && <p className={styles.summary}>{p.output_summary}</p>}
       {p.deliverables.length > 0 && (
-        <ul className={styles.deliverables}>
-          {p.deliverables.map((d, i) => (
-            <li key={d.id}>
-              <span className={styles.deliverableNum} aria-hidden>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              {d.text}
-            </li>
+        <ul className={styles.plainList}>
+          {p.deliverables.map((d) => (
+            <li key={d.id}>{d.text}</li>
           ))}
         </ul>
       )}
@@ -232,37 +221,20 @@ function Output({ p }: { p: ProjectDetailData }) {
 
 function Touchpoints({ p }: { p: ProjectDetailData }) {
   return (
-    <div className={styles.stack}>
-      {p.touchpoints.length > 0 && (
-        <CardGrid columns="functional">
-          {p.touchpoints.map((t) => {
-            const { label } = TOUCHPOINTS[t.kind];
-            const Icon = TOUCHPOINT_ICONS[t.kind];
-            return (
-              <Card key={t.id}>
-                <span className={styles.touchIcon} aria-hidden>
-                  <Icon />
-                </span>
-                <CardTitle>{label}</CardTitle>
-                {t.body && <p className={styles.body}>{t.body}</p>}
-              </Card>
-            );
-          })}
-        </CardGrid>
-      )}
-      {p.tools.length > 0 && (
-        <div className={styles.tools}>
-          <span className={styles.toolsLabel}>Tools used</span>
-          <div className={styles.tags}>
-            {p.tools.map((t) => (
-              <Tag key={t.id} variant="neutral">
-                {t.name}
-              </Tag>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+    <CardGrid columns="functional">
+      {p.touchpoints.map((t) => {
+        const Icon = TOUCHPOINT_ICONS[t.kind];
+        return (
+          <Card key={t.id}>
+            <span className={styles.touchIcon} aria-hidden>
+              <Icon />
+            </span>
+            <CardTitle>{touchpointLabel(t)}</CardTitle>
+            {t.body && <p className={styles.body}>{t.body}</p>}
+          </Card>
+        );
+      })}
+    </CardGrid>
   );
 }
 
