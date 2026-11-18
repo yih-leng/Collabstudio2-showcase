@@ -1,3 +1,5 @@
+import type { TouchpointKind } from './touchpoints';
+
 export type ProjectStatus = 'live' | 'approved' | 'in_progress' | 'concept';
 export type Visibility = 'published' | 'draft' | 'hidden';
 export type MediaKind = 'image' | 'video' | 'audio' | 'embed';
@@ -37,9 +39,17 @@ export interface Project {
   status: ProjectStatus;
   status_note: string | null;
   one_liner: string | null;
-  /** About this project: the brief and the challenge, in a short paragraph. */
+  /** No longer shown: replaced by summary, objective and concept (migration 0006). */
   about: string | null;
+  /** 01 About this project: what the project is. */
+  summary: string | null;
+  /** The client's objective or production bottleneck, in 1–2 sentences. */
+  objective: string | null;
+  /** The creative idea, visual style and narrative, in 2–3 sentences. */
+  concept: string | null;
   output_summary: string | null;
+  /** 04 Turnaround / result: production time, efficiency or results. */
+  turnaround: string | null;
   capabilities_summary: string | null;
   workflow_label: string | null;
   featured: boolean;
@@ -59,6 +69,24 @@ export interface OverviewBlock {
   project_id: string;
   label: string;
   body: string;
+  sort_order: number;
+}
+
+/** 02 AI touchpoints: one of the kinds in lib/touchpoints.ts, with what it did here. */
+export interface AiTouchpoint {
+  id: string;
+  project_id: string;
+  kind: TouchpointKind;
+  body: string;
+  sort_order: number;
+}
+
+/** 04 A key figure under Turnaround / result: "13 days" · "storyboard lock to final approval". */
+export interface ResultFigure {
+  id: string;
+  project_id: string;
+  value: string;
+  label: string;
   sort_order: number;
 }
 
@@ -142,16 +170,17 @@ export interface ShowcaseSlide {
 }
 
 export interface ProjectDetailData extends ProjectCardData {
-  about: string | null;
+  summary: string | null;
+  objective: string | null;
+  concept: string | null;
   output_summary: string | null;
-  capabilities_summary: string | null;
-  workflow_label: string | null;
+  turnaround: string | null;
+  touchpoints: AiTouchpoint[];
+  figures: ResultFigure[];
   visibility: Visibility;
   is_internal: boolean;
   hero: Media | null;
-  blocks: OverviewBlock[];
   deliverables: ListItemRow[];
-  workflow: ListItemRow[];
   gallery: Media[];
   prev: { slug: string; title: string } | null;
   next: { slug: string; title: string } | null;

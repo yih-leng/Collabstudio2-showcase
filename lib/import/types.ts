@@ -1,3 +1,4 @@
+import type { TouchpointKind } from '../touchpoints';
 import type { ProjectStatus } from '../types';
 
 // Deck import: a PowerPoint, PDF or OpenDocument deck is read in the browser
@@ -8,7 +9,9 @@ export type DeckFormat = 'pptx' | 'pdf' | 'odp';
 export type AssetKind = 'image' | 'video' | 'audio';
 
 /** The draft field a reviewer note is about, so the review can show it under that field. */
-export const NOTE_FIELDS = ['title', 'one_liner', 'clients', 'type', 'year', 'status', 'about', 'output', 'overview', 'capabilities', 'media', 'general'] as const;
+export const NOTE_FIELDS = [
+  'title', 'one_liner', 'clients', 'type', 'year', 'status', 'summary', 'objective', 'concept', 'touchpoints', 'output', 'turnaround', 'media', 'general',
+] as const;
 export type NoteField = (typeof NOTE_FIELDS)[number];
 
 export interface ReviewerNote {
@@ -58,14 +61,18 @@ export interface ProjectDraft {
   year: number;
   status: ProjectStatus;
   one_liner: string;
-  about: string;
+  /** 01 About this project. */
+  summary: string;
+  objective: string;
+  concept: string;
+  /** 02 AI touchpoints: a kind from lib/touchpoints.ts and what it did here. */
+  touchpoints: { kind: TouchpointKind; body: string }[];
+  /** 03 Output. */
   output_summary: string;
   deliverables: string[];
-  overview_blocks: { label: string; body: string }[];
-  capabilities_summary: string;
+  /** 04 Turnaround / result, as the deck states it. */
+  turnaround: string;
   capability_names: string[];
-  workflow_label: string;
-  workflow_steps: string[];
   tool_names: string[];
   slides: number[];
   asset_ids: string[];

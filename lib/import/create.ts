@@ -90,24 +90,22 @@ export async function createFromDraft(
     year: draft.year >= 1990 && draft.year <= 2100 ? draft.year : null,
     status: draft.status,
     one_liner: draft.one_liner.trim() || null,
-    about: draft.about.trim() || null,
+    summary: draft.summary.trim() || null,
+    objective: draft.objective.trim() || null,
+    concept: draft.concept.trim() || null,
     output_summary: draft.output_summary.trim() || null,
-    capabilities_summary: draft.capabilities_summary.trim() || null,
-    workflow_label: draft.workflow_label.trim() || null,
+    turnaround: draft.turnaround.trim() || null,
     visibility: 'draft',
     sort_order: (last?.sort_order ?? -1) + 1,
   });
   if (error) throw new Error(`The project couldn't be created: ${error.message}`);
 
-  const blocks = draft.overview_blocks
-    .filter((b) => b.label.trim() || b.body.trim())
-    .map((b, i) => ({ id: newId(), project_id: id, label: b.label.trim() || 'Untitled', body: b.body.trim(), sort_order: i }));
-  const items = [
-    ...draft.deliverables.filter((t) => t.trim()).map((text, i) => ({ id: newId(), project_id: id, type: 'deliverable', text: text.trim(), sort_order: i })),
-    ...draft.workflow_steps.filter((t) => t.trim()).map((text, i) => ({ id: newId(), project_id: id, type: 'ai_workflow', text: text.trim(), sort_order: i })),
-  ];
+  const touchpoints = draft.touchpoints.map((t, i) => ({ id: newId(), project_id: id, kind: t.kind, body: t.body.trim(), sort_order: i }));
+  const items = draft.deliverables
+    .filter((t) => t.trim())
+    .map((text, i) => ({ id: newId(), project_id: id, type: 'deliverable', text: text.trim(), sort_order: i }));
   const writes = await Promise.all([
-    blocks.length ? sb.from('overview_blocks').insert(blocks) : { error: null },
+    touchpoints.length ? sb.from('ai_touchpoints').insert(touchpoints) : { error: null },
     items.length ? sb.from('list_items').insert(items) : { error: null },
   ]);
   const failed = writes.find((w) => w.error);

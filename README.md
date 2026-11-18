@@ -39,7 +39,7 @@ deck, and the admin works too.
 2. **Create the tables.** In Supabase, open **SQL Editor → New query**, paste
    all of `supabase/migrations/0001_init.sql`, and press **Run**.
    Then do the same with `supabase/migrations/0002_about.sql`,
-   `0003_audio.sql`, `0004_hide_internal.sql` and `0005_activity.sql`.
+   `0003_audio.sql`, `0004_hide_internal.sql`, `0005_activity.sql` and `0006_story.sql`.
 3. **Add the sample projects.** New query again, paste all of
    `supabase/seed.sql`, and **Run**. (Both files are safe to run twice.)
 4. **Turn off public sign-up.** **Authentication → Sign In / Providers →
@@ -102,13 +102,18 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
 
    | On the page | In the editor |
    |---|---|
-   | Hero video or image | **1 · Hero and gallery**: pick the hero (a video if you have one) |
-   | Title, project type, status and facts | **Basics** |
-   | About this project | **2 · About this project**: the brief and the challenge, a short paragraph |
-   | Output | **3 · Output**: a one-line summary, then each deliverable |
-   | Overview | **4 · Overview**: blocks like Big idea, Story, Look and cast, Timeline |
-   | Capabilities | **5 · Capabilities**: capability tags, how AI was used, tools |
-   | Gallery | Every other image and video from **1 · Hero and gallery** |
+   | Title, one-liner, project type, status and facts | **1 · Basics** and **2 · Client details** |
+   | Hero video or image | **3 · Hero and gallery**: pick the hero (a video if you have one) |
+   | 01 About this project | **4 · About this project**: Summary (what it is), The objective (1–2 sentences), The concept (2–3 sentences) |
+   | 02 AI touchpoints | **5 · AI touchpoints**: pick 3 or 4 from the list and say what each did on this project; tools used |
+   | 03 Output | **6 · Output**: a one-line summary, then each deliverable |
+   | 04 Turnaround / result | **7 · Turnaround / result**: how fast it was made or what it achieved, plus optional key figures ("13 days" · "storyboard to approval") |
+   | 05 Gallery | Every other image and video from **3 · Hero and gallery** |
+
+   The touchpoint list lives in `lib/touchpoints.ts`: World building and
+   characterisation, Brand placement / product integration, Video generation,
+   Image generation, Music and sound, Voice over, Localisation, Script and
+   storyboard, Look development, and Upscaling and finishing.
 
    - **Basics**: title, web address, one-liner (the card text), clients,
      **project type** (required: Film, Key Visual, Microdrama, Brand Campaign,
@@ -160,7 +165,7 @@ Review and Done.
    fine.
 2. Claude reads each deck and drafts the projects in it (a showcase deck can
    hold several): title, clients, type, status, one-liner, About, Output,
-   Overview, Capabilities, how AI was used, which pictures to use and the
+   Summary, Objective, Concept, AI touchpoints, Turnaround, which pictures to use and the
    cover. It also leaves notes on anything to check, such as slides from
    another project, internal notes, or brief details marked TBC; each note
    shows under the field it's about.
@@ -244,7 +249,7 @@ Entries can't be edited or deleted from the site.
 | `lib/data.ts` | Server reads for public pages (Supabase, or the seed when not configured) |
 | `lib/admin-api.ts` | Uploads and ordering helpers for the admin |
 | `lib/import/` and `app/api/import/draft/` | Import from deck: reading PPTX, ODP and PDF in the browser, drafting with Claude (structured output), and creating the projects |
-| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`), audio (`0003`), Hidden replaces Internal (`0004`), the activity log and its triggers (`0005`) |
+| `supabase/migrations/` | Tables, row-level security, storage bucket and policies (`0001`), the About column (`0002`), audio (`0003`), Hidden replaces Internal (`0004`), the activity log and its triggers (`0005`), the four-part story: summary, objective, concept, AI touchpoints, turnaround and key figures (`0006`) |
 | `lib/activity.ts` and `lib/demo/activity.ts` | How log entries read and group on the Activity page, and the local demo's copy of the `0005` triggers (keep the two in step) |
 | `lib/demo/` and `app/api/demo/` | The local demo: a stand-in for Supabase that saves to `.demo/` and applies the same row-level rules. Off once Supabase keys are set, and off in production |
 | `supabase/seed-source.mjs` | The deck's projects, with their media. Edit, then `npm run seed:build` to regenerate `seed.sql`, `updates/deck-update.sql` and `lib/seed.generated.json` |

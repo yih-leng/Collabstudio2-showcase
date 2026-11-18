@@ -16,19 +16,21 @@ type Db = Record<string, Row[]>;
 export const DEMO_DIR = path.join(process.cwd(), '.demo');
 const DB_FILE = path.join(DEMO_DIR, 'db.json');
 
-const CHILD_TABLES = ['overview_blocks', 'list_items', 'media'];
+const CHILD_TABLES = ['overview_blocks', 'list_items', 'media', 'ai_touchpoints', 'result_figures'];
 const PUBLIC_READ = ['clients', 'categories', 'tags', 'settings'];
 
 const DEFAULTS: Record<string, () => Row> = {
   projects: () => ({
     client_ids: [], category_ids: [], tag_ids: [], year: null, status: 'concept', status_note: null,
-    one_liner: null, about: null, output_summary: null, capabilities_summary: null, workflow_label: null,
+    one_liner: null, about: null, summary: null, objective: null, concept: null, output_summary: null, turnaround: null, capabilities_summary: null, workflow_label: null,
     featured: false, featured_order: 0, sort_order: 0, visibility: 'draft', is_internal: false,
     cover_media_id: null, hero_media_id: null, updated_at: new Date().toISOString(), deleted_at: null,
   }),
   media: () => ({ storage_path: null, aspect: '16:9', caption: null, sort_order: 0 }),
   overview_blocks: () => ({ body: '', sort_order: 0 }),
   list_items: () => ({ sort_order: 0 }),
+  ai_touchpoints: () => ({ body: '', sort_order: 0 }),
+  result_figures: () => ({ label: '', sort_order: 0 }),
   clients: () => ({ logo_url: null, logo_path: null, sort_order: 0 }),
   categories: () => ({ sort_order: 0 }),
   tags: () => ({ sort_order: 0 }),
@@ -73,7 +75,7 @@ function load(): Db {
     cachedAt = mtime;
     // Columns added after the file was made, and the old "internal" flag, which is now Hidden.
     for (const p of cache.projects ?? []) {
-      if (!('about' in p)) p.about = null;
+      for (const k of ['about', 'summary', 'objective', 'concept', 'turnaround']) if (!(k in p)) p[k] = null;
       if (p.is_internal) Object.assign(p, { is_internal: false, visibility: 'hidden' });
     }
   } else if (!cache) {
@@ -209,7 +211,7 @@ export function runQuery(spec: QuerySpec, admin: boolean): QueryResult {
     const ids = new Set(gone.map((r) => r.id));
     // The migration's foreign keys: children go with their project; a deleted
     // cover or hero clears the project's pointer to it.
-    if (t === 'projects') for (const c of CHILD_TABLES) db[c] = db[c].filter((r) => !ids.has(r.project_id));
+    if (t === 'projects') for (const c of CHILD_TABLES) db[c] = (db[c] ?? []).filter((r) => !ids.has(r.project_id));
     if (t === 'media') {
       for (const p of db.projects) {
         if (ids.has(p.cover_media_id)) p.cover_media_id = null;

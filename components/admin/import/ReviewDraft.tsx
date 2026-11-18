@@ -6,6 +6,7 @@ import shared from '@/components/admin/admin.module.css';
 import { MB } from '@/lib/admin-api';
 import { STATUS_LABEL, embedProvider, slugify } from '@/lib/format';
 import type { DeckAsset, NoteField, ParsedDeck, ProjectDraft } from '@/lib/import/types';
+import { TOUCHPOINTS, TOUCHPOINT_KINDS, type TouchpointKind } from '@/lib/touchpoints';
 import type { ProjectStatus } from '@/lib/types';
 import { useImport, type Review } from './ImportContext';
 import styles from './import.module.css';
@@ -49,7 +50,8 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
   };
   const slideRange = d.slides.length ? `slides ${Math.min(...d.slides)}–${Math.max(...d.slides)}` : 'the deck';
   const off = creating || !r.include;
-  const moreNotes = notesFor('output', 'overview', 'capabilities').length;
+  const moreNotes = notesFor('output', 'turnaround').length;
+  const unusedKinds = TOUCHPOINT_KINDS.filter((k) => !d.touchpoints.some((t) => t.kind === k));
 
   return (
     <div className={styles.review} data-review>
@@ -133,12 +135,63 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
         </Section>
 
         <Section n={4} title="About this project">
-          <Textarea label="About this project" hideLabel rows={4} maxLength={600} showCount value={d.about} onChange={(e) => onDraft({ about: e.target.value })} />
-          {noteList('about')}
+          <Textarea label="Summary" rows={2} maxLength={300} showCount value={d.summary} onChange={(e) => onDraft({ summary: e.target.value })} />
+          {noteList('summary')}
+          <Textarea label="The objective" rows={3} maxLength={400} showCount value={d.objective} onChange={(e) => onDraft({ objective: e.target.value })} />
+          {noteList('objective')}
+          <Textarea label="The concept" rows={4} maxLength={600} showCount value={d.concept} onChange={(e) => onDraft({ concept: e.target.value })} />
+          {noteList('concept')}
+        </Section>
+
+        <Section n={5} title="AI touchpoints" hint="How AI made the output. 3 or 4 read best.">
+          {d.touchpoints.map((t, i) => (
+            <div key={i} className={styles.block}>
+              <div className={shared.row}>
+                <Dropdown
+                  label={`Touchpoint ${i + 1}`}
+                  options={TOUCHPOINT_KINDS.filter((k) => k === t.kind || !d.touchpoints.some((x) => x.kind === k)).map((k) => ({
+                    value: k,
+                    label: TOUCHPOINTS[k].label,
+                  }))}
+                  value={t.kind}
+                  onValueChange={(v) => onDraft({ touchpoints: d.touchpoints.map((x, j) => (j === i ? { ...x, kind: v as TouchpointKind } : x)) })}
+                />
+                <span className={shared.fit}>
+                  <Button
+                    variant="ghost"
+                    iconOnly
+                    icon={X}
+                    aria-label={`Remove ${TOUCHPOINTS[t.kind].label}`}
+                    onClick={() => onDraft({ touchpoints: d.touchpoints.filter((_, j) => j !== i) })}
+                  />
+                </span>
+              </div>
+              <Textarea
+                label={`What ${TOUCHPOINTS[t.kind].label.toLowerCase()} did on this project`}
+                hideLabel
+                rows={2}
+                maxLength={240}
+                value={t.body}
+                onChange={(e) => onDraft({ touchpoints: d.touchpoints.map((x, j) => (j === i ? { ...x, body: e.target.value } : x)) })}
+              />
+            </div>
+          ))}
+          <span>
+            <Button
+              variant="secondary"
+              size="sm"
+              leadingIcon={Plus}
+              disabled={!unusedKinds.length}
+              onClick={() => onDraft({ touchpoints: [...d.touchpoints, { kind: unusedKinds[0], body: '' }] })}
+            >
+              Add touchpoint
+            </Button>
+          </span>
+          {noteList('touchpoints')}
         </Section>
 
         <details className={styles.more} open={moreNotes > 0 || undefined}>
-          <summary>{`Output, overview and capabilities${moreNotes ? ` · ${moreNotes} to check` : ''}`}</summary>
+          <summary>{`Output, turnaround and tags${moreNotes ? ` · ${moreNotes} to check` : ''}`}</summary>
           <p className={shared.muted}>Drafted too. Easy to fine-tune later in the editor.</p>
           <div className={shared.stackSm}>
             <Textarea label="Output summary" rows={2} value={d.output_summary} onChange={(e) => onDraft({ output_summary: e.target.value })} />
@@ -150,55 +203,15 @@ export function ReviewDraft({ review: r, deck }: { review: Review; deck: ParsedD
               onChange={(e) => onDraft({ deliverables: e.target.value.split('\n') })}
             />
             {noteList('output')}
-            {d.overview_blocks.map((b, i) => (
-              <div key={i} className={styles.block}>
-                <div className={shared.row}>
-                  <InputField
-                    label="Overview label"
-                    value={b.label}
-                    onChange={(e) => onDraft({ overview_blocks: d.overview_blocks.map((x, j) => (j === i ? { ...x, label: e.target.value } : x)) })}
-                  />
-                  <span className={shared.fit}>
-                    <Button
-                      variant="ghost"
-                      iconOnly
-                      icon={X}
-                      aria-label={`Remove ${b.label || 'block'}`}
-                      onClick={() => onDraft({ overview_blocks: d.overview_blocks.filter((_, j) => j !== i) })}
-                    />
-                  </span>
-                </div>
-                <Textarea
-                  label={`${b.label || 'Block'} text`}
-                  hideLabel
-                  rows={3}
-                  value={b.body}
-                  onChange={(e) => onDraft({ overview_blocks: d.overview_blocks.map((x, j) => (j === i ? { ...x, body: e.target.value } : x)) })}
-                />
-              </div>
-            ))}
-            <span>
-              <Button variant="secondary" size="sm" leadingIcon={Plus} onClick={() => onDraft({ overview_blocks: [...d.overview_blocks, { label: '', body: '' }] })}>
-                Add overview block
-              </Button>
-            </span>
-            {noteList('overview')}
-            <Textarea label="Capabilities shown" rows={2} value={d.capabilities_summary} onChange={(e) => onDraft({ capabilities_summary: e.target.value })} />
+            <Textarea label="Turnaround / result" rows={2} maxLength={400} value={d.turnaround} onChange={(e) => onDraft({ turnaround: e.target.value })} />
+            {noteList('turnaround')}
+            <InputField label="Tools used" helper="Separate with commas" value={commaList(d.tool_names)} onChange={(e) => onDraft({ tool_names: fromComma(e.target.value) })} />
             <InputField
               label="Capability tags"
-              helper="Separate with commas"
+              helper="Separate with commas. Used to filter Our Works."
               value={commaList(d.capability_names)}
               onChange={(e) => onDraft({ capability_names: fromComma(e.target.value) })}
             />
-            <Textarea
-              label={d.workflow_label || 'How AI was used'}
-              helper="One step per line"
-              rows={3}
-              value={d.workflow_steps.join('\n')}
-              onChange={(e) => onDraft({ workflow_steps: e.target.value.split('\n') })}
-            />
-            <InputField label="Tools used" helper="Separate with commas" value={commaList(d.tool_names)} onChange={(e) => onDraft({ tool_names: fromComma(e.target.value) })} />
-            {noteList('capabilities')}
           </div>
         </details>
       </fieldset>

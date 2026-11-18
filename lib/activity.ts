@@ -40,7 +40,13 @@ const FIELD_LABEL: Record<string, string> = {
   status_note: 'status note',
   one_liner: 'one-liner',
   about: 'About',
+  summary: 'summary',
+  objective: 'objective',
+  concept: 'concept',
   output_summary: 'Output',
+  turnaround: 'turnaround / result',
+  ai_touchpoints: 'AI touchpoints',
+  result_figures: 'key figures',
   deliverables: 'deliverables',
   overview: 'Overview',
   capabilities_summary: 'Capabilities',
@@ -216,7 +222,8 @@ export function describe(g: ActivityGroup): { before: string; name: string | nul
   }
 }
 
-/** "tasha" from tasha@kult.studio; visitors have no account. */
-export function personName(email: string | null) {
-  return email ? email.split('@')[0] : 'Visitor';
+/** "tasha" from tasha@kult.studio. Enquiries come from visitors; other changes with no one signed in were made in Supabase itself. */
+export function personName(email: string | null, action = '') {
+  if (email) return email.split('@')[0];
+  return action.startsWith('enquiry.') ? 'Visitor' : 'Supabase';
 }

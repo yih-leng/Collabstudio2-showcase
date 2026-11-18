@@ -1,5 +1,6 @@
 'use client';
 
+import { isTouchpointKind } from '../touchpoints';
 import { NOTE_FIELDS, type DraftEstimate, type DraftUsage, type ListNames, type ParsedDeck, type ProjectDraft, type ReviewerNote } from './types';
 
 /** Claude looks at this many pictures per deck at most; the biggest are sent first. */
@@ -76,6 +77,8 @@ function tidy(d: ProjectDraft, deck: ParsedDeck): ProjectDraft {
     asset_ids,
     cover_asset_id: cover || asset_ids.find((id) => deck.assets.find((a) => a.id === id)?.kind === 'image') || '',
     video_links: d.video_links.filter((l) => deck.links.includes(l)),
+    // One of each kind, from the known list.
+    touchpoints: d.touchpoints.filter((t, i, all) => isTouchpointKind(t.kind) && all.findIndex((x) => x.kind === t.kind) === i),
     // Older or odd replies may send plain strings; those are about the whole project.
     reviewer_notes: (d.reviewer_notes as (ReviewerNote | string)[]).map((n) =>
       typeof n === 'string' ? { field: 'general', note: n } : NOTE_FIELDS.includes(n.field) ? n : { ...n, field: 'general' },
@@ -103,14 +106,14 @@ function basicDraft(deck: ParsedDeck): ProjectDraft {
     year: 0,
     status: 'concept',
     one_liner: '',
-    about: longest.replace(/\n/g, ' ').slice(0, 600),
+    summary: longest.replace(/\n/g, ' ').slice(0, 300),
+    objective: '',
+    concept: '',
+    touchpoints: [],
     output_summary: '',
+    turnaround: '',
     deliverables: [],
-    overview_blocks: [],
-    capabilities_summary: '',
     capability_names: [],
-    workflow_label: '',
-    workflow_steps: [],
     tool_names: [],
     slides: deck.slides.map((s) => s.n),
     asset_ids: assets.map((a) => a.id),

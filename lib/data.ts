@@ -2,14 +2,16 @@ import 'server-only';
 import { cache } from 'react';
 import { embedProvider } from './format';
 import { getServerClient } from './supabase/server';
+import { isTouchpointKind } from './touchpoints';
 import type {
+  AiTouchpoint,
   ListItemRow,
   Lists,
   Media,
-  OverviewBlock,
   Project,
   ProjectCardData,
   ProjectDetailData,
+  ResultFigure,
   ShowcaseSlide,
   SiteSettings,
 } from './types';
@@ -157,14 +159,16 @@ export const getProjectDetail = cache(async (slug: string): Promise<ProjectDetai
   const { data } = await sb.from('projects').select('*').eq('slug', slug).maybeSingle();
   const project = (data as Project) ?? null;
   if (!project) return null;
-  const [b, i, m, lists, visible] = await Promise.all([
-    sb.from('overview_blocks').select('*').eq('project_id', project.id),
+  const [tp, f, i, m, lists, visible] = await Promise.all([
+    sb.from('ai_touchpoints').select('*').eq('project_id', project.id),
+    sb.from('result_figures').select('*').eq('project_id', project.id),
     sb.from('list_items').select('*').eq('project_id', project.id),
     sb.from('media').select('*').eq('project_id', project.id),
     listsP,
     visibleP,
   ]);
-  const blocks = (b.data ?? []) as OverviewBlock[];
+  const touchpoints = ((tp.data ?? []) as AiTouchpoint[]).filter((t) => isTouchpointKind(t.kind));
+  const figures = (f.data ?? []) as ResultFigure[];
   const items = (i.data ?? []) as ListItemRow[];
   const media = (m.data ?? []) as Media[];
 
@@ -177,16 +181,17 @@ export const getProjectDetail = cache(async (slug: string): Promise<ProjectDetai
 
   return {
     ...card,
-    about: project.about,
+    summary: project.summary,
+    objective: project.objective,
+    concept: project.concept,
     output_summary: project.output_summary,
-    capabilities_summary: project.capabilities_summary,
-    workflow_label: project.workflow_label,
+    turnaround: project.turnaround,
+    touchpoints: touchpoints.sort(byOrder),
+    figures: figures.sort(byOrder),
     visibility: project.visibility,
     is_internal: project.is_internal,
     hero: media.find((m) => m.id === project!.hero_media_id) ?? null,
-    blocks: blocks.sort(byOrder),
     deliverables: items.filter((i) => i.type === 'deliverable').sort(byOrder),
-    workflow: items.filter((i) => i.type === 'ai_workflow').sort(byOrder),
     gallery: media.filter((m) => m.id !== project!.hero_media_id).sort(byOrder),
     prev: idx > 0 ? link(all[idx - 1]) : null,
     next: idx >= 0 && idx < all.length - 1 ? link(all[idx + 1]) : null,

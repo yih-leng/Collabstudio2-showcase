@@ -106,7 +106,7 @@ export default function ActivityPage() {
 
   const columns: TableColumn<ActivityGroup>[] = [
     { key: 'at', header: 'When', sortable: true, sortValue: (g) => g.at, render: (g) => <span className={styles.when}>{when(g.at)}</span> },
-    { key: 'who', header: 'Who', sortable: true, sortValue: (g) => g.actor_email ?? '', render: (g) => <span title={g.actor_email ?? undefined}>{personName(g.actor_email)}</span> },
+    { key: 'who', header: 'Who', sortable: true, sortValue: (g) => g.actor_email ?? '', render: (g) => <span title={g.actor_email ?? undefined}>{personName(g.actor_email, g.action)}</span> },
     {
       key: 'what',
       header: 'What happened',

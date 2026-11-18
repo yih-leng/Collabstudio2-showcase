@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { isRequestAdmin } from '@/lib/server-admin';
 import { getServerClient } from '@/lib/supabase/server';
 import { PRICES, costOf, outputRange } from '@/lib/import/pricing';
+import { TOUCHPOINTS, TOUCHPOINT_KINDS } from '@/lib/touchpoints';
 import { NOTE_FIELDS, type DraftEstimate, type DraftUsage, type ListNames } from '@/lib/import/types';
 
 // Drafts showcase projects from one deck's slides with Claude. The browser
@@ -45,16 +46,19 @@ Write each project in the site's fields:
 - year: the year the work was made if the deck shows it, else 0.
 - status: "concept" for pitches and ideas not yet made, "approved" for work signed off but not made, "in_progress" for work being made, "live" for work that has launched. A pitch deck is "concept" unless it says otherwise.
 - one_liner: one sentence that sells the idea, in the deck's own voice.
-- about: the brief and the challenge, two to four sentences.
+- summary: what the project is, in one sentence (such as "A hero film to showcase the merch using animated artwork").
+- objective: the client's objective or production bottleneck, in one or two sentences.
+- concept: the creative idea, visual style and narrative strategy, in two or three sentences.
+- touchpoints: how AI made the output, as 3 or 4 of these kinds, each used once: ${TOUCHPOINT_KINDS.map((k) => `${k} (${TOUCHPOINTS[k].label}: ${TOUCHPOINTS[k].description})`).join('; ')}. Each body is one sentence on what that touchpoint did on this project, with the deck's own numbers and specifics. Only include kinds the deck shows; leave the list empty when it doesn't say how AI was used.
 - output_summary and deliverables: what was or will be made (episodes, films, stickers, formats). Deliverables are short items.
-- overview_blocks: two to five blocks that tell the idea, each with a short label (such as "Big idea", "Story / Concept", "Audience", "Look and cast", "Versions", "Timeline") and a short paragraph.
-- capabilities_summary and capability_names: what the studio did (such as "AI animation", "Character design", "Scriptwriting"). Reuse existing capability names when they fit.
-- workflow_label, workflow_steps and tool_names: how AI was used, step by step, and the AI tools named in the deck. Leave them empty when the deck doesn't say; never guess tools.
+- turnaround: production time, efficiency or results as the deck states them (dates, days, reach, metrics). Empty when the deck doesn't say; never estimate.
+- capability_names: what the studio did (such as "AI animation", "Character design", "Scriptwriting"). Reuse existing capability names when they fit.
+- tool_names: the AI tools named in the deck. Leave empty when the deck doesn't say; never guess tools.
 - slides: the slide numbers this project uses.
 - asset_ids: the deck's pictures and videos worth showing on the project page, best first. Leave out logos, decorative backgrounds, slide furniture, text-only graphics, and pictures from slides you excluded. Only use ids that appear in the deck.
 - cover_asset_id: the strongest picture for the project's card (a key visual, not a title slide, logo or text). Empty when there is none.
 - video_links: the YouTube, Vimeo or Google Drive links from this project's slides that are the work itself.
-- reviewer_notes: short notes for the person who will check the draft, about anything they must look at before publishing: slides you left out and why, internal notes or confidential brief details, numbers or claims you couldn't verify, placeholder text, missing information. Give each note the field it is about ("one_liner" for a claim you put in the one-liner, "media" for pictures or video links, "general" when it is about the whole project).
+- reviewer_notes: short notes for the person who will check the draft, about anything they must look at before publishing: slides you left out and why, internal notes or confidential brief details, numbers or claims you couldn't verify, placeholder text, missing information. Give each note the field it is about ("one_liner" for a claim you put in the one-liner, "turnaround" for a date or figure you couldn't confirm, "media" for pictures or video links, "general" when it is about the whole project).
 
 Keep the deck's facts. Don't invent clients, results, numbers, dates or tools. Write in plain British English, keep the deck's tone, and keep Malay or Chinese lines from the deck as they are where they are quoted. Strip emoji and mis-encoded characters, but keep ordinary punctuation such as hyphens ("No-sell", not "Nosell").`;
 
@@ -68,14 +72,14 @@ const PROJECT_SCHEMA = {
     'year',
     'status',
     'one_liner',
-    'about',
+    'summary',
+    'objective',
+    'concept',
+    'touchpoints',
     'output_summary',
     'deliverables',
-    'overview_blocks',
-    'capabilities_summary',
+    'turnaround',
     'capability_names',
-    'workflow_label',
-    'workflow_steps',
     'tool_names',
     'slides',
     'asset_ids',
@@ -90,22 +94,22 @@ const PROJECT_SCHEMA = {
     year: { type: 'integer' },
     status: { type: 'string', enum: ['live', 'approved', 'in_progress', 'concept'] },
     one_liner: { type: 'string' },
-    about: { type: 'string' },
-    output_summary: { type: 'string' },
-    deliverables: { type: 'array', items: { type: 'string' } },
-    overview_blocks: {
+    summary: { type: 'string' },
+    objective: { type: 'string' },
+    concept: { type: 'string' },
+    touchpoints: {
       type: 'array',
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['label', 'body'],
-        properties: { label: { type: 'string' }, body: { type: 'string' } },
+        required: ['kind', 'body'],
+        properties: { kind: { type: 'string', enum: [...TOUCHPOINT_KINDS] }, body: { type: 'string' } },
       },
     },
-    capabilities_summary: { type: 'string' },
+    output_summary: { type: 'string' },
+    turnaround: { type: 'string' },
+    deliverables: { type: 'array', items: { type: 'string' } },
     capability_names: { type: 'array', items: { type: 'string' } },
-    workflow_label: { type: 'string' },
-    workflow_steps: { type: 'array', items: { type: 'string' } },
     tool_names: { type: 'array', items: { type: 'string' } },
     slides: { type: 'array', items: { type: 'integer' } },
     asset_ids: { type: 'array', items: { type: 'string' } },

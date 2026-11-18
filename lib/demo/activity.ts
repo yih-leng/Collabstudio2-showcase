@@ -10,7 +10,7 @@ type Db = Record<string, Row[]>;
 
 const PROJECT_FIELDS = [
   'title', 'slug', 'client_ids', 'category_ids', 'tag_ids', 'year', 'status', 'status_note', 'one_liner', 'about',
-  'output_summary', 'capabilities_summary', 'workflow_label', 'cover_media_id', 'hero_media_id',
+  'summary', 'objective', 'concept', 'output_summary', 'turnaround', 'capabilities_summary', 'workflow_label', 'cover_media_id', 'hero_media_id',
 ];
 
 const same = (a: unknown, b: unknown) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
@@ -63,7 +63,7 @@ export function logChange(db: Db, admin: boolean, table: string, before: Row | n
     return;
   }
 
-  if (table === 'media' || table === 'overview_blocks' || table === 'list_items') {
+  if (['media', 'overview_blocks', 'list_items', 'ai_touchpoints', 'result_figures'].includes(table)) {
     const title = db.projects?.find((p) => p.id === r.project_id)?.title;
     if (!title) return; // the project is being deleted
     if (table === 'media') {
@@ -71,8 +71,11 @@ export function logChange(db: Db, admin: boolean, table: string, before: Row | n
       else if (!after) log('media.removed', 'media', title, r.project_id, { kind: r.kind });
       return;
     }
-    if (before && after && (table === 'overview_blocks' ? same(before.label, after.label) && same(before.body, after.body) : same(before.text, after.text))) return;
-    const field = table === 'overview_blocks' ? 'overview' : r.type === 'deliverable' ? 'deliverables' : 'ai_workflow';
+    // A reorder alone isn't an edit.
+    const content = (x: Row) => JSON.stringify({ ...x, sort_order: undefined });
+    if (before && after && content(before) === content(after)) return;
+    const field =
+      table === 'overview_blocks' ? 'overview' : table === 'list_items' ? (r.type === 'deliverable' ? 'deliverables' : 'ai_workflow') : table;
     addActivity(db, admin, { action: 'project.edited', entity_type: 'project', entity_id: r.project_id, label: title, project_id: r.project_id, details: { fields: [field] } });
     return;
   }

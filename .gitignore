@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local demo data (npm run dev without Supabase)
 .demo
+
+# exports of live data, for one-off content work
+.data

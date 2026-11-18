@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, Tabs, Tag } from '@collabrium/ui';
+import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, StatCard, StatGrid, Tabs, Tag } from '@collabrium/ui';
 import { ScrollReveal } from '@collabrium/ui/motion';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { Gallery } from '@/components/Gallery';
 import { HeroCarousel } from '@/components/HeroCarousel';
 import { SiteShell } from '@/components/SiteShell';
 import { STATUS_BADGE, VISIBILITY_LABEL, statusText } from '@/lib/format';
+import { TOUCHPOINT_ICONS } from '@/lib/touchpoint-icons';
+import { TOUCHPOINTS } from '@/lib/touchpoints';
 import type { Client, Media, ProjectDetailData } from '@/lib/types';
 import styles from './project.module.css';
 
@@ -16,22 +18,18 @@ import styles from './project.module.css';
  * The project page template. Every project follows the same order, and a
  * section only shows when it has content:
  *   title and facts → media carousel (hero, then every deliverable) →
- *   About this project → Output → Overview →
- *   Capabilities (incl. how AI was used) → Gallery → next/previous.
+ *   01 About this project (summary, objective, concept) → 02 AI touchpoints →
+ *   03 Output → 04 Turnaround / result → Gallery → next/previous.
  */
 export function ProjectView({ project: p }: { project: ProjectDetailData }) {
   const isPreview = p.visibility !== 'published';
   const type = p.categories[0]?.name;
 
   const sections = [
-    p.about && { id: 'about', title: 'About this project', body: <About text={p.about} /> },
+    (p.summary || p.objective || p.concept) && { id: 'about', title: 'About this project', body: <About p={p} /> },
+    (p.touchpoints.length > 0 || p.tools.length > 0) && { id: 'ai', title: 'AI touchpoints', body: <Touchpoints p={p} /> },
     (p.output_summary || p.deliverables.length > 0) && { id: 'output', title: 'Output', body: <Output p={p} /> },
-    p.blocks.length > 0 && { id: 'overview', title: 'Overview', body: <Overview p={p} /> },
-    (p.capabilities.length > 0 || p.capabilities_summary || p.workflow.length > 0 || p.tools.length > 0) && {
-      id: 'capabilities',
-      title: 'Capabilities',
-      body: <Capabilities p={p} />,
-    },
+    (p.turnaround || p.figures.length > 0) && { id: 'result', title: 'Turnaround / result', body: <Result p={p} /> },
     p.gallery.length > 0 && { id: 'gallery', title: 'Gallery', body: <GallerySection items={p.gallery} /> },
   ].filter(Boolean) as { id: string; title: string; body: React.ReactNode }[];
   const current = useCurrentSection(sections.map((s) => s.id));
@@ -188,8 +186,28 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
-function About({ text }: { text: string }) {
-  return <p className={styles.about}>{text}</p>;
+function About({ p }: { p: ProjectDetailData }) {
+  return (
+    <div className={styles.stack}>
+      {p.summary && <p className={styles.about}>{p.summary}</p>}
+      {(p.objective || p.concept) && (
+        <CardGrid columns="functional">
+          {p.objective && (
+            <Card surface="warm">
+              <CardTitle>The objective</CardTitle>
+              <p className={styles.body}>{p.objective}</p>
+            </Card>
+          )}
+          {p.concept && (
+            <Card surface="warm">
+              <CardTitle>The concept</CardTitle>
+              <p className={styles.body}>{p.concept}</p>
+            </Card>
+          )}
+        </CardGrid>
+      )}
+    </div>
+  );
 }
 
 function Output({ p }: { p: ProjectDetailData }) {
@@ -212,59 +230,52 @@ function Output({ p }: { p: ProjectDetailData }) {
   );
 }
 
-function Overview({ p }: { p: ProjectDetailData }) {
+function Touchpoints({ p }: { p: ProjectDetailData }) {
   return (
-    <CardGrid columns="functional">
-      {p.blocks.map((b) => (
-        <Card key={b.id} surface="warm">
-          <CardTitle>{b.label}</CardTitle>
-          <p className={styles.body}>{b.body}</p>
-        </Card>
-      ))}
-    </CardGrid>
+    <div className={styles.stack}>
+      {p.touchpoints.length > 0 && (
+        <CardGrid columns="functional">
+          {p.touchpoints.map((t) => {
+            const { label } = TOUCHPOINTS[t.kind];
+            const Icon = TOUCHPOINT_ICONS[t.kind];
+            return (
+              <Card key={t.id}>
+                <span className={styles.touchIcon} aria-hidden>
+                  <Icon />
+                </span>
+                <CardTitle>{label}</CardTitle>
+                {t.body && <p className={styles.body}>{t.body}</p>}
+              </Card>
+            );
+          })}
+        </CardGrid>
+      )}
+      {p.tools.length > 0 && (
+        <div className={styles.tools}>
+          <span className={styles.toolsLabel}>Tools used</span>
+          <div className={styles.tags}>
+            {p.tools.map((t) => (
+              <Tag key={t.id} variant="neutral">
+                {t.name}
+              </Tag>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
-function Capabilities({ p }: { p: ProjectDetailData }) {
+function Result({ p }: { p: ProjectDetailData }) {
   return (
     <div className={styles.stack}>
-      {(p.capabilities_summary || p.capabilities.length > 0) && (
-        <div className={styles.stackSm}>
-          {p.capabilities_summary && <p className={styles.summary}>{p.capabilities_summary}</p>}
-          {p.capabilities.length > 0 && (
-            <div className={styles.tags}>
-              {p.capabilities.map((t) => (
-                <Tag key={t.id} variant="fire">
-                  {t.name}
-                </Tag>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-      {(p.workflow.length > 0 || p.tools.length > 0) && (
-        <Card>
-          <CardTitle>{p.workflow_label || 'How AI was used'}</CardTitle>
-          {p.workflow.length > 0 && (
-            <ol className={styles.steps}>
-              {p.workflow.map((d) => (
-                <li key={d.id}>{d.text}</li>
-              ))}
-            </ol>
-          )}
-          {p.tools.length > 0 && (
-            <div className={styles.tools}>
-              <span className={styles.toolsLabel}>Tools used</span>
-              <div className={styles.tags}>
-                {p.tools.map((t) => (
-                  <Tag key={t.id} variant="neutral">
-                    {t.name}
-                  </Tag>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
+      {p.turnaround && <p className={styles.summary}>{p.turnaround}</p>}
+      {p.figures.length > 0 && (
+        <StatGrid>
+          {p.figures.map((f) => (
+            <StatCard key={f.id} label={f.label} value={f.value} />
+          ))}
+        </StatGrid>
       )}
     </div>
   );

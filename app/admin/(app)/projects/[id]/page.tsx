@@ -33,12 +33,11 @@ import { TextListEditor, type TextItem } from '@/components/admin/TextListEditor
 import styles from '@/components/admin/admin.module.css';
 import { newId } from '@/lib/admin-api';
 import { STATUS_LABEL, VISIBILITY_LABEL, slugify } from '@/lib/format';
-import type { ListItemRow, Media, OverviewBlock, Project, ProjectStatus, Visibility } from '@/lib/types';
+import { TOUCHPOINTS, TOUCHPOINT_KINDS, type TouchpointKind } from '@/lib/touchpoints';
+import type { AiTouchpoint, ListItemRow, Media, Project, ProjectStatus, ResultFigure, Visibility } from '@/lib/types';
 
-// Brief and challenge live in About this project; these are the usual Overview blocks.
-const BLOCK_SUGGESTIONS = ['Big idea', 'Story / Concept', 'Audience', 'Look and cast', 'Versions', 'Timeline'];
-
-type Block = { id: string; label: string; body: string };
+type Touch = { id: string; kind: TouchpointKind; body: string };
+type Figure = { id: string; value: string; label: string };
 type Errors = Partial<Record<'title' | 'slug' | 'year' | 'type', string>>;
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
@@ -49,9 +48,9 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
   const [project, setProject] = useState<Project | null>(null);
   const [missing, setMissing] = useState(false);
-  const [blocks, setBlocks] = useState<Block[]>([]);
+  const [touchpoints, setTouchpoints] = useState<Touch[]>([]);
+  const [figures, setFigures] = useState<Figure[]>([]);
   const [deliverables, setDeliverables] = useState<TextItem[]>([]);
-  const [workflow, setWorkflow] = useState<TextItem[]>([]);
   const [media, setMedia] = useState<Media[]>([]);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -59,7 +58,14 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const [confirmTrash, setConfirmTrash] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [slugTouched, setSlugTouched] = useState(true);
-  const original = useRef<{ blocks: string[]; items: string[]; featured: boolean }>({ blocks: [], items: [], featured: false });
+  // What's saved now, so a save can drop the rows that were removed. The older parts
+  // (Overview blocks, AI workflow steps) are no longer edited here and are left alone.
+  const original = useRef<{ touchpoints: string[]; figures: string[]; deliverables: string[]; featured: boolean }>({
+    touchpoints: [],
+    figures: [],
+    deliverables: [],
+    featured: false,
+  });
 
   const load = useCallback(async () => {
     const { data } = await sb.from('projects').select('*').eq('id', id).maybeSingle();
@@ -67,19 +73,27 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       setMissing(true);
       return;
     }
-    const [b, i, m] = await Promise.all([
-      sb.from('overview_blocks').select('*').eq('project_id', id).order('sort_order'),
-      sb.from('list_items').select('*').eq('project_id', id).order('sort_order'),
+    const [t, f, i, m] = await Promise.all([
+      sb.from('ai_touchpoints').select('*').eq('project_id', id).order('sort_order'),
+      sb.from('result_figures').select('*').eq('project_id', id).order('sort_order'),
+      sb.from('list_items').select('*').eq('project_id', id).eq('type', 'deliverable').order('sort_order'),
       sb.from('media').select('*').eq('project_id', id).order('sort_order'),
     ]);
     const items = (i.data ?? []) as ListItemRow[];
     setProject(data as Project);
     setSlugTouched(!(data as Project).slug.startsWith('untitled-'));
-    setBlocks(((b.data ?? []) as OverviewBlock[]).map(({ id, label, body }) => ({ id, label, body })));
-    setDeliverables(items.filter((x) => x.type === 'deliverable').map(({ id, text }) => ({ id, text })));
-    setWorkflow(items.filter((x) => x.type === 'ai_workflow').map(({ id, text }) => ({ id, text })));
+    const tps = (t.data ?? []) as AiTouchpoint[];
+    const figs = (f.data ?? []) as ResultFigure[];
+    setTouchpoints(tps.map(({ id, kind, body }) => ({ id, kind, body })));
+    setFigures(figs.map(({ id, value, label }) => ({ id, value, label })));
+    setDeliverables(items.map(({ id, text }) => ({ id, text })));
     setMedia((m.data ?? []) as Media[]);
-    original.current = { blocks: (b.data ?? []).map((x) => x.id), items: items.map((x) => x.id), featured: (data as Project).featured };
+    original.current = {
+      touchpoints: tps.map((x) => x.id),
+      figures: figs.map((x) => x.id),
+      deliverables: items.map((x) => x.id),
+      featured: (data as Project).featured,
+    };
     setDirty(false);
   }, [sb, id]);
 
@@ -182,10 +196,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           status: q.status,
           status_note: q.status_note?.trim() || null,
           one_liner: q.one_liner?.trim() || null,
-          about: q.about?.trim() || null,
+          summary: q.summary?.trim() || null,
+          objective: q.objective?.trim() || null,
+          concept: q.concept?.trim() || null,
           output_summary: q.output_summary?.trim() || null,
-          capabilities_summary: q.capabilities_summary?.trim() || null,
-          workflow_label: q.workflow_label?.trim() || null,
+          turnaround: q.turnaround?.trim() || null,
           featured: q.featured,
           visibility: q.visibility,
           ...featuredOrder,
@@ -200,27 +215,37 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         throw error;
       }
 
-      // Overview blocks and list items: write the current set, drop the removed ones.
-      const keptBlocks = blocks.filter((b) => b.label.trim() || b.body.trim());
-      const blockRows = keptBlocks.map((b, i) => ({ id: b.id, project_id: q.id, label: b.label.trim() || 'Untitled', body: b.body.trim(), sort_order: i }));
-      const itemRows = [
-        ...deliverables.filter((d) => d.text.trim()).map((d, i) => ({ id: d.id, project_id: q.id, type: 'deliverable', text: d.text.trim(), sort_order: i })),
-        ...workflow.filter((d) => d.text.trim()).map((d, i) => ({ id: d.id, project_id: q.id, type: 'ai_workflow', text: d.text.trim(), sort_order: i })),
-      ];
-      const goneBlocks = original.current.blocks.filter((x) => !blockRows.some((b) => b.id === x));
-      const goneItems = original.current.items.filter((x) => !itemRows.some((b) => b.id === x));
+      // Touchpoints, key figures and deliverables: write the current set, drop the removed ones.
+      const touchRows = touchpoints.map((t, i) => ({ id: t.id, project_id: q.id, kind: t.kind, body: t.body.trim(), sort_order: i }));
+      const keptFigures = figures.filter((f) => f.value.trim());
+      const figureRows = keptFigures.map((f, i) => ({ id: f.id, project_id: q.id, value: f.value.trim(), label: f.label.trim(), sort_order: i }));
+      const itemRows = deliverables
+        .filter((d) => d.text.trim())
+        .map((d, i) => ({ id: d.id, project_id: q.id, type: 'deliverable', text: d.text.trim(), sort_order: i }));
+      const gone = (was: string[], now: { id: string }[]) => was.filter((x) => !now.some((r) => r.id === x));
+      const goneTouch = gone(original.current.touchpoints, touchRows);
+      const goneFigures = gone(original.current.figures, figureRows);
+      const goneItems = gone(original.current.deliverables, itemRows);
+      const none = Promise.resolve({ error: null });
 
       const results = await Promise.all([
-        blockRows.length ? sb.from('overview_blocks').upsert(blockRows) : Promise.resolve({ error: null }),
-        itemRows.length ? sb.from('list_items').upsert(itemRows) : Promise.resolve({ error: null }),
-        goneBlocks.length ? sb.from('overview_blocks').delete().in('id', goneBlocks) : Promise.resolve({ error: null }),
-        goneItems.length ? sb.from('list_items').delete().in('id', goneItems) : Promise.resolve({ error: null }),
+        touchRows.length ? sb.from('ai_touchpoints').upsert(touchRows) : none,
+        figureRows.length ? sb.from('result_figures').upsert(figureRows) : none,
+        itemRows.length ? sb.from('list_items').upsert(itemRows) : none,
+        goneTouch.length ? sb.from('ai_touchpoints').delete().in('id', goneTouch) : none,
+        goneFigures.length ? sb.from('result_figures').delete().in('id', goneFigures) : none,
+        goneItems.length ? sb.from('list_items').delete().in('id', goneItems) : none,
       ]);
       const failed = results.find((r) => r.error);
       if (failed?.error) throw failed.error;
 
-      original.current = { blocks: blockRows.map((b) => b.id), items: itemRows.map((x) => x.id), featured: q.featured };
-      setBlocks(keptBlocks);
+      original.current = {
+        touchpoints: touchRows.map((x) => x.id),
+        figures: figureRows.map((x) => x.id),
+        deliverables: itemRows.map((x) => x.id),
+        featured: q.featured,
+      };
+      setFigures(keptFigures);
       setProject(q);
       setDirty(false);
       toast({ tone: 'success', title: 'Saved', message: q.visibility === 'published' ? 'Your changes are live.' : `Saved as ${VISIBILITY_LABEL[q.visibility].toLowerCase()}.` });
@@ -255,17 +280,27 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     router.push('/admin');
   };
 
-  const addBlock = (label = '') => {
+  const unusedKinds = TOUCHPOINT_KINDS.filter((k) => !touchpoints.some((t) => t.kind === k));
+  const addTouchpoint = () => {
     const nid = newId();
-    setBlocks((b) => [...b, { id: nid, label, body: '' }]);
+    setTouchpoints((ts) => [...ts, { id: nid, kind: unusedKinds[0] ?? 'video', body: '' }]);
     setDirty(true);
-    requestAnimationFrame(() => document.getElementById(`block-${nid}-${label ? 'body' : 'label'}`)?.focus());
+    requestAnimationFrame(() => document.getElementById(`touch-${nid}-body`)?.focus());
   };
-  const updateBlock = (bid: string, values: Partial<Block>) => {
-    setBlocks((b) => b.map((x) => (x.id === bid ? { ...x, ...values } : x)));
+  const updateTouchpoint = (tid: string, values: Partial<Touch>) => {
+    setTouchpoints((ts) => ts.map((x) => (x.id === tid ? { ...x, ...values } : x)));
     setDirty(true);
   };
-  const unusedSuggestions = BLOCK_SUGGESTIONS.filter((s) => !blocks.some((b) => b.label.trim().toLowerCase() === s.toLowerCase()));
+  const addFigure = () => {
+    const nid = newId();
+    setFigures((fs) => [...fs, { id: nid, value: '', label: '' }]);
+    setDirty(true);
+    requestAnimationFrame(() => document.getElementById(`figure-${nid}-value`)?.focus());
+  };
+  const updateFigure = (fid: string, values: Partial<Figure>) => {
+    setFigures((fs) => fs.map((x) => (x.id === fid ? { ...x, ...values } : x)));
+    setDirty(true);
+  };
 
   const primaryLabel = p.visibility === 'published' ? 'Save changes' : 'Publish';
   const cover = media.find((m) => m.id === p.cover_media_id) ?? null;
@@ -421,19 +456,116 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 <span className={styles.editorSectionNum}>4</span>
                 About this project
               </h2>
-              <p className={styles.muted}>The brief and the challenge, in a short paragraph</p>
+              <p className={styles.muted}>What it is, what the client needed, and the idea</p>
             </header>
             <Card>
               <div className={styles.cardBody}>
                 <Textarea
-                  label="About this project"
-                  hideLabel
+                  label="Summary"
+                  helper="What the project is, in a sentence or two"
+                  rows={2}
+                  maxLength={300}
+                  showCount
+                  value={p.summary ?? ''}
+                  onChange={(e) => set('summary', e.target.value)}
+                />
+                <Textarea
+                  label="The objective"
+                  helper="The client's objective or production bottleneck, in 1–2 sentences"
+                  rows={3}
+                  maxLength={400}
+                  showCount
+                  value={p.objective ?? ''}
+                  onChange={(e) => set('objective', e.target.value)}
+                />
+                <Textarea
+                  label="The concept"
+                  helper="The creative idea, visual style and narrative, in 2–3 sentences"
                   rows={4}
                   maxLength={600}
                   showCount
-                  placeholder="What the client asked for, and what made it hard"
-                  value={p.about ?? ''}
-                  onChange={(e) => set('about', e.target.value)}
+                  value={p.concept ?? ''}
+                  onChange={(e) => set('concept', e.target.value)}
+                />
+              </div>
+            </Card>
+          </section>
+
+          <section id="sec-ai" className={styles.editorSection} aria-labelledby="sec-ai-h">
+            <header className={styles.editorSectionHead}>
+              <h2 id="sec-ai-h" className={styles.editorSectionTitle}>
+                <span className={styles.editorSectionNum}>5</span>
+                AI touchpoints
+              </h2>
+              <p className={styles.muted}>How AI made the output. Pick 3 or 4 and say what each did on this project.</p>
+            </header>
+            <Card>
+              <div className={styles.cardBody}>
+                {touchpoints.length > 0 && (
+                  <SortableList
+                    items={touchpoints}
+                    onReorder={dirtyWrap(setTouchpoints)}
+                    label={(t) => TOUCHPOINTS[t.kind].label}
+                    renderItem={(t, i) => (
+                      <div className={styles.stackSm}>
+                        <div className={styles.row}>
+                          <Dropdown
+                            label={`Touchpoint ${i + 1}`}
+                            helper={TOUCHPOINTS[t.kind].description}
+                            options={TOUCHPOINT_KINDS.filter((k) => k === t.kind || !touchpoints.some((x) => x.kind === k)).map((k) => ({
+                              value: k,
+                              label: TOUCHPOINTS[k].label,
+                            }))}
+                            value={t.kind}
+                            onValueChange={(v) => updateTouchpoint(t.id, { kind: v as TouchpointKind })}
+                          />
+                          <span className={styles.fit}>
+                            <Button
+                              variant="ghost"
+                              iconOnly
+                              icon={X}
+                              aria-label={`Remove ${TOUCHPOINTS[t.kind].label}`}
+                              onClick={() => {
+                                setTouchpoints((all) => all.filter((x) => x.id !== t.id));
+                                setDirty(true);
+                              }}
+                            />
+                          </span>
+                        </div>
+                        <Textarea
+                          id={`touch-${t.id}-body`}
+                          label={`What ${TOUCHPOINTS[t.kind].label.toLowerCase()} did on this project`}
+                          hideLabel
+                          rows={2}
+                          maxLength={240}
+                          placeholder="e.g. 3 AI heroes in a dense orange-sky metropolis, with two city looks explored."
+                          value={t.body}
+                          onChange={(e) => updateTouchpoint(t.id, { body: e.target.value })}
+                        />
+                      </div>
+                    )}
+                  />
+                )}
+                <div className={styles.actions}>
+                  <Button variant="secondary" size="sm" leadingIcon={Plus} disabled={!unusedKinds.length} onClick={addTouchpoint}>
+                    Add touchpoint
+                  </Button>
+                  {touchpoints.length > 4 && <span className={styles.muted}>Most projects read best with 3 or 4.</span>}
+                </div>
+                <TagPicker
+                  label="Tools used"
+                  options={lists.tags.filter((t) => t.type === 'tool')}
+                  value={toolIds}
+                  onChange={(v) => set('tag_ids', [...capabilityIds, ...v])}
+                  create={{ table: 'tags', type: 'tool', noun: 'tool' }}
+                />
+                <TagPicker
+                  label="Capability tags"
+                  helper="Not shown on the project page; used to filter Our Works"
+                  options={lists.tags.filter((t) => t.type === 'capability')}
+                  value={capabilityIds}
+                  onChange={(v) => set('tag_ids', [...v, ...toolIds])}
+                  create={{ table: 'tags', type: 'capability', noun: 'capability' }}
                 />
               </div>
             </Card>
@@ -442,7 +574,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
           <section id="sec-output" className={styles.editorSection} aria-labelledby="sec-output-h">
             <header className={styles.editorSectionHead}>
               <h2 id="sec-output-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>5</span>
+                <span className={styles.editorSectionNum}>6</span>
                 Output
               </h2>
               <p className={styles.muted}>What we delivered</p>
@@ -455,96 +587,69 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
             </Card>
           </section>
 
-          <section id="sec-overview" className={styles.editorSection} aria-labelledby="sec-overview-h">
+          <section id="sec-result" className={styles.editorSection} aria-labelledby="sec-result-h">
             <header className={styles.editorSectionHead}>
-              <h2 id="sec-overview-h" className={styles.editorSectionTitle}>
-                <span className={styles.editorSectionNum}>6</span>
-                Overview
-              </h2>
-              <p className={styles.muted}>The thinking behind the work: add, rename, reorder or remove blocks</p>
-            </header>
-            <Card>
-              <div className={styles.cardBody}>
-                {blocks.length > 0 && (
-                  <SortableList
-                    items={blocks}
-                    onReorder={dirtyWrap(setBlocks)}
-                    label={(b) => b.label || 'block'}
-                    renderItem={(b, i) => (
-                      <div className={styles.stackSm}>
-                        <div className={styles.row}>
-                          <InputField id={`block-${b.id}-label`} label={`Block ${i + 1} label`} size="sm" value={b.label} onChange={(e) => updateBlock(b.id, { label: e.target.value })} />
-                          <span className={styles.fit}>
-                            <Button
-                              variant="ghost"
-                              iconOnly
-                              icon={X}
-                              aria-label={`Remove ${b.label || `block ${i + 1}`}`}
-                              onClick={() => {
-                                setBlocks((all) => all.filter((x) => x.id !== b.id));
-                                setDirty(true);
-                              }}
-                            />
-                          </span>
-                        </div>
-                        <Textarea id={`block-${b.id}-body`} label={`${b.label || `Block ${i + 1}`} text`} hideLabel rows={3} value={b.body} onChange={(e) => updateBlock(b.id, { body: e.target.value })} />
-                      </div>
-                    )}
-                  />
-                )}
-                <div className={styles.actions}>
-                  <Button variant="secondary" size="sm" leadingIcon={Plus} onClick={() => addBlock()}>
-                    Add block
-                  </Button>
-                  {unusedSuggestions.map((s) => (
-                    <Button key={s} variant="ghost" size="sm" leadingIcon={Plus} onClick={() => addBlock(s)}>
-                      {s}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </section>
-
-          <section id="sec-capabilities" className={styles.editorSection} aria-labelledby="sec-capabilities-h">
-            <header className={styles.editorSectionHead}>
-              <h2 id="sec-capabilities-h" className={styles.editorSectionTitle}>
+              <h2 id="sec-result-h" className={styles.editorSectionTitle}>
                 <span className={styles.editorSectionNum}>7</span>
-                Capabilities
+                Turnaround / result
               </h2>
-              <p className={styles.muted}>The type of work, and how AI made it</p>
+              <p className={styles.muted}>How fast it was made, and any results. Add key figures when you have them.</p>
             </header>
             <Card>
               <div className={styles.cardBody}>
                 <Textarea
-                  label="Capabilities shown"
-                  helper="One line on what this project proves we can do"
-                  rows={2}
-                  value={p.capabilities_summary ?? ''}
-                  onChange={(e) => set('capabilities_summary', e.target.value)}
+                  label="Turnaround / result"
+                  hideLabel
+                  rows={3}
+                  maxLength={400}
+                  showCount
+                  placeholder="e.g. Planned 13 days, storyboard lock to final approval."
+                  value={p.turnaround ?? ''}
+                  onChange={(e) => set('turnaround', e.target.value)}
                 />
-                <TagPicker
-                  label="Capability tags"
-                  options={lists.tags.filter((t) => t.type === 'capability')}
-                  value={capabilityIds}
-                  onChange={(v) => set('tag_ids', [...v, ...toolIds])}
-                  create={{ table: 'tags', type: 'capability', noun: 'capability' }}
-                />
-                <InputField
-                  label="Steps title"
-                  helper='Leave empty for "How AI was used"'
-                  placeholder="How AI was used"
-                  value={p.workflow_label ?? ''}
-                  onChange={(e) => set('workflow_label', e.target.value)}
-                />
-                <TextListEditor items={workflow} onChange={dirtyWrap(setWorkflow)} itemLabel="Step" addLabel="Add step" placeholder="e.g. Persona sheets set the look of the talent" />
-                <TagPicker
-                  label="Tools used"
-                  options={lists.tags.filter((t) => t.type === 'tool')}
-                  value={toolIds}
-                  onChange={(v) => set('tag_ids', [...capabilityIds, ...v])}
-                  create={{ table: 'tags', type: 'tool', noun: 'tool' }}
-                />
+                {figures.length > 0 && (
+                  <SortableList
+                    items={figures}
+                    onReorder={dirtyWrap(setFigures)}
+                    label={(f) => f.value || 'figure'}
+                    renderItem={(f, i) => (
+                      <div className={styles.row}>
+                        <InputField
+                          id={`figure-${f.id}-value`}
+                          label={`Figure ${i + 1}`}
+                          placeholder="13 days"
+                          size="sm"
+                          value={f.value}
+                          onChange={(e) => updateFigure(f.id, { value: e.target.value })}
+                        />
+                        <InputField
+                          label="What it measures"
+                          placeholder="Storyboard lock to final approval"
+                          size="sm"
+                          value={f.label}
+                          onChange={(e) => updateFigure(f.id, { label: e.target.value })}
+                        />
+                        <span className={styles.fit}>
+                          <Button
+                            variant="ghost"
+                            iconOnly
+                            icon={X}
+                            aria-label={`Remove ${f.value || `figure ${i + 1}`}`}
+                            onClick={() => {
+                              setFigures((all) => all.filter((x) => x.id !== f.id));
+                              setDirty(true);
+                            }}
+                          />
+                        </span>
+                      </div>
+                    )}
+                  />
+                )}
+                <span>
+                  <Button variant="secondary" size="sm" leadingIcon={Plus} onClick={addFigure}>
+                    Add key figure
+                  </Button>
+                </span>
               </div>
             </Card>
           </section>
