@@ -150,14 +150,14 @@ export async function getHomeData() {
   const clients = lists.clients.filter((c) => clientIds.has(c.id));
 
   // Published work per project type, most first (ties keep the types' own order).
-  // A project with several types counts once under each. The preview shows the
-  // first of them in site order that has a cover.
+  // A project with several types counts once under each. The preview cycles
+  // through their covers in site order.
   const inSiteOrder = workOrder(published);
   const projectTypes: ProjectTypeSummary[] = lists.categories
     .map((c) => {
       const work = inSiteOrder.filter((p) => p.category_ids.includes(c.id));
-      const lead = work.find((p) => p.cover_media_id) ?? work[0];
-      return { id: c.id, name: c.name, count: work.length, lead: lead ? { title: lead.title, cover: byId(lead.cover_media_id) } : null };
+      const covers = work.map((p) => byId(p.cover_media_id)).filter(Boolean) as Media[];
+      return { id: c.id, name: c.name, count: work.length, covers };
     })
     .filter((t) => t.count > 0)
     .sort((a, b) => b.count - a.count);

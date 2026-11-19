@@ -25,6 +25,8 @@
 }
 
 .row {
+  position: relative;
+  isolation: isolate;
   display: flex;
   align-items: center;
   gap: var(--spacing-12);
@@ -41,6 +43,51 @@
   font-weight: var(--weight-regular);
 }
 
+/* The AI glow on hover: a soft spotlight in the design system's AI pastel
+   gradient (as on the AI banner and AI button) that follows the pointer along
+   the row. It only animates while lit. */
+.row::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: var(--spot-x, 25%);
+  width: calc(var(--spacing-120) * 2.2);
+  height: calc(var(--spacing-120) * 1.2);
+  translate: -50% -50%;
+  border-radius: 50%;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    var(--color-fire-pastel) 0%,
+    var(--color-wood-pastel) 20%,
+    var(--color-earth-pastel) 40%,
+    var(--color-water-pastel) 60%,
+    var(--color-gold-pastel) 80%,
+    var(--color-fire-pastel) 100%
+  );
+  background-size: 200% 100%;
+  filter: blur(calc(var(--spacing-24) + var(--spacing-4)));
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-standard);
+  animation: ai-glow-move 4s linear infinite paused;
+}
+
+.row:hover::before,
+.row:focus-visible::before {
+  opacity: 0.75;
+  animation-play-state: running;
+}
+
+@keyframes ai-glow-move {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
 .count {
   display: inline-flex;
 }
@@ -51,11 +98,6 @@
   font-weight: var(--weight-bold);
   opacity: 0;
   transition: opacity var(--duration-base) var(--ease-standard);
-}
-
-.row:hover .name,
-.row:focus-visible .name {
-  font-style: italic;
 }
 
 .row:hover .go,
@@ -75,7 +117,8 @@
   top: 0;
   left: 0;
   z-index: var(--z-float);
-  width: calc(var(--spacing-120) * 2);
+  width: calc(var(--spacing-120) * 3.2);
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   border-radius: var(--radius-md);
   background: var(--color-neutral-1);
@@ -89,15 +132,16 @@
   opacity: 1;
 }
 
-.previewText {
-  margin: 0;
-  padding: var(--spacing-8) var(--spacing-12);
-  font-size: var(--text-caption-size);
-  color: var(--color-neutral-5);
+/* The covers sit on top of each other and cross-fade as they cycle. */
+.slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-standard);
 }
 
-.previewText strong {
-  color: var(--color-neutral-9);
+.slide[data-shown] {
+  opacity: 1;
 }
 
 @media (hover: none) {
@@ -151,7 +195,19 @@
 
 @media (prefers-reduced-motion: reduce) {
   .go,
-  .preview {
+  .preview,
+  .slide,
+  .row::before {
     transition: none;
+  }
+
+  .row::before {
+    animation: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .row::before {
+    display: none;
   }
 }
