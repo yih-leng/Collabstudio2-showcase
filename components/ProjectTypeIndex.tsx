@@ -13,8 +13,8 @@ const CYCLE_MS = 1400;
 
 /**
  * The home page's project types: each type with how many published projects it
- * has, opening Our Works filtered to it. Two columns on wider screens, one under
- * the numbers on phones. Pointing at a type lights an AI glow that follows
+ * has, opening Our Works filtered to it, under a "Projects we did" title. Two
+ * columns on wider screens, one on phones. Pointing at a type lights an AI glow that follows
  * the pointer along the row, and its covers show above the row, one after
  * another (not on touch screens, which have no pointer to follow).
  */
@@ -54,9 +54,8 @@ export function ProjectTypeIndex({ types }: { types: ProjectTypeSummary[] }) {
 
   return (
     <section aria-labelledby="types-heading" className={styles.section} onMouseMove={follow} onMouseLeave={() => setActive(null)}>
-      {/* Read out everywhere; shown on phones only, where the list sits under the numbers. */}
       <h2 id="types-heading" className={styles.heading}>
-        Projects by type
+        Projects we did
       </h2>
       <ul className={styles.list}>
         {types.map((t) => (

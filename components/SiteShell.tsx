@@ -39,7 +39,8 @@ export function SiteShell({
   children,
   width = 'full',
 }: {
-  header: React.ReactNode;
+  /** The page header. The home page has none: it opens on its own statement. */
+  header?: React.ReactNode;
   children: React.ReactNode;
   width?: 'full' | 'reading';
 }) {

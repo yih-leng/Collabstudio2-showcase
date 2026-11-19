@@ -3,7 +3,14 @@
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   align-items: end;
   gap: var(--spacing-40);
-  margin-top: var(--section-gap);
+}
+
+/* The numbers, then Explore all work under them. */
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-24);
 }
 
 /* Brand moment: the one place Source Serif 4 appears. */

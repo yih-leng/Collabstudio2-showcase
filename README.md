@@ -1,7 +1,7 @@
 # CollabStudio · AI Creative Showcase
 
 KULT's AI creative work, for clients and the sales team. Featured projects play
-in the home page banner; everything sits in the filterable Our Works page. Projects,
+in the home page's work slider; everything sits in the filterable Our Works page. Projects,
 media, clients, tags and site text are all managed in `/admin`,
 with no code changes.
 
@@ -121,23 +121,26 @@ design system, run `npm run setup` in `collabrium-dls-v2.0`, copy its fresh
      Storyboard; add more under Clients and tags), year, status.
    - **Visibility**: Published, Draft or Hidden (Hidden is for confidential
      work: only signed-in admins see it); **Featured** puts it in the home
-     page banner.
+     page's work slider.
    - **Media**: drag in images, videos (MP4, MOV, WebM) and audio (MP3, WAV,
      M4A, AIFF, FLAC), or paste a YouTube, Vimeo or Google Drive link. Videos
      over 20 MB and WAV/AIFF/FLAC audio are turned into a smaller web preview
      in your browser before they upload (the progress bar shows it), so a
      300 MB master is fine to drop in. Use Chrome, Edge or Safari for this.
      Every item also appears in the carousel at the top of the project page. Set each one's shape (16:9, 9:16, 4:5, 1:1) and caption, drag
-     to reorder, and pick the **cover** (the card thumbnail) and the **hero**
-     (the big one at the top of the project page, and what plays in the home
-     page banner). Media saves as you go.
+     to reorder, and pick the **cover** (the card thumbnail, and the card's picture in the
+     home page's work slider) and the **hero** (the big one at the top of the
+     project page; a hero video or YouTube/Vimeo link plays on the slider card).
+     Media saves as you go.
 3. **Preview** saves and opens the page as visitors will see it (drafts only
    show to signed-in admins).
 4. Set Visibility to **Published** and **Save**. It's live.
 
-**Ordering.** Projects → **Featured order** sets the order of the home page
-banner, which plays featured projects only (if nothing is featured, it shows
-all published work); **Site order** sets the Our Works page and next/previous links. Drag the
+**Ordering.** Projects → **Featured order** sets the order of the home page's
+work slider, which shows featured projects only (if nothing is featured, it
+shows all published work). The slider moves on by itself, pausing while it's
+pointed at; it can also be dragged, and clicking a card behind brings it to
+the front; **Site order** sets the Our Works page and next/previous links. Drag the
 handle, or focus it and use Space and the arrow keys.
 
 **Archiving.** **Archive** (a row action on the Projects list) takes a project off the site but keeps everything;
@@ -232,8 +235,9 @@ Entries can't be edited or deleted from the site.
 - **Clients and tags**: clients (with logo upload for the home page client
   strip), project types, capabilities and tools. Rename, reorder, delete
   (deleting takes it off any project that used it).
-- **Site settings**: the home page title and intro, and the showreel (link or
-  MP4).
+- **Site settings**: the home page intro (the big statement the home page
+  opens with; the title only shows if the intro is empty), and the showreel
+  (link or MP4), which leads the work slider.
 
 The site has no contact page, so there's no enquiries inbox. The `enquiries`
 table and the contact fields in `settings` stay in the database, unused.

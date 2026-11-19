@@ -5,14 +5,14 @@
   margin-top: var(--section-gap);
 }
 
-/* The list says what it is on its own on wide screens; phones get the heading. */
+/* Styled like the home page's other section titles ("Clients we've made work for"). */
 .heading {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+  margin: 0 0 var(--spacing-24);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-neutral-5);
 }
 
 .list {
@@ -150,24 +150,14 @@
   }
 }
 
-/* Phones: one short list right under the numbers, with its heading. */
+/* Phones: one short list, closer to its heading. */
 @media (max-width: 767px) {
   .section {
     margin-top: var(--spacing-24);
   }
 
   .heading {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip-path: none;
-    margin: 0 0 var(--spacing-4);
-    font-size: var(--text-caption-size);
-    font-weight: var(--weight-bold);
-    letter-spacing: var(--tracking-eyebrow);
-    text-transform: uppercase;
-    color: var(--color-neutral-5);
+    margin-bottom: var(--spacing-4);
   }
 
   .list {

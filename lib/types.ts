@@ -167,14 +167,20 @@ export interface ProjectCardData {
   cover: Media | null;
 }
 
-/** One slide in the home page banner: a project, or the studio showreel. */
+/** One card in the home page's work slider: a project, or the studio showreel. */
 export interface ShowcaseSlide {
   id: string;
   /** Null for the showreel, which links to the Work page. */
   slug: string | null;
   title: string;
-  eyebrow: string;
+  /** "Skechers × Cloakwork". */
+  client: string;
   one_liner: string | null;
+  /** Project types, then the status when it isn't live yet. */
+  tags: string[];
+  /** The card's picture: the cover (or hero) image. */
+  still: Pick<Media, 'kind' | 'url' | 'aspect' | 'caption'> | null;
+  /** What plays while the card is pointed at: an uploaded video or a YouTube or Vimeo link. */
   media: Pick<Media, 'kind' | 'url' | 'aspect' | 'caption'> | null;
 }
 

@@ -1,6 +1,6 @@
 import 'server-only';
 import { cache } from 'react';
-import { embedProvider } from './format';
+import { STATUS_LABEL, embedProvider } from './format';
 import { getServerClient } from './supabase/server';
 import { touchpointLabel } from './touchpoints';
 import type {
@@ -117,31 +117,35 @@ export async function getHomeData() {
 
   const slides: ShowcaseSlide[] = ordered.map((p) => {
     const card = resolveCard(p, lists, media);
-    // Prefer moving pictures that autoplay; otherwise a still. Audio has no picture to show.
     const hero = byId(p.hero_media_id);
     const cover = byId(p.cover_media_id);
-    // Only what can play silently by itself: uploads, YouTube, Vimeo. Google Drive can't autoplay.
+    // The card shows a still; pointing at it plays what can play silently by itself:
+    // uploads, YouTube, Vimeo (Google Drive can't autoplay). Audio has no picture.
     const moving = (m: Media | null) =>
       m && (m.kind === 'video' || (m.kind === 'embed' && embedProvider(m.url) !== 'Google Drive'));
     const still = (m: Media | null) => m && m.kind === 'image';
-    const pick = [hero, cover].find(moving) ?? [cover, hero].find(still) ?? null;
     return {
       id: p.id,
       slug: p.slug,
       title: p.title,
-      eyebrow: [card.clients.map((c) => c.name).join(' × '), p.year].filter(Boolean).join(' · '),
+      client: card.clients.map((c) => c.name).join(' × '),
       one_liner: p.one_liner,
-      media: pick,
+      tags: [...card.categories.map((c) => c.name), ...(p.status === 'live' ? [] : [STATUS_LABEL[p.status]])],
+      still: [cover, hero].find(still) ?? null,
+      media: [hero, cover].find(moving) ?? null,
     };
   });
   if (settings.showreel) {
+    const reel = { kind: settings.showreel.kind, url: settings.showreel.url, aspect: '16:9' as const, caption: 'Showreel' };
     slides.unshift({
       id: 'showreel',
       slug: null,
       title: 'Showreel',
-      eyebrow: 'KULT · AI creative',
+      client: 'KULT',
       one_liner: settings.hero_intro || null,
-      media: { kind: settings.showreel.kind, url: settings.showreel.url, aspect: '16:9', caption: 'Showreel' },
+      tags: ['Showreel'],
+      still: null,
+      media: reel,
     });
   }
 
