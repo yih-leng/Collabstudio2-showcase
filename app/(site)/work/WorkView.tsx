@@ -1,8 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  CardGrid,
   EmptyState,
   Filters,
   PageHeader,
@@ -11,7 +10,7 @@ import {
   type FilterDimension,
   type FilterValue,
 } from '@collabrium/ui';
-import { ProjectCard } from '@/components/ProjectCard';
+import { WorkBento } from '@/components/WorkBento';
 import { STATUS_LABEL } from '@/lib/format';
 import { SiteShell } from '@/components/SiteShell';
 import type { Lists, ProjectCardData } from '@/lib/types';
@@ -84,6 +83,17 @@ export function WorkView({
     );
   }, [projects, value, search]);
 
+  // Once the page scrolls past the top of the filter bar, it sits on a hairline.
+  const sentinel = useRef<HTMLSpanElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 0));
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const clearAll = () => {
     setValue({});
     setSearch('');
@@ -100,26 +110,26 @@ export function WorkView({
       }
     >
       <div className={styles.stack}>
-        {/* TODO(design-system: Filters has no search inside a filter's panel; add it there, then turn it on here). */}
-        <Filters
-          dimensions={dimensions}
-          value={value}
-          onValueChange={onFilters}
-          search
-          searchValue={search}
-          onSearchChange={onSearch}
-          searchPlaceholder="Search by title, client or tag"
-          searchLabel="Search projects"
-        />
-        <p className={styles.count} aria-live="polite">
-          {shown.length} of {projects.length} {projects.length === 1 ? 'project' : 'projects'}
-        </p>
+        {/* Search, filters and the count stay at the top while the work scrolls. */}
+        <span ref={sentinel} className={styles.sentinel} aria-hidden />
+        <div className={styles.bar} data-stuck={stuck || undefined}>
+          {/* TODO(design-system: Filters has no search inside a filter's panel; add it there, then turn it on here). */}
+          <Filters
+            dimensions={dimensions}
+            value={value}
+            onValueChange={onFilters}
+            search
+            searchValue={search}
+            onSearchChange={onSearch}
+            searchPlaceholder="Search by title, client or tag"
+            searchLabel="Search projects"
+          />
+          <p className={styles.count} aria-live="polite">
+            {shown.length} of {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+          </p>
+        </div>
         {shown.length ? (
-          <CardGrid>
-            {shown.map((p) => (
-              <ProjectCard key={p.id} project={p} headingLevel={2} />
-            ))}
-          </CardGrid>
+          <WorkBento projects={shown} />
         ) : (
           <EmptyState variant="inline" linkAction={{ label: 'Clear filters', onClick: clearAll }}>
             No projects match these filters yet.

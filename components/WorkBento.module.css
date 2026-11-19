@@ -1,0 +1,259 @@
+/* Our Works bento grid. Our own wrappers, tokens only.
+   TODO(design-system: no bento or media grid). */
+
+.bento {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.row {
+  display: grid;
+  gap: var(--spacing-8);
+}
+
+.tile {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-8);
+  color: var(--color-neutral-1);
+  container-type: inline-size;
+  transition:
+    translate var(--duration-base) var(--ease-settle),
+    box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  transition: transform var(--duration-slow) var(--ease-settle);
+}
+
+/* At rest a soft fade under the title; open, the same shade as the home slider. */
+.shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.rest {
+  background: linear-gradient(to top, color-mix(in srgb, var(--color-neutral-9) 60%, transparent), transparent 45%);
+}
+
+.open {
+  opacity: 0;
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--color-neutral-9) 50%, transparent),
+      transparent 28%,
+      transparent 60%,
+      color-mix(in srgb, var(--color-neutral-9) 62%, transparent)
+    ),
+    color-mix(in srgb, var(--color-neutral-9) 12%, transparent);
+}
+
+.link {
+  position: absolute;
+  inset: 0;
+}
+
+/* Placed as on the home slider: client and one-liner across the top, title and
+   tags at the bottom left, View project at the bottom right. Clicks pass
+   through to the tile, except on the button. */
+.info {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--spacing-20);
+}
+
+.top,
+.bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+}
+
+.top {
+  align-items: flex-start;
+}
+
+.bottom {
+  align-items: flex-end;
+}
+
+.client {
+  font-size: var(--text-body2-size);
+  font-weight: var(--weight-black);
+}
+
+.client small {
+  display: block;
+  margin-top: var(--spacing-2);
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  opacity: 0.8;
+}
+
+.line {
+  max-width: 28ch;
+  margin: 0;
+  font-size: var(--text-caption-size);
+  line-height: var(--text-caption-lh);
+  text-align: right;
+}
+
+.title {
+  max-width: 18ch;
+  margin: 0;
+  font-family: var(--font-secondary);
+  font-size: var(--text-h3-size);
+  line-height: var(--text-h3-lh);
+  font-weight: inherit;
+}
+
+.tile[data-full] .title {
+  max-width: 24ch;
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-lh);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-8);
+}
+
+.tag {
+  padding: var(--spacing-2) var(--spacing-8);
+  border: var(--border-width-sm) solid color-mix(in srgb, var(--color-neutral-1) 30%, transparent);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--color-neutral-1) 14%, transparent);
+  backdrop-filter: blur(var(--spacing-8));
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+}
+
+.view {
+  flex: none;
+  pointer-events: auto;
+}
+
+/* Comes in on hover or keyboard focus. */
+.later {
+  opacity: 0;
+  transition:
+    opacity var(--duration-base) var(--ease-standard),
+    translate var(--duration-slow) var(--ease-settle);
+}
+
+.top.later {
+  translate: 0 calc(var(--spacing-4) * -1);
+}
+
+.view.later,
+.tag.later {
+  translate: 0 var(--spacing-4);
+}
+
+.tile:hover,
+.tile:focus-within {
+  translate: 0 calc(var(--spacing-4) * -1);
+  box-shadow: var(--shadow-4);
+}
+
+.tile:hover .media,
+.tile:focus-within .media {
+  transform: scale(1.05);
+}
+
+.tile:hover .later,
+.tile:focus-within .later {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: var(--duration-fast);
+}
+
+.tile:hover .open,
+.tile:focus-within .open {
+  opacity: 1;
+}
+
+.tile:hover .rest,
+.tile:focus-within .rest {
+  opacity: 0;
+}
+
+/* Narrow tiles stack their text so it doesn't crowd. */
+@container (max-width: 380px) {
+  .info {
+    padding: var(--spacing-16);
+  }
+
+  .top {
+    flex-direction: column;
+    gap: var(--spacing-4);
+  }
+
+  .line {
+    text-align: left;
+  }
+
+  .bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-12);
+  }
+}
+
+/* Phones (and touch screens): one tile per row, details showing, no one-liner. */
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .tile {
+    aspect-ratio: 4 / 5 !important;
+  }
+
+  .tile[data-full] .title {
+    font-size: var(--text-h3-size);
+    line-height: var(--text-h3-lh);
+  }
+}
+
+@media (max-width: 768px), (hover: none) {
+  .later {
+    opacity: 1;
+    translate: 0 0;
+  }
+
+  .open {
+    opacity: 1;
+  }
+
+  .rest,
+  .line {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .media,
+  .shade,
+  .later {
+    transition: none;
+  }
+}
