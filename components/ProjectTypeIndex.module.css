@@ -1,0 +1,157 @@
+/* Home page project types. Our own wrappers, tokens only.
+   TODO(design-system: no editorial index list). */
+
+.section {
+  margin-top: var(--section-gap);
+}
+
+/* The list says what it is on its own on wide screens; phones get the heading. */
+.heading {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--spacing-40);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-12);
+  padding: var(--spacing-12) var(--spacing-4) var(--spacing-12) 0;
+  border-bottom: var(--border-width-sm) solid var(--color-neutral-3);
+  color: var(--color-neutral-9);
+  text-decoration: none;
+}
+
+.name {
+  font-family: var(--font-secondary);
+  font-size: var(--text-h2-size);
+  line-height: var(--text-h2-lh);
+  font-weight: var(--weight-regular);
+}
+
+.count {
+  display: inline-flex;
+}
+
+.go {
+  margin-left: auto;
+  font-size: var(--text-caption-size);
+  font-weight: var(--weight-bold);
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.row:hover .name,
+.row:focus-visible .name {
+  font-style: italic;
+}
+
+.row:hover .go,
+.row:focus-visible .go {
+  opacity: 1;
+}
+
+.row:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+  border-radius: var(--radius-sm);
+}
+
+/* The preview that follows the pointer. */
+.preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-float);
+  width: calc(var(--spacing-120) * 2);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-neutral-1);
+  box-shadow: var(--shadow-3);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-base) var(--ease-standard);
+}
+
+.preview[data-on] {
+  opacity: 1;
+}
+
+.previewText {
+  margin: 0;
+  padding: var(--spacing-8) var(--spacing-12);
+  font-size: var(--text-caption-size);
+  color: var(--color-neutral-5);
+}
+
+.previewText strong {
+  color: var(--color-neutral-9);
+}
+
+@media (hover: none) {
+  .preview {
+    display: none;
+  }
+}
+
+/* Phones: one short list right under the numbers, with its heading. */
+@media (max-width: 767px) {
+  .section {
+    margin-top: var(--spacing-24);
+  }
+
+  .heading {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    margin: 0 0 var(--spacing-4);
+    font-size: var(--text-caption-size);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-neutral-5);
+  }
+
+  .list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .row {
+    padding: var(--spacing-8) 0;
+  }
+
+  .name {
+    font-size: var(--text-h4-size);
+    line-height: var(--text-h4-lh);
+  }
+
+  /* The count sits at the right edge; no "See the work" on phones. */
+  .count {
+    margin-left: auto;
+  }
+
+  .go {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .go,
+  .preview {
+    transition: none;
+  }
+}

@@ -20,7 +20,6 @@ import {
   Eye,
   FilmSlate,
   Plus,
-  Archive,
   X,
 } from '@phosphor-icons/react';
 import { useAdmin } from '@/components/admin/AdminContext';
@@ -77,7 +76,6 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
-  const [confirmTrash, setConfirmTrash] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [confirmNew, setConfirmNew] = useState(false);
   // The project as last loaded or saved, to tell a brand-new empty one apart.
@@ -371,18 +369,6 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     if (await save({ visibility: 'draft' })) goBack();
   };
 
-  const moveToTrash = async () => {
-    setConfirmTrash(false);
-    const { error } = await sb.from('projects').update({ deleted_at: new Date().toISOString(), featured: false }).eq('id', p.id);
-    if (error) {
-      toast({ tone: 'danger', title: "That didn't archive", message: error.message });
-      return;
-    }
-    setDirty(false);
-    toast({ tone: 'success', title: 'Archived', message: p.title });
-    goBack();
-  };
-
   const unusedKinds = TOUCHPOINT_KINDS.filter((k) => !touchpoints.some((t) => t.kind === k));
   const addTouchpoint = () => {
     const nid = newId();
@@ -406,7 +392,23 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     setDirty(true);
   };
 
-  const primaryLabel = p.visibility === 'published' ? 'Save changes' : 'Publish';
+  // A live project has one save: Save changes, keeping whatever visibility is
+  // set. Until it's live there are two: Save draft, and Publish.
+  const live = saved.current?.visibility === 'published';
+  const saveButtons = live ? (
+    <Button variant="primary" loading={saving} onClick={() => save()}>
+      Save changes
+    </Button>
+  ) : (
+    <>
+      <Button variant="secondary" disabled={saving} onClick={() => save({ visibility: 'draft' })}>
+        Save draft
+      </Button>
+      <Button variant="primary" loading={saving} onClick={() => save({ visibility: 'published' })}>
+        Publish
+      </Button>
+    </>
+  );
   const cover = media.find((m) => m.id === p.cover_media_id) ?? null;
 
   return (
@@ -430,12 +432,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 <Button variant="ghost" onClick={leave}>
                   Cancel
                 </Button>
-                <Button variant="secondary" disabled={saving} onClick={() => save({ visibility: 'draft' })}>
-                  Save draft
-                </Button>
-                <Button variant="primary" loading={saving} onClick={() => save(p.visibility === 'published' ? {} : { visibility: 'published' })}>
-                  {primaryLabel}
-                </Button>
+                {saveButtons}
               </>
             }
           />
@@ -777,19 +774,6 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
 
         <aside className={styles.editorAside} aria-label="Project settings">
           <Card>
-            {/* The main actions again, in reach wherever you are on the page. */}
-            <div className={styles.asideSave}>
-              <Button variant="secondary" disabled={saving} onClick={() => save({ visibility: 'draft' })}>
-                Save draft
-              </Button>
-              <Button variant="primary" loading={saving} onClick={() => save(p.visibility === 'published' ? {} : { visibility: 'published' })}>
-                {primaryLabel}
-              </Button>
-            </div>
-            {dirty && <p className={styles.muted}>You have unsaved changes.</p>}
-
-            <div className={styles.cardDivider} role="presentation" />
-
             <CardTitle headingLevel={3}>Card preview</CardTitle>
             <p className={styles.muted}>How it shows on Our Works</p>
             <div className={styles.cardBody}>
@@ -813,36 +797,19 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
                 onValueChange={(v) => set('visibility', v as Visibility)}
               />
               <Switch label="Featured" description="Show it in the home page banner" checked={p.featured} onChange={(e) => set('featured', e.target.checked)} />
+              {/* Preview, then the main saves again, in reach wherever you are on the page. */}
+              {dirty && <p className={styles.muted}>You have unsaved changes.</p>}
               <div className={styles.asideActions}>
-                <Button variant="secondary" size="sm" leadingIcon={Eye} onClick={preview}>
+                <Button variant="ghost" leadingIcon={Eye} onClick={preview}>
                   Preview
                 </Button>
-                <Button variant="ghost" size="sm" leadingIcon={Archive} onClick={() => setConfirmTrash(true)}>
-                  Archive
-                </Button>
+                <div className={styles.asideSave}>{saveButtons}</div>
               </div>
             </div>
           </Card>
         </aside>
       </div>
 
-      <Modal
-        open={confirmTrash}
-        onClose={() => setConfirmTrash(false)}
-        title="Archive this project?"
-        actions={
-          <>
-            <Button variant="secondary" onClick={() => setConfirmTrash(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" onClick={moveToTrash}>
-              Archive
-            </Button>
-          </>
-        }
-      >
-        It comes off the site straight away. You can restore it from the Archived tab on Projects at any time.
-      </Modal>
       <Modal
         open={confirmCancel}
         onClose={() => setConfirmCancel(false)}

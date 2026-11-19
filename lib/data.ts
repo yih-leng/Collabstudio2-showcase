@@ -11,6 +11,7 @@ import type {
   Project,
   ProjectCardData,
   ProjectDetailData,
+  ProjectTypeSummary,
   ResultFigure,
   ShowcaseSlide,
   SiteSettings,
@@ -106,7 +107,11 @@ export async function getHomeData() {
   // falls back to all published work in site order, so the home page never opens empty.
   const featured = published.filter((p) => p.featured).sort((a, b) => a.featured_order - b.featured_order);
   const ordered = featured.length ? featured : published;
-  const mediaIds = ordered.flatMap((p) => [p.hero_media_id, p.cover_media_id]).filter(Boolean) as string[];
+  // Banner media, plus every published cover for the project type previews.
+  const mediaIds = [
+    ...ordered.flatMap((p) => [p.hero_media_id, p.cover_media_id]),
+    ...published.map((p) => p.cover_media_id),
+  ].filter(Boolean) as string[];
   const media = await getMediaByIds([...new Set(mediaIds)]);
   const byId = (id: string | null) => (id ? (media.find((m) => m.id === id) ?? null) : null);
 
@@ -145,9 +150,15 @@ export async function getHomeData() {
   const clients = lists.clients.filter((c) => clientIds.has(c.id));
 
   // Published work per project type, most first (ties keep the types' own order).
-  // A project with several types counts once under each.
-  const projectTypes = lists.categories
-    .map((c) => ({ id: c.id, name: c.name, count: published.filter((p) => p.category_ids.includes(c.id)).length }))
+  // A project with several types counts once under each. The preview shows the
+  // first of them in site order that has a cover.
+  const inSiteOrder = workOrder(published);
+  const projectTypes: ProjectTypeSummary[] = lists.categories
+    .map((c) => {
+      const work = inSiteOrder.filter((p) => p.category_ids.includes(c.id));
+      const lead = work.find((p) => p.cover_media_id) ?? work[0];
+      return { id: c.id, name: c.name, count: work.length, lead: lead ? { title: lead.title, cover: byId(lead.cover_media_id) } : null };
+    })
     .filter((t) => t.count > 0)
     .sort((a, b) => b.count - a.count);
 

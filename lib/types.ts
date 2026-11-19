@@ -143,6 +143,14 @@ export interface Lists {
 }
 
 /** A project with everything the public pages show, resolved. */
+/** A project type on the home page: how much published work it has, and one to preview. */
+export interface ProjectTypeSummary {
+  id: string;
+  name: string;
+  count: number;
+  lead: { title: string; cover: Media | null } | null;
+}
+
 export interface ProjectCardData {
   id: string;
   slug: string;

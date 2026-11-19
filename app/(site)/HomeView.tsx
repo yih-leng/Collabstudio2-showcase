@@ -1,14 +1,14 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { Button, PageHeader, StatCard, StatGrid } from '@collabrium/ui';
+import { Button, PageHeader } from '@collabrium/ui';
 import { ScrollReveal, WordReveal } from '@collabrium/ui/motion';
 import { ClientMarquee } from '@/components/ClientMarquee';
 import { CountUpOnView } from '@/components/CountUpOnView';
+import { ProjectTypeIndex } from '@/components/ProjectTypeIndex';
 import { Showcase } from '@/components/Showcase';
 import { SiteShell } from '@/components/SiteShell';
-import { projectTypeIcon } from '@/lib/project-type-icons';
-import type { Client, ShowcaseSlide, SiteSettings } from '@/lib/types';
+import type { Client, ProjectTypeSummary, ShowcaseSlide, SiteSettings } from '@/lib/types';
 import styles from './home.module.css';
 
 export function HomeView({
@@ -22,7 +22,7 @@ export function HomeView({
   slides: ShowcaseSlide[];
   clients: Client[];
   projectCount: number;
-  projectTypes: { id: string; name: string; count: number }[];
+  projectTypes: ProjectTypeSummary[];
 }) {
   const router = useRouter();
   return (
@@ -65,27 +65,7 @@ export function HomeView({
         </ScrollReveal>
       </section>
 
-      {projectTypes.length > 0 && (
-        <section aria-labelledby="types-heading" className={styles.section}>
-          <h2 id="types-heading" className={styles.eyebrow}>
-            By project type
-          </h2>
-          <ScrollReveal>
-            <StatGrid>
-              {projectTypes.map((t) => (
-                <StatCard
-                  key={t.id}
-                  label={t.name}
-                  value={<CountUpOnView value={t.count} />}
-                  icon={projectTypeIcon(t.name)}
-                  description={t.count === 1 ? 'Project' : 'Projects'}
-                  href={`/work?category=${encodeURIComponent(t.id)}`}
-                />
-              ))}
-            </StatGrid>
-          </ScrollReveal>
-        </section>
-      )}
+      {projectTypes.length > 0 && <ProjectTypeIndex types={projectTypes} />}
 
       {clients.length > 0 && (
         <section aria-labelledby="clients-heading" className={styles.section}>

@@ -10,30 +10,3 @@
   color: var(--color-neutral-5);
 }
 
-/* Search, then the filters, wrapping onto more rows on narrow screens. */
-.toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--spacing-8);
-}
-
-.search {
-  flex: 1 1 calc(var(--spacing-120) * 2.4);
-  min-width: 0;
-}
-
-.filter {
-  flex: 0 1 calc(var(--spacing-120) * 1.5);
-  min-width: calc(var(--spacing-120) * 1.2);
-}
-
-@media (max-width: 767px) {
-  .search {
-    flex-basis: 100%;
-  }
-
-  .filter {
-    flex: 1 1 calc(50% - var(--spacing-8));
-  }
-}
