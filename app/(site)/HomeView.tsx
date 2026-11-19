@@ -2,10 +2,12 @@
 
 import { useRouter } from 'next/navigation';
 import { Button, PageHeader, StatCard, StatGrid } from '@collabrium/ui';
-import { CountUp, ScrollReveal, WordReveal } from '@collabrium/ui/motion';
+import { ScrollReveal, WordReveal } from '@collabrium/ui/motion';
 import { ClientMarquee } from '@/components/ClientMarquee';
+import { CountUpOnView } from '@/components/CountUpOnView';
 import { Showcase } from '@/components/Showcase';
 import { SiteShell } from '@/components/SiteShell';
+import { projectTypeIcon } from '@/lib/project-type-icons';
 import type { Client, ShowcaseSlide, SiteSettings } from '@/lib/types';
 import styles from './home.module.css';
 
@@ -49,13 +51,13 @@ export function HomeView({
           <div className={styles.stats}>
             <div className={styles.stat}>
               <span className={styles.figure}>
-                <CountUp value={projectCount} duration="ambient" />
+                <CountUpOnView value={projectCount} />
               </span>
               <span className={styles.label}>{projectCount === 1 ? 'Project' : 'Projects'} shipped with AI</span>
             </div>
             <div className={styles.stat}>
               <span className={styles.figure}>
-                <CountUp value={clients.length} duration="ambient" />
+                <CountUpOnView value={clients.length} />
               </span>
               <span className={styles.label}>{clients.length === 1 ? 'Brand' : 'Brands'} we&apos;ve made work for</span>
             </div>
@@ -74,7 +76,8 @@ export function HomeView({
                 <StatCard
                   key={t.id}
                   label={t.name}
-                  value={t.count}
+                  value={<CountUpOnView value={t.count} />}
+                  icon={projectTypeIcon(t.name)}
                   description={t.count === 1 ? 'Project' : 'Projects'}
                   href={`/work?category=${encodeURIComponent(t.id)}`}
                 />

@@ -9,6 +9,7 @@
 
 .track {
   will-change: transform;
+  contain: layout paint;
   transition: opacity var(--duration-slow) var(--ease-standard);
   display: flex;
   width: max-content;
@@ -41,6 +42,10 @@
   font-weight: var(--weight-black);
   white-space: nowrap;
   text-decoration: none;
+  /* Each logo on its own layer, so growing one on hover doesn't repaint the
+     whole moving row (that repaint is what made hover and un-hover stutter). */
+  will-change: transform;
+  backface-visibility: hidden;
   transition:
     transform var(--duration-base) var(--ease-settle),
     color var(--duration-base) var(--ease-standard);

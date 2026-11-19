@@ -1,0 +1,56 @@
+/* Our Works placeholder. Tokens only. TODO(design-system: no general skeleton). */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+}
+
+.block {
+  display: block;
+  border-radius: var(--radius-sm);
+  background: var(--color-neutral-2);
+}
+
+.bar {
+  height: var(--control-height-md);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 2.4)), 1fr));
+  gap: var(--spacing-24);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-8);
+}
+
+.thumb {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  background: var(--color-neutral-3);
+}
+
+.line {
+  width: 70%;
+  height: var(--text-h4-lh);
+}
+
+.lineShort {
+  width: 45%;
+  height: var(--text-body2-lh);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .block {
+    animation: pulse var(--duration-pulse) var(--ease-flow) infinite alternate;
+  }
+}
+
+@keyframes pulse {
+  to {
+    opacity: 0.55;
+  }
+}

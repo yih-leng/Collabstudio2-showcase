@@ -21,6 +21,12 @@ export function createDemoBrowserClient(): SupabaseClient {
         const res = await fetch('/api/demo/auth', { cache: 'no-store' });
         return { data: await res.json(), error: null };
       },
+      // Supabase's getSession, in the same shape: the demo login's user, if any.
+      getSession: async () => {
+        const res = await fetch('/api/demo/auth', { cache: 'no-store' });
+        const { user } = (await res.json()) as { user: unknown };
+        return { data: { session: user ? { user } : null }, error: null };
+      },
       signInWithPassword: (creds: { email: string; password: string }) =>
         post<{ error: { message: string } | null }>('/api/demo/auth', creds),
       signOut: async () => {

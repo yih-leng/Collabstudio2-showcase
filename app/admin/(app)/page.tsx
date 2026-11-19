@@ -56,10 +56,13 @@ export default function ProjectsPage() {
       return;
     }
     const projects = (data ?? []) as Project[];
-    const coverIds = projects.map((p) => p.cover_media_id).filter(Boolean) as string[];
-    const { data: media } = coverIds.length ? await sb.from('media').select('*').in('id', coverIds) : { data: [] };
-    setRows(projects.map((p) => ({ ...p, cover: (media ?? []).find((m) => m.id === p.cover_media_id) ?? null })));
+    // Show the list now; the cover thumbnails follow a moment later.
+    setRows((cur) => projects.map((p) => ({ ...p, cover: cur?.find((r) => r.id === p.id)?.cover ?? null })));
     setLoadError(false);
+    const coverIds = projects.map((p) => p.cover_media_id).filter(Boolean) as string[];
+    if (!coverIds.length) return;
+    const { data: media } = await sb.from('media').select('*').in('id', coverIds);
+    setRows((rs) => rs?.map((r) => ({ ...r, cover: (media ?? []).find((m) => m.id === r.cover_media_id) ?? null })) ?? rs);
   }, [sb]);
 
   // Reload when Import from deck creates projects.
@@ -113,12 +116,14 @@ export default function ProjectsPage() {
     if (!trashing) return;
     const row = trashing;
     setTrashing(null);
+    // Off the list straight away, then saved; a failed save puts it back.
+    setRows((rs) => rs?.filter((r) => r.id !== row.id) ?? rs);
     const { error } = await sb.from('projects').update({ deleted_at: new Date().toISOString(), featured: false }).eq('id', row.id);
     if (error) {
       toast({ tone: 'danger', title: "That didn't archive", message: error.message });
+      load();
       return;
     }
-    setRows((rs) => rs?.filter((r) => r.id !== row.id) ?? rs);
     setArchivedKey((k) => k + 1);
     toast({
       tone: 'success',

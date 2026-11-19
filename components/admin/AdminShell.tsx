@@ -3,14 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AppShell, InfoBanner, SidebarNav } from '@collabrium/ui';
-import { ArrowSquareOut, ClockCounterClockwise, EnvelopeSimple, FilmSlate, GearSix, ListBullets, SignOut } from '@phosphor-icons/react';
+import { ArrowSquareOut, ClockCounterClockwise, FilmSlate, GearSix, ListBullets, SignOut } from '@phosphor-icons/react';
 import { STUDIO_LOGO } from '@/components/SiteShell';
 import { isDemoMode } from '@/lib/demo/config';
 import { useAdmin } from './AdminContext';
 
 function activeFor(pathname: string) {
   if (pathname.startsWith('/admin/activity')) return 'activity';
-  if (pathname.startsWith('/admin/enquiries')) return 'enquiries';
   if (pathname.startsWith('/admin/lists')) return 'lists';
   if (pathname.startsWith('/admin/settings')) return 'settings';
   return 'projects';
@@ -26,7 +25,7 @@ export function AdminShell({
   width?: 'full' | 'reading';
 }) {
   const pathname = usePathname();
-  const { user, unread, signOut } = useAdmin();
+  const { user, signOut } = useAdmin();
   const email = user.email ?? 'Admin';
 
   return (
@@ -50,19 +49,6 @@ export function AdminShell({
               label: 'Showcase',
               items: [
                 { id: 'projects', label: 'Projects', icon: FilmSlate, href: '/admin' },
-              ],
-            },
-            {
-              id: 'inbox',
-              label: 'Inbox',
-              items: [
-                {
-                  id: 'enquiries',
-                  label: 'Enquiries',
-                  icon: EnvelopeSimple,
-                  href: '/admin/enquiries',
-                  ...(unread ? { count: unread } : {}),
-                },
               ],
             },
             {

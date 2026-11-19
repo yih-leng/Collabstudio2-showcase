@@ -18,8 +18,6 @@ interface AdminCtx {
   user: User;
   lists: Lists;
   refreshLists: () => Promise<void>;
-  unread: number;
-  refreshUnread: () => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -41,7 +39,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   const [gate, setGate] = useState<Gate>(isSupabaseConfigured || isDemoMode ? 'loading' : 'unconfigured');
   const [user, setUser] = useState<User | null>(null);
   const [lists, setLists] = useState<Lists>({ clients: [], categories: [], tags: [] });
-  const [unread, setUnread] = useState(0);
 
   const refreshLists = useCallback(async () => {
     if (!sb) return;
@@ -51,12 +48,6 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
       sb.from('tags').select('*').order('sort_order').order('name'),
     ]);
     setLists({ clients: c.data ?? [], categories: cat.data ?? [], tags: t.data ?? [] });
-  }, [sb]);
-
-  const refreshUnread = useCallback(async () => {
-    if (!sb) return;
-    const { count } = await sb.from('enquiries').select('id', { count: 'exact', head: true }).eq('is_read', false);
-    setUnread(count ?? 0);
   }, [sb]);
 
   const signOut = useCallback(async () => {
@@ -73,21 +64,27 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
     if (!sb) return;
     setGate('loading');
     (async () => {
-      const { data } = await sb.auth.getUser();
-      if (!data.user) {
+      // The middleware has already checked the login on the server, so the
+      // session in the browser is enough here (and needs no round trip).
+      // Row-level security still checks every read and write.
+      const { data } = await sb.auth.getSession();
+      const signedIn = data.session?.user;
+      if (!signedIn) {
         router.replace('/admin/login');
         return;
       }
-      setUser(data.user);
-      const { data: admin } = await sb.from('admins').select('user_id').eq('user_id', data.user.id).maybeSingle();
+      setUser(signedIn);
+      const [{ data: admin }] = await Promise.all([
+        sb.from('admins').select('user_id').eq('user_id', signedIn.id).maybeSingle(),
+        refreshLists(),
+      ]);
       if (!admin) {
         setGate('not-admin');
         return;
       }
-      await Promise.all([refreshLists(), refreshUnread()]);
       setGate('ready');
     })();
-  }, [sb, router, refreshLists, refreshUnread]);
+  }, [sb, router, refreshLists]);
 
   if (gate === 'unconfigured') {
     return (
@@ -118,7 +115,7 @@ export function AdminProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <Ctx.Provider value={{ sb: sb!, user: user!, lists, refreshLists, unread, refreshUnread, signOut }}>
+    <Ctx.Provider value={{ sb: sb!, user: user!, lists, refreshLists, signOut }}>
       <FileDropFix />
       {/* Import from deck lives here, so drafting carries on from page to page. */}
       <ImportProvider>{children}</ImportProvider>

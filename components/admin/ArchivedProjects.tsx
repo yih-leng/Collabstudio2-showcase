@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Button, EmptyState, Modal, Table, useToast, type TableColumn } from '@collabrium/ui';
 import { Archive, ArrowCounterClockwise, TrashSimple } from '@phosphor-icons/react';
 import { useAdmin } from '@/components/admin/AdminContext';
-import { removeFromStorage } from '@/lib/admin-api';
+import { deleteProjectForGood } from '@/lib/admin-api';
 import { VISIBILITY_LABEL, formatDate } from '@/lib/format';
 import type { Project } from '@/lib/types';
 
@@ -38,30 +38,30 @@ export function ArchivedProjects({ reloadKey, onChange }: { reloadKey: number; o
       return next;
     });
 
+  // Both actions take the row off the list straight away, then save; if the
+  // save fails the list reloads and says so.
   const restore = async (p: Project) => {
+    drop(p, true);
+    toast({ tone: 'success', title: 'Restored', message: `${p.title} is back as ${VISIBILITY_LABEL[p.visibility].toLowerCase()}.` });
     const { error } = await sb.from('projects').update({ deleted_at: null }).eq('id', p.id);
     if (error) {
       toast({ tone: 'danger', title: "That didn't restore", message: error.message });
-      return;
+      load();
     }
-    drop(p, true);
-    toast({ tone: 'success', title: 'Restored', message: `${p.title} is back as ${VISIBILITY_LABEL[p.visibility].toLowerCase()}.` });
   };
 
   const purge = async () => {
     const p = purging;
     setPurging(null);
     if (!p) return;
-    const { data: files } = await sb.from('media').select('storage_path').eq('project_id', p.id);
-    await sb.from('projects').update({ cover_media_id: null, hero_media_id: null }).eq('id', p.id);
-    const { error } = await sb.from('projects').delete().eq('id', p.id);
-    if (error) {
-      toast({ tone: 'danger', title: "That didn't delete", message: error.message });
-      return;
-    }
-    await removeFromStorage(sb, (files ?? []).map((f) => f.storage_path));
     drop(p);
     toast({ tone: 'success', title: 'Deleted for good', message: p.title });
+    try {
+      await deleteProjectForGood(sb, p.id);
+    } catch (e) {
+      toast({ tone: 'danger', title: "That didn't delete", message: (e as Error).message });
+      load();
+    }
   };
 
   const columns: TableColumn<Project>[] = [

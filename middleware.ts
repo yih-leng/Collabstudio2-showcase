@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { DEMO_COOKIE, isDemoMode } from './lib/demo/config';
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from './lib/supabase/config';
 
-// Refreshes the Supabase session on every request and keeps /admin behind the login
+// Refreshes the Supabase session for signed-in people and keeps /admin behind the login
 // (the demo login's cookie when Supabase isn't connected).
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -21,6 +21,11 @@ export async function middleware(request: NextRequest) {
     return response;
   }
 
+  // Visitors without a login have nothing to refresh or check, so their pages
+  // skip the round trip to Supabase entirely.
+  const hasSession = request.cookies.getAll().some((c) => c.name.startsWith('sb-') && c.name.includes('-auth-token'));
+  if (!hasSession) return isAdminArea ? toLogin() : response;
+
   const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     cookies: {
       getAll: () => request.cookies.getAll(),
@@ -32,11 +37,12 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims refreshes an expired session, then checks the login's signature
+  // (on the server only when the project still uses the older shared secret),
+  // which is far quicker than asking the auth server on every page.
+  const { data } = await supabase.auth.getClaims();
 
-  if (isAdminArea && !user) return toLogin();
+  if (isAdminArea && !data?.claims) return toLogin();
   return response;
 }
 

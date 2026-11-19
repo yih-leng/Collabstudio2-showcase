@@ -31,7 +31,6 @@ const AREAS: { value: ActivityArea | 'all'; label: string }[] = [
   { value: 'ai', label: 'AI usage' },
   { value: 'lists', label: 'Clients and tags' },
   { value: 'settings', label: 'Site settings' },
-  { value: 'enquiries', label: 'Enquiries' },
 ];
 
 type AiRow = Pick<ActivityRow, 'created_at' | 'details'>;

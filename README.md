@@ -2,7 +2,7 @@
 
 KULT's AI creative work, for clients and the sales team. Featured projects play
 in the home page banner; everything sits in the filterable Our Works page. Projects,
-media, clients, tags, site text and enquiries are all managed in `/admin`,
+media, clients, tags and site text are all managed in `/admin`,
 with no code changes.
 
 Built with Next.js (App Router) + TypeScript, Supabase (database, login,
@@ -215,7 +215,7 @@ text, and you fill in the rest.
 **Activity** (in the admin menu, under Setup) lists who changed what, and
 when: projects created, edited, published, featured, trashed, restored or
 deleted; pictures and videos added or removed; clients, types and tags added,
-renamed or removed; site settings changed; new enquiries; and every AI draft
+renamed or removed; site settings changed; and every AI draft
 from Import from deck, with its tokens and cost. Changes made together read as
 one line ("Created Blinkie as a draft with 16 pictures"). At the top: AI spend
 this month and all time, and how many projects were drafted with AI. Filter by
@@ -229,14 +229,14 @@ Entries can't be edited or deleted from the site.
 
 ## Other admin screens
 
-- **Enquiries**: everything sent from the contact form at `/contact` (it's no
-  longer in the site menu; link to it from elsewhere if you need it). New ones
-  are counted in the menu. Open one to read it in full and reply by email.
 - **Clients and tags**: clients (with logo upload for the home page client
   strip), project types, capabilities and tools. Rename, reorder, delete
   (deleting takes it off any project that used it).
-- **Site settings**: the home page title and intro, the showreel (link or
-  MP4), and the contact details shown beside the enquiry form.
+- **Site settings**: the home page title and intro, and the showreel (link or
+  MP4).
+
+The site has no contact page, so there's no enquiries inbox. The `enquiries`
+table and the contact fields in `settings` stay in the database, unused.
 
 ---
 
@@ -244,7 +244,7 @@ Entries can't be edited or deleted from the site.
 
 | Path | What it is |
 |---|---|
-| `app/(site)/` | Public pages: Home, Work, project detail, Work with us |
+| `app/(site)/` | Public pages: Home and Our Works, with each project's page |
 | `app/admin/` | Login, and the admin (`(app)/`) behind it |
 | `components/` | Site shell, project card, media frame, gallery; `admin/` holds the admin pieces |
 | `lib/data.ts` | Server reads for public pages (Supabase, or the seed when not configured) |
@@ -259,7 +259,7 @@ Entries can't be edited or deleted from the site.
 
 **Security model.** Row-level security does the gatekeeping: the public can
 read only published, non-internal, non-deleted projects (and their blocks,
-lists and media), and can only *insert* enquiries. Everything else needs a
+lists and media). Everything else needs a
 user listed in `public.admins`. The middleware keeps `/admin` behind the login,
 and the admin double-checks the admin list on load. Uploaded files sit in one
 public `media` bucket: anyone with a file's exact URL can open it, including

@@ -31,7 +31,7 @@ import { SortableList } from '@/components/admin/SortableList';
 import { TagPicker } from '@/components/admin/TagPicker';
 import { TextListEditor, type TextItem } from '@/components/admin/TextListEditor';
 import styles from '@/components/admin/admin.module.css';
-import { newId } from '@/lib/admin-api';
+import { deleteProjectForGood, newId } from '@/lib/admin-api';
 import { STATUS_LABEL, VISIBILITY_LABEL, slugify } from '@/lib/format';
 import { CUSTOM, TOUCHPOINTS, TOUCHPOINT_KINDS, isTouchpointKind, touchpointLabel, type AnyTouchpointKind } from '@/lib/touchpoints';
 import type { AiTouchpoint, ListItemRow, Media, Project, ProjectStatus, ResultFigure, Visibility } from '@/lib/types';
@@ -39,6 +39,28 @@ import type { AiTouchpoint, ListItemRow, Media, Project, ProjectStatus, ResultFi
 type Touch = { id: string; kind: AnyTouchpointKind; label: string; body: string };
 type Figure = { id: string; value: string; label: string };
 type Errors = Partial<Record<'title' | 'slug' | 'year' | 'type' | 'touchpoints', string>>;
+
+const UNTITLED = 'Untitled project';
+
+/** A project as New project creates it, with nothing filled in yet. */
+function isBlank(p: Project) {
+  return (
+    p.title.trim() === UNTITLED &&
+    p.slug.startsWith('untitled-') &&
+    !p.client_ids.length &&
+    !p.category_ids.length &&
+    !p.tag_ids.length &&
+    p.year === null &&
+    !p.featured &&
+    p.visibility === 'draft' &&
+    ![p.one_liner, p.status_note, p.summary, p.objective, p.concept, p.output_summary, p.turnaround].some((v) => v?.trim())
+  );
+}
+
+// An empty new project left without Back or Cancel (the browser's back button,
+// the sidebar) is deleted once the editor closes. The short wait lets a quick
+// remount of the same editor (React's development double-render) call it off.
+const pendingDiscard = new Map<string, number>();
 
 export default function EditProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -57,6 +79,11 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   const [errors, setErrors] = useState<Errors>({});
   const [confirmTrash, setConfirmTrash] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmNew, setConfirmNew] = useState(false);
+  // The project as last loaded or saved, to tell a brand-new empty one apart.
+  const saved = useRef<Project | null>(null);
+  const leaving = useRef(false);
+  const untouched = useRef(false);
   const [slugTouched, setSlugTouched] = useState(true);
   // What's saved now, so a save can drop the rows that were removed. The older parts
   // (Overview blocks, AI workflow steps) are no longer edited here and are left alone.
@@ -68,19 +95,21 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   });
 
   const load = useCallback(async () => {
-    const { data } = await sb.from('projects').select('*').eq('id', id).maybeSingle();
-    if (!data) {
-      setMissing(true);
-      return;
-    }
-    const [t, f, i, m] = await Promise.all([
+    // Everything at once: one round trip rather than two.
+    const [{ data }, t, f, i, m] = await Promise.all([
+      sb.from('projects').select('*').eq('id', id).maybeSingle(),
       sb.from('ai_touchpoints').select('*').eq('project_id', id).order('sort_order'),
       sb.from('result_figures').select('*').eq('project_id', id).order('sort_order'),
       sb.from('list_items').select('*').eq('project_id', id).eq('type', 'deliverable').order('sort_order'),
       sb.from('media').select('*').eq('project_id', id).order('sort_order'),
     ]);
+    if (!data) {
+      setMissing(true);
+      return;
+    }
     const items = (i.data ?? []) as ListItemRow[];
     setProject(data as Project);
+    saved.current = data as Project;
     setSlugTouched(!(data as Project).slug.startsWith('untitled-'));
     const tps = (t.data ?? []) as AiTouchpoint[];
     const figs = (f.data ?? []) as ResultFigure[];
@@ -100,6 +129,38 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
   useEffect(() => {
     load();
   }, [load]);
+
+  // Whether this is still an empty new project: nothing typed, saved or uploaded.
+  useEffect(() => {
+    const o = original.current;
+    untouched.current =
+      !!saved.current &&
+      isBlank(saved.current) &&
+      !dirty &&
+      !media.length &&
+      !o.touchpoints.length &&
+      !o.figures.length &&
+      !o.deliverables.length;
+  });
+
+  // Leaving an empty new project any other way than Back or Cancel deletes it too.
+  useEffect(() => {
+    const waiting = pendingDiscard.get(id);
+    if (waiting) {
+      window.clearTimeout(waiting);
+      pendingDiscard.delete(id);
+    }
+    return () => {
+      if (leaving.current || !untouched.current) return;
+      pendingDiscard.set(
+        id,
+        window.setTimeout(() => {
+          pendingDiscard.delete(id);
+          deleteProjectForGood(sb, id).catch(() => {});
+        }, 0),
+      );
+    };
+  }, [sb, id]);
 
   // Warn before leaving with unsaved edits.
   useEffect(() => {
@@ -256,6 +317,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       };
       setFigures(keptFigures);
       setProject(q);
+      saved.current = q;
       setDirty(false);
       toast({ tone: 'success', title: 'Saved', message: q.visibility === 'published' ? 'Your changes are live.' : `Saved as ${VISIBILITY_LABEL[q.visibility].toLowerCase()}.` });
       return true;
@@ -277,6 +339,38 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     }
   };
 
+  // Back and Cancel. An empty new project is deleted rather than left as a draft;
+  // a new one with something in it asks whether to keep it; any other project
+  // with unsaved changes asks before they're lost.
+  const isNew = !!saved.current && isBlank(saved.current) && !original.current.touchpoints.length && !original.current.figures.length && !original.current.deliverables.length;
+  const goBack = () => {
+    leaving.current = true;
+    router.push('/admin');
+  };
+  const leave = async () => {
+    if (untouched.current) return discardNew();
+    if (isNew) return setConfirmNew(true);
+    if (dirty) return setConfirmCancel(true);
+    goBack();
+  };
+  const discardNew = async () => {
+    setConfirmNew(false);
+    setDirty(false);
+    leaving.current = true;
+    try {
+      await deleteProjectForGood(sb, p.id);
+    } catch (e) {
+      leaving.current = false;
+      toast({ tone: 'danger', title: "We couldn't discard the project", message: (e as Error).message });
+      return;
+    }
+    router.push('/admin');
+  };
+  const keepNewAsDraft = async () => {
+    setConfirmNew(false);
+    if (await save({ visibility: 'draft' })) goBack();
+  };
+
   const moveToTrash = async () => {
     setConfirmTrash(false);
     const { error } = await sb.from('projects').update({ deleted_at: new Date().toISOString(), featured: false }).eq('id', p.id);
@@ -286,7 +380,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
     }
     setDirty(false);
     toast({ tone: 'success', title: 'Archived', message: p.title });
-    router.push('/admin');
+    goBack();
   };
 
   const unusedKinds = TOUCHPOINT_KINDS.filter((k) => !touchpoints.some((t) => t.kind === k));
@@ -320,13 +414,20 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
       width="full"
       header={
         <>
-          <BackButton label="Projects" href="/admin" />
+          <BackButton
+            label="Projects"
+            href="/admin"
+            onClick={(e) => {
+              e.preventDefault();
+              leave();
+            }}
+          />
           <PageHeader
-            title={p.title || 'Untitled project'}
+            title={p.title || UNTITLED}
             subtitle={dirty ? 'You have unsaved changes.' : `${VISIBILITY_LABEL[p.visibility]}${p.featured ? ' · Featured' : ''}`}
             actions={
               <>
-                <Button variant="ghost" onClick={() => (dirty ? setConfirmCancel(true) : router.push('/admin'))}>
+                <Button variant="ghost" onClick={leave}>
                   Cancel
                 </Button>
                 <Button variant="secondary" disabled={saving} onClick={() => save({ visibility: 'draft' })}>
@@ -694,7 +795,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
             <div className={styles.cardBody}>
               <MediaFrame media={cover} aspect="16:9" mode="thumb" placeholderLabel="Pick a cover under Hero and gallery" />
               <div>
-                <p className={styles.previewTitle}>{p.title || 'Untitled project'}</p>
+                <p className={styles.previewTitle}>{p.title || UNTITLED}</p>
                 <p className={styles.muted}>{p.one_liner || 'Add a one-liner under Basics'}</p>
               </div>
             </div>
@@ -755,7 +856,7 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
               variant="danger"
               onClick={() => {
                 setDirty(false);
-                router.push('/admin');
+                goBack();
               }}
             >
               Discard changes
@@ -764,6 +865,27 @@ export default function EditProjectPage({ params }: { params: Promise<{ id: stri
         }
       >
         Your changes to this project haven&apos;t been saved. Discard them and go back to Projects?
+      </Modal>
+      <Modal
+        open={confirmNew}
+        onClose={() => setConfirmNew(false)}
+        title="Keep this new project?"
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmNew(false)}>
+              Keep editing
+            </Button>
+            <Button variant="danger" onClick={discardNew}>
+              Discard project
+            </Button>
+            <Button variant="primary" loading={saving} onClick={keepNewAsDraft}>
+              Save as draft
+            </Button>
+          </>
+        }
+      >
+        You&apos;ve started this project but haven&apos;t saved it. Save it as a draft to finish later, or discard it
+        {media.length ? ' and the files you uploaded' : ''}.
       </Modal>
     </AdminShell>
   );

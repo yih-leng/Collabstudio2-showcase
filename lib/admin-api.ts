@@ -76,6 +76,22 @@ export async function removeFromStorage(sb: SupabaseClient, paths: (string | nul
   if (list.length) await sb.storage.from(MEDIA_BUCKET).remove(list);
 }
 
+/**
+ * Deletes a project for good: its row (touchpoints, figures, lists and media rows
+ * go with it) and its uploaded files. Two round trips: the file list and the
+ * unhooked cover run together, then the delete.
+ */
+export async function deleteProjectForGood(sb: SupabaseClient, id: string) {
+  const [{ data: files }] = await Promise.all([
+    sb.from('media').select('storage_path').eq('project_id', id),
+    sb.from('projects').update({ cover_media_id: null, hero_media_id: null }).eq('id', id),
+  ]);
+  const { error } = await sb.from('projects').delete().eq('id', id);
+  if (error) throw error;
+  // The files go last and quietly: the project is already gone either way.
+  removeFromStorage(sb, (files ?? []).map((f: { storage_path: string | null }) => f.storage_path)).catch(() => {});
+}
+
 /** Writes 0..n into `field` in the given order. */
 export async function saveOrder(sb: SupabaseClient, table: string, ids: string[], field = 'sort_order') {
   const results = await Promise.all(ids.map((id, i) => sb.from(table).update({ [field]: i }).eq('id', id)));

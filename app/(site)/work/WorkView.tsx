@@ -2,10 +2,12 @@
 
 import { useMemo, useState } from 'react';
 import {
+  Button,
   CardGrid,
+  Dropdown,
   EmptyState,
-  Filters,
   PageHeader,
+  SearchInput,
   filtersFromSearchParams,
   filtersToSearchParams,
   type FilterDimension,
@@ -29,14 +31,17 @@ export function WorkView({
   const dimensions = useMemo<FilterDimension[]>(() => {
     const used = <T extends { id: string }>(all: T[], pick: (p: ProjectCardData) => { id: string }[]) =>
       all.filter((x) => projects.some((p) => pick(p).some((y) => y.id === x.id)));
+    // Names list A to Z; years newest first.
+    const az = (opts: { value: string; label: string }[]) =>
+      [...opts].sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base', numeric: true }));
     const years = [...new Set(projects.map((p) => p.year).filter(Boolean) as number[])].sort((a, b) => b - a);
     return [
-      { key: 'client', label: 'Client', options: used(lists.clients, (p) => p.clients).map((c) => ({ value: c.id, label: c.name })) },
-      { key: 'category', label: 'Project type', options: used(lists.categories, (p) => p.categories).map((c) => ({ value: c.id, label: c.name })) },
+      { key: 'client', label: 'Client', options: az(used(lists.clients, (p) => p.clients).map((c) => ({ value: c.id, label: c.name }))) },
+      { key: 'category', label: 'Project type', options: az(used(lists.categories, (p) => p.categories).map((c) => ({ value: c.id, label: c.name }))) },
       {
         key: 'capability',
         label: 'Capability',
-        options: lists.tags.filter((t) => t.type === 'capability').map((t) => ({ value: t.id, label: t.name })),
+        options: az(lists.tags.filter((t) => t.type === 'capability').map((t) => ({ value: t.id, label: t.name }))),
       },
       { key: 'year', label: 'Year', options: years.map((y) => ({ value: String(y), label: String(y) })) },
     ];
@@ -81,6 +86,8 @@ export function WorkView({
     );
   }, [projects, value, search]);
 
+  const filtering = Boolean(search.trim()) || Object.values(value).some((v) => v?.length);
+
   const clearAll = () => {
     setValue({});
     setSearch('');
@@ -97,16 +104,41 @@ export function WorkView({
       }
     >
       <div className={styles.stack}>
-        <Filters
-          dimensions={dimensions}
-          value={value}
-          onValueChange={onFilters}
-          search
-          searchValue={search}
-          onSearchChange={onSearch}
-          searchPlaceholder="Search by title, client or tag"
-          searchLabel="Search projects"
-        />
+        {/* A search across the cards, then one searchable multi-select per filter.
+            TODO(design-system: Filters has no search inside a filter's panel, so
+            these are Dropdowns until it does). */}
+        <div className={styles.toolbar} role="search" aria-label="Filter projects">
+          <div className={styles.search}>
+            <SearchInput
+              label="Search projects"
+              hideLabel
+              placeholder="Search by title, client or tag"
+              value={search}
+              onValueChange={onSearch}
+            />
+          </div>
+          {dimensions.map((d) => (
+            <div key={d.key} className={styles.filter}>
+              <Dropdown
+                multiple
+                searchable
+                label={d.label}
+                hideLabel
+                placeholder={d.label}
+                options={d.options}
+                value={value[d.key] ?? []}
+                onValueChange={(vals) => onFilters({ ...value, [d.key]: vals })}
+                countLabel={(n) => (n === 1 ? (d.options.find((o) => o.value === value[d.key]?.[0])?.label ?? `${d.label}: 1`) : `${d.label}: ${n}`)}
+                emptyTitle={`No ${d.label.toLowerCase()} yet`}
+              />
+            </div>
+          ))}
+          {filtering && (
+            <Button variant="link" onClick={clearAll}>
+              Clear all
+            </Button>
+          )}
+        </div>
         <p className={styles.count} aria-live="polite">
           {shown.length} of {projects.length} {projects.length === 1 ? 'project' : 'projects'}
         </p>

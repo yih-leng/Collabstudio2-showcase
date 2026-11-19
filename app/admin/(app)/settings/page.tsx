@@ -12,7 +12,7 @@ import {
   useToast,
   type FileUploaderItem,
 } from '@collabrium/ui';
-import { AddressBook, FileVideo, FilmReel, LinkSimple, TextAa, Trash } from '@phosphor-icons/react';
+import { FileVideo, FilmReel, LinkSimple, TextAa, Trash } from '@phosphor-icons/react';
 import { AdminShell } from '@/components/admin/AdminShell';
 import { useAdmin } from '@/components/admin/AdminContext';
 import styles from '@/components/admin/admin.module.css';
@@ -39,7 +39,6 @@ export default function SettingsPage() {
   const [reelLink, setReelLink] = useState('');
   const [reelError, setReelError] = useState<string>();
   const [files, setFiles] = useState<FileUploaderItem[]>([]);
-  const [emailError, setEmailError] = useState<string>();
   const [oldReelPath, setOldReelPath] = useState<string | null>(null);
 
   useEffect(() => {
@@ -95,11 +94,6 @@ export default function SettingsPage() {
   };
 
   const save = async () => {
-    if (s.contact_email && !/^\S+@\S+\.\S+$/.test(s.contact_email)) {
-      setEmailError('Enter an email like hello@kult.studio');
-      document.getElementById('settings-email')?.focus();
-      return;
-    }
     setSaving(true);
     const rows = Object.entries(s).map(([key, value]) => ({ key, value: typeof value === 'string' ? value.trim() : value }));
     const { error } = await sb.from('settings').upsert(rows);
@@ -121,7 +115,7 @@ export default function SettingsPage() {
       header={
         <PageHeader
           title="Site settings"
-          subtitle="The home page hero, the showreel and your contact details."
+          subtitle="The home page hero and the showreel."
           actions={
             <Button variant="primary" loading={saving} onClick={save}>
               Save
@@ -199,25 +193,6 @@ export default function SettingsPage() {
               onAccept={uploadReel}
               onRetry={uploadReel}
             />
-          </div>
-        </Card>
-
-        <Card>
-          <CardHeader icon={AddressBook} element="fire" title="Contact details" subtitle="Shown beside the enquiry form" headingLevel={2} />
-          <div className={styles.cardBody}>
-            <InputField
-              id="settings-email"
-              label="Email"
-              type="email"
-              value={s.contact_email}
-              error={emailError}
-              onChange={(e) => {
-                set('contact_email', e.target.value);
-                setEmailError(undefined);
-              }}
-            />
-            <InputField label="Phone" type="tel" value={s.contact_phone} onChange={(e) => set('contact_phone', e.target.value)} />
-            <Textarea label="Address" rows={2} value={s.contact_address} onChange={(e) => set('contact_address', e.target.value)} />
           </div>
         </Card>
 
