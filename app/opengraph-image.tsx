@@ -1,5 +1,6 @@
 import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
+import sharp from 'sharp';
 import { getPublishedProjects } from '@/lib/data';
 
 // The link preview for pages without their own picture (home, Our Works): the
@@ -11,7 +12,10 @@ import { getPublishedProjects } from '@/lib/data';
 // the image is drawn without the site's CSS.
 export const alt = 'CollabStudio · AI Creative Showcase: featured work';
 export const size = { width: 1200, height: 630 };
-export const contentType = 'image/png';
+// A JPEG, kept small: WhatsApp and some other apps drop a preview image much
+// over 300 KB, and a PNG of photographs is several times that.
+export const contentType = 'image/jpeg';
+const QUALITY = 80;
 
 const GAP = 7;
 const CANVAS = '#FCFAF5';
@@ -40,13 +44,12 @@ export default async function OpengraphImage() {
   const covers = (await Promise.all(urls.slice(0, 8).map((u) => load(u, origin)))).filter(Boolean).slice(0, 5) as string[];
 
   const tile = (src: string) => (
-    // eslint-disable-next-line @next/next/no-img-element
     <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
   );
   const [lead, ...rest] = covers;
   const rows = [rest.slice(0, 2), rest.slice(2, 4)].filter((r) => r.length);
 
-  return new ImageResponse(
+  const png = new ImageResponse(
     lead ? (
       <div style={{ width: '100%', height: '100%', display: 'flex', gap: GAP, backgroundColor: CANVAS }}>
         <div style={{ display: 'flex', flex: rows.length ? 1 : 2, overflow: 'hidden' }}>{tile(lead)}</div>
@@ -84,4 +87,6 @@ export default async function OpengraphImage() {
     ),
     size,
   );
+  const jpeg = await sharp(Buffer.from(await png.arrayBuffer())).jpeg({ quality: QUALITY, mozjpeg: true }).toBuffer();
+  return new Response(new Uint8Array(jpeg), { headers: { 'content-type': contentType } });
 }
