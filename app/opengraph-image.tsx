@@ -1,34 +1,85 @@
+import { headers } from 'next/headers';
 import { ImageResponse } from 'next/og';
+import { getPublishedProjects } from '@/lib/data';
 
-// The link preview for pages without their own picture (home, Our Works):
-// a CollabStudio card. Project pages use their cover instead.
-// Colours are the design system's (Neutral-9, Fire pastel, warm canvas), written
-// out because the image is drawn without the site's CSS.
-export const alt = 'CollabStudio · AI Creative Showcase';
+// The link preview for pages without their own picture (home, Our Works): the
+// work itself, no words (the chat app shows the site's name and description
+// under it). One cover takes the left half and four more fill the right, in
+// site order, so featured work leads and newly featured work shows up by itself.
+// Project pages use their own cover instead.
+// Colours are the design system's warm canvas and Neutral-9, written out because
+// the image is drawn without the site's CSS.
+export const alt = 'CollabStudio · AI Creative Showcase: featured work';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
-export default function OpengraphImage() {
+const GAP = 7;
+const CANVAS = '#FCFAF5';
+// The image renderer reads PNG and JPEG only.
+const READABLE = /^image\/(png|jpe?g)$/;
+
+/** A cover as a data URL the renderer can draw, or null when it can't be read. */
+async function load(url: string, origin: string): Promise<string | null> {
+  try {
+    const res = await fetch(new URL(url, origin));
+    const type = res.headers.get('content-type')?.split(';')[0] ?? '';
+    if (!res.ok || !READABLE.test(type)) return null;
+    return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString('base64')}`;
+  } catch {
+    return null;
+  }
+}
+
+export default async function OpengraphImage() {
+  const h = await headers();
+  const origin = `${h.get('x-forwarded-proto') ?? 'https'}://${h.get('host')}`;
+  const projects = await getPublishedProjects();
+  const urls = projects.map((p) => (p.cover?.kind === 'image' ? p.cover.url : null)).filter(Boolean) as string[];
+
+  // Try a few spare covers in case some can't be read.
+  const covers = (await Promise.all(urls.slice(0, 8).map((u) => load(u, origin)))).filter(Boolean).slice(0, 5) as string[];
+
+  const tile = (src: string) => (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+  );
+  const [lead, ...rest] = covers;
+  const rows = [rest.slice(0, 2), rest.slice(2, 4)].filter((r) => r.length);
+
   return new ImageResponse(
-    (
+    lead ? (
+      <div style={{ width: '100%', height: '100%', display: 'flex', gap: GAP, backgroundColor: CANVAS }}>
+        <div style={{ display: 'flex', flex: rows.length ? 1 : 2, overflow: 'hidden' }}>{tile(lead)}</div>
+        {rows.length > 0 && (
+          <div style={{ display: 'flex', flexDirection: 'column', flex: 1, gap: GAP }}>
+            {rows.map((row, i) => (
+              <div key={i} style={{ display: 'flex', flex: 1, gap: GAP }}>
+                {row.map((src, j) => (
+                  <div key={j} style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+                    {tile(src)}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    ) : (
+      // No readable covers yet: the studio name on the warm canvas.
       <div
         style={{
           width: '100%',
           height: '100%',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          padding: 72,
-          backgroundColor: '#080808',
-          backgroundImage:
-            'radial-gradient(circle at 25% 30%, rgba(255,180,157,0.9) 0%, rgba(255,180,157,0) 45%), radial-gradient(circle at 80% 75%, rgba(149,192,244,0.8) 0%, rgba(149,192,244,0) 45%)',
-          color: '#FFFFFF',
-          fontFamily: 'sans-serif',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: CANVAS,
+          color: '#080808',
+          fontSize: 72,
+          fontWeight: 800,
         }}
       >
-        <div style={{ fontSize: 28, letterSpacing: 6, textTransform: 'uppercase', color: '#FFB49D', fontWeight: 700 }}>KULT · CollabStudio</div>
-        <div style={{ fontSize: 84, fontWeight: 800, lineHeight: 1.05, marginTop: 16 }}>AI Creative Showcase</div>
-        <div style={{ fontSize: 32, marginTop: 20, color: '#D8D8D8' }}>Films, characters, key visuals and brand campaigns made with AI.</div>
+        CollabStudio
       </div>
     ),
     size,
