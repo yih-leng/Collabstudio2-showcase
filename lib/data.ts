@@ -102,9 +102,19 @@ export async function getPublishedProjects(): Promise<ProjectCardData[]> {
   const ids = published.flatMap((p) => [p.cover_media_id, p.hero_media_id]).filter(Boolean) as string[];
   const media = await getMediaByIds([...new Set(ids)]);
   const byId = (id: string | null) => (id ? (media.find((m) => m.id === id) ?? null) : null);
+  const own = (p: Project) => [byId(p.hero_media_id), byId(p.cover_media_id)].find(canAutoplay) ?? null;
+  // When neither the hero nor the cover can play (a Google Drive link, say), fall
+  // back to the first clip in the project's gallery that can.
+  const lacking = published.filter((p) => !own(p)).map((p) => p.id);
+  let clips: Media[] = [];
+  if (lacking.length) {
+    const sb = await getServerClient();
+    const { data } = await sb.from('media').select('*').in('project_id', lacking).in('kind', ['video', 'embed']).order('sort_order');
+    clips = ((data ?? []) as Media[]).filter(canAutoplay);
+  }
   return published.map((p) => ({
     ...resolveCard(p, lists, media),
-    preview: [byId(p.hero_media_id), byId(p.cover_media_id)].find(canAutoplay) ?? null,
+    preview: own(p) ?? clips.find((m) => m.project_id === p.id && m.id !== p.hero_media_id) ?? null,
   }));
 }
 
