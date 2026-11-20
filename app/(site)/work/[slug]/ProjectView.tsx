@@ -2,7 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { Badge, BackButton, Card, CardGrid, CardTitle, InfoBanner, PageHeader, StatCard, StatGrid, Tabs, Tag, Tooltip } from '@collabrium/ui';
+import {
+  Badge,
+  BackButton,
+  Card,
+  CardGrid,
+  CardTitle,
+  FilterChipGroup,
+  InfoBanner,
+  PageHeader,
+  StatCard,
+  StatGrid,
+  Tag,
+  Tooltip,
+} from '@collabrium/ui';
 import { ScrollReveal } from '@collabrium/ui/motion';
 import { ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 import { Gallery } from '@/components/Gallery';
@@ -12,6 +25,7 @@ import { STATUS_BADGE, VISIBILITY_LABEL, statusText } from '@/lib/format';
 import { TOUCHPOINT_ICONS } from '@/lib/touchpoint-icons';
 import { touchpointLabel } from '@/lib/touchpoints';
 import type { Client, Media, ProjectDetailData } from '@/lib/types';
+import enter from '@/components/enter.module.css';
 import styles from './project.module.css';
 
 /**
@@ -34,7 +48,15 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
   const current = useCurrentSection(sections.map((s) => s.id));
 
   return (
-    <SiteShell header={<BackButton label="Our Works" href="/work" />}>
+    // The page opens in order, as the others do: back link, title and facts,
+    // the media, the section links; the sections fade in as they scroll in.
+    <SiteShell
+      header={
+        <div className={enter.enter}>
+          <BackButton label="Our Works" href="/work" />
+        </div>
+      }
+    >
       <article className={styles.article}>
         {isPreview && (
           <InfoBanner tone="warning">
@@ -43,12 +65,10 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
         )}
 
         {p.status === 'in_progress' && (
-          <InfoBanner tone="info">
-            This work is in progress. What you see here is subject to change before it’s final.
-          </InfoBanner>
+          <InfoBanner tone="info">This work is in progress. What you see here is subject to change before it’s final.</InfoBanner>
         )}
 
-        <header className={styles.intro}>
+        <header className={`${styles.intro} ${enter.enter}`} style={{ '--at': 1 } as React.CSSProperties}>
           <div className={styles.introMain}>
             <PageHeader title={p.title} />
             {p.one_liner && <p className={styles.lede}>{p.one_liner}</p>}
@@ -72,15 +92,20 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
                 </dd>
               </div>
             )}
-            <Fact label={p.categories.length > 1 ? 'Project types' : 'Project type'} value={p.categories.map((c) => c.name).join(', ')} />
+            <Fact
+              label={p.categories.length > 1 ? 'Project types' : 'Project type'}
+              value={p.categories.map((c) => c.name).join(', ')}
+            />
             <Fact label="Year" value={p.year ? String(p.year) : ''} />
           </dl>
         </header>
 
-        <HeroCarousel items={[...(p.hero ? [p.hero] : []), ...p.gallery]} title={p.title} />
+        <div className={enter.enter} style={{ '--at': 2 } as React.CSSProperties}>
+          <HeroCarousel items={[...(p.hero ? [p.hero] : []), ...p.gallery]} title={p.title} />
+        </div>
 
         {sections.length > 0 && (
-          <nav aria-label="On this page" className={styles.toc}>
+          <nav aria-label="On this page" className={`${styles.toc} ${enter.enter}`} style={{ '--at': 3 } as React.CSSProperties}>
             {sections.map((s, i) => (
               <a
                 key={s.id}
@@ -106,14 +131,16 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
 
         {sections.map((s, i) => (
           <section key={s.id} id={s.id} aria-labelledby={`${s.id}-h`} className={styles.section}>
-            <div className={styles.sectionHead}>
-              <span className={styles.sectionNum} aria-hidden>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <h2 id={`${s.id}-h`} className={styles.h2}>
-                {s.title}
-              </h2>
-            </div>
+            <ScrollReveal>
+              <div className={styles.sectionHead}>
+                <span className={styles.sectionNum} aria-hidden>
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <h2 id={`${s.id}-h`} className={styles.h2}>
+                  {s.title}
+                </h2>
+              </div>
+            </ScrollReveal>
             <ScrollReveal>
               <div className={styles.sectionBody}>{s.body}</div>
             </ScrollReveal>
@@ -121,26 +148,28 @@ export function ProjectView({ project: p }: { project: ProjectDetailData }) {
         ))}
 
         {(p.prev || p.next) && (
-          <nav aria-label="More projects" className={styles.pager}>
-            {p.prev ? (
-              <Link href={`/work/${p.prev.slug}`} className={styles.pagerLink}>
-                <span className={styles.pagerHint}>
-                  <ArrowLeft aria-hidden /> Previous
-                </span>
-                <span className={styles.pagerTitle}>{p.prev.title}</span>
-              </Link>
-            ) : (
-              <span />
-            )}
-            {p.next && (
-              <Link href={`/work/${p.next.slug}`} className={`${styles.pagerLink} ${styles.pagerNext}`}>
-                <span className={styles.pagerHint}>
-                  Next <ArrowRight aria-hidden />
-                </span>
-                <span className={styles.pagerTitle}>{p.next.title}</span>
-              </Link>
-            )}
-          </nav>
+          <ScrollReveal>
+            <nav aria-label="More projects" className={styles.pager}>
+              {p.prev ? (
+                <Link href={`/work/${p.prev.slug}`} className={styles.pagerLink}>
+                  <span className={styles.pagerHint}>
+                    <ArrowLeft aria-hidden /> Previous
+                  </span>
+                  <span className={styles.pagerTitle}>{p.prev.title}</span>
+                </Link>
+              ) : (
+                <span />
+              )}
+              {p.next && (
+                <Link href={`/work/${p.next.slug}`} className={`${styles.pagerLink} ${styles.pagerNext}`}>
+                  <span className={styles.pagerHint}>
+                    Next <ArrowRight aria-hidden />
+                  </span>
+                  <span className={styles.pagerTitle}>{p.next.title}</span>
+                </Link>
+              )}
+            </nav>
+          </ScrollReveal>
         )}
       </article>
     </SiteShell>
@@ -152,7 +181,10 @@ function useCurrentSection(ids: string[]) {
   const [current, setCurrent] = useState<string | null>(null);
   const key = ids.join(',');
   useEffect(() => {
-    const els = key.split(',').map((id) => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    const els = key
+      .split(',')
+      .map((id) => document.getElementById(id))
+      .filter(Boolean) as HTMLElement[];
     if (!els.length) return;
     const seen = new Map<string, boolean>();
     const io = new IntersectionObserver(
@@ -268,16 +300,23 @@ function GallerySection({ items }: { items: Media[] }) {
     { id: 'videos', label: 'Videos', items: items.filter((m) => m.kind === 'video' || m.kind === 'embed') },
     { id: 'audio', label: 'Audio', items: items.filter((m) => m.kind === 'audio') },
   ].filter((g) => g.items.length);
+  const [kind, setKind] = useState('all');
   // Only offer the split when there is more than one kind.
   if (groups.length < 2) return <Gallery items={items} />;
+  const shown = groups.find((g) => g.id === kind)?.items ?? items;
   return (
-    <Tabs
-      aria-label="Gallery"
-      surface="canvas"
-      tabs={[
-        { id: 'all', label: 'All', count: items.length, content: <Gallery items={items} /> },
-        ...groups.map((g) => ({ id: g.id, label: g.label, count: g.items.length, content: <Gallery items={g.items} /> })),
-      ]}
-    />
+    <div className={styles.gallery}>
+      <FilterChipGroup
+        aria-label="Show in the gallery"
+        mode="single"
+        value={kind}
+        onValueChange={setKind}
+        options={[
+          { value: 'all', label: 'All', count: items.length },
+          ...groups.map((g) => ({ value: g.id, label: g.label, count: g.items.length })),
+        ]}
+      />
+      <Gallery key={kind} items={shown} />
+    </div>
   );
 }

@@ -91,12 +91,21 @@ function resolveCard(p: Project, lists: Lists, media: Media[]): ProjectCardData 
   };
 }
 
-/** Published projects for the public grid (internal ones only for signed-in admins). */
+/** Media that can play silently by itself: uploads, YouTube, Vimeo (Google Drive can't autoplay). Audio has no picture. */
+const canAutoplay = (m: Media | null) =>
+  !!m && (m.kind === 'video' || (m.kind === 'embed' && embedProvider(m.url) !== 'Google Drive'));
+
+/** Published projects for the public grid (internal ones only for signed-in admins), each with a clip to preview when it has one. */
 export async function getPublishedProjects(): Promise<ProjectCardData[]> {
   const [projects, lists] = await Promise.all([getVisibleProjects(), getLists()]);
   const published = workOrder(projects.filter((p) => p.visibility === 'published'));
-  const media = await getMediaByIds(published.map((p) => p.cover_media_id).filter(Boolean) as string[]);
-  return published.map((p) => resolveCard(p, lists, media));
+  const ids = published.flatMap((p) => [p.cover_media_id, p.hero_media_id]).filter(Boolean) as string[];
+  const media = await getMediaByIds([...new Set(ids)]);
+  const byId = (id: string | null) => (id ? (media.find((m) => m.id === id) ?? null) : null);
+  return published.map((p) => ({
+    ...resolveCard(p, lists, media),
+    preview: [byId(p.hero_media_id), byId(p.cover_media_id)].find(canAutoplay) ?? null,
+  }));
 }
 
 export async function getHomeData() {
@@ -119,10 +128,8 @@ export async function getHomeData() {
     const card = resolveCard(p, lists, media);
     const hero = byId(p.hero_media_id);
     const cover = byId(p.cover_media_id);
-    // The card shows a still; pointing at it plays what can play silently by itself:
-    // uploads, YouTube, Vimeo (Google Drive can't autoplay). Audio has no picture.
-    const moving = (m: Media | null) =>
-      m && (m.kind === 'video' || (m.kind === 'embed' && embedProvider(m.url) !== 'Google Drive'));
+    // The card shows a still; pointing at it plays what can play silently by itself.
+    const moving = canAutoplay;
     const still = (m: Media | null) => m && m.kind === 'image';
     return {
       id: p.id,

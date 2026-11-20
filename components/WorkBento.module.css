@@ -4,12 +4,12 @@
 .bento {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-8);
+  gap: var(--spacing-16);
 }
 
 .row {
   display: grid;
-  gap: var(--spacing-8);
+  gap: var(--spacing-16);
 }
 
 .tile {
@@ -21,9 +21,23 @@
   background: var(--color-neutral-8);
   color: var(--color-neutral-1);
   container-type: inline-size;
+  /* Waits out of sight until it scrolls in, then rises into place. */
+  opacity: 0;
   transition:
     translate var(--duration-base) var(--ease-settle),
     box-shadow var(--duration-base) var(--ease-standard);
+}
+
+.tile[data-shown] {
+  opacity: 1;
+  animation: tileIn var(--duration-reveal) var(--ease-reveal) var(--delay, 0s) backwards;
+}
+
+@keyframes tileIn {
+  from {
+    opacity: 0;
+    translate: 0 var(--spacing-24);
+  }
 }
 
 .media {
@@ -31,6 +45,40 @@
   inset: 0;
   z-index: -2;
   transition: transform var(--duration-slow) var(--ease-settle);
+}
+
+/* The clip over the cover; fades in once it is actually playing. */
+.preview {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity var(--duration-slow) var(--ease-standard);
+}
+
+.preview[data-playing] {
+  opacity: 1;
+  /* An embedded player starts on a black frame and its own title; give it a moment. */
+  transition-delay: var(--duration-base);
+}
+
+.preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* An embedded player is 16:9 whatever the tile; scaled to cover it. */
+.preview iframe {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, calc(100cqw / var(--r) * 16 / 9));
+  height: max(100%, calc(100cqw * 9 / 16));
+  border: 0;
+  translate: -50% -50%;
+  scale: 1.15;
+  pointer-events: none;
 }
 
 /* At rest a soft fade under the title; open, the same shade as the home slider. */
@@ -224,6 +272,7 @@
   }
 
   .tile {
+    --r: 0.8 !important;
     aspect-ratio: 4 / 5 !important;
   }
 
@@ -250,10 +299,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .tile[data-shown] {
+    animation-name: fadeIn;
+  }
+
   .tile,
   .media,
   .shade,
   .later {
     transition: none;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
   }
 }

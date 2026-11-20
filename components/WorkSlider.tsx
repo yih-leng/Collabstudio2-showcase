@@ -260,6 +260,7 @@ export function WorkSlider({ slides }: { slides: ShowcaseSlide[] }) {
                     transform: `translateX(${p.x}px) scale(${p.scale})`,
                     pointerEvents: p.opacity < 0.05 ? 'none' : undefined,
                     '--dim': p.dim,
+                    '--enter': Math.max(0, Math.round(d)),
                   } as React.CSSProperties
                 }
                 onPointerEnter={(e) => e.pointerType === 'mouse' && !dragging && setHovered(s.id)}

@@ -89,6 +89,20 @@
     box-shadow var(--duration-base) var(--ease-standard);
 }
 
+/* On arrival the cards come in one after another, front first, once the
+   slider itself has started to show (--cards-at, set by the page). */
+.stage[data-ready] .card {
+  animation: cardIn var(--duration-reveal) var(--ease-reveal) backwards;
+  animation-delay: calc(var(--cards-at, 0s) + var(--enter, 0) * var(--duration-fast));
+}
+
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    translate: var(--spacing-40) 0;
+  }
+}
+
 /* Pointing at a card lifts it a little, lights it up and eases the picture in. */
 .card {
   transition: translate var(--duration-base) var(--ease-settle), box-shadow var(--duration-base) var(--ease-standard);
@@ -342,5 +356,9 @@ iframe.moving {
   .moving,
   .info {
     transition: none;
+  }
+
+  .stage[data-ready] .card {
+    animation: none;
   }
 }

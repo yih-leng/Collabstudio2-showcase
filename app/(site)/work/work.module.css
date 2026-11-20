@@ -4,45 +4,46 @@
   gap: var(--spacing-16);
 }
 
+/* The title and description, then a hairline. */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-24);
+}
+
+.divider {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
+/* The filters, with the count at the end of their row. */
+.bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--spacing-16);
+}
+
 .count {
+  display: flex;
+  align-items: center;
+  min-height: var(--control-height-md);
   margin: 0;
   font-size: var(--text-caption-size);
   color: var(--color-neutral-5);
+  white-space: nowrap;
 }
 
-
-/* Search, filters and the count, held at the top of the page while the work
-   scrolls under them. Runs across the page gutters so nothing shows at its sides. */
-.bar {
-  position: sticky;
-  /* The page's scroller has padding at its top; this lifts the bar past it to the very top. */
-  top: calc(var(--section-gap) * -1);
-  z-index: calc(var(--z-float) - 2);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-12);
-  margin-inline: calc(var(--page-gutter) * -1);
-  padding: var(--spacing-12) var(--page-gutter);
-  background: var(--color-canvas-warm);
-  border-bottom: var(--border-width-sm) solid transparent;
-  transition: border-color var(--duration-base) var(--ease-standard);
-}
-
-.bar[data-stuck] {
-  border-bottom-color: var(--color-neutral-2);
-}
-
-/* Marks where the bar starts, so we know when it is held. */
-.sentinel {
-  display: block;
-  height: 0;
-  margin-bottom: calc(var(--spacing-16) * -1);
-}
-
-/* Phones: held just under the floating nav's band (the scroller's top padding
-   is a little taller than the band). */
+/* Phones: the count goes under the filters. */
 @media (max-width: 768px) {
   .bar {
-    top: calc(var(--spacing-20) * -1);
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--spacing-12);
+  }
+
+  .count {
+    min-height: 0;
   }
 }

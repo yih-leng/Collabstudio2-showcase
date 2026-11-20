@@ -402,3 +402,10 @@
     grid-column: 1;
   }
 }
+
+/* Gallery: the kind chips (All, Images, Videos, Audio) above the tiles. */
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-16);
+}

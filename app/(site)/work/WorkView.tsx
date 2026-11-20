@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 import {
   EmptyState,
   Filters,
@@ -14,17 +14,10 @@ import { WorkBento } from '@/components/WorkBento';
 import { STATUS_LABEL } from '@/lib/format';
 import { SiteShell } from '@/components/SiteShell';
 import type { Lists, ProjectCardData } from '@/lib/types';
+import enter from '@/components/enter.module.css';
 import styles from './work.module.css';
 
-export function WorkView({
-  projects,
-  lists,
-  initialQuery,
-}: {
-  projects: ProjectCardData[];
-  lists: Lists;
-  initialQuery: string;
-}) {
+export function WorkView({ projects, lists, initialQuery }: { projects: ProjectCardData[]; lists: Lists; initialQuery: string }) {
   const dimensions = useMemo<FilterDimension[]>(() => {
     const used = <T extends { id: string }>(all: T[], pick: (p: ProjectCardData) => { id: string }[]) =>
       all.filter((x) => projects.some((p) => pick(p).some((y) => y.id === x.id)));
@@ -33,8 +26,16 @@ export function WorkView({
       [...opts].sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base', numeric: true }));
     const years = [...new Set(projects.map((p) => p.year).filter(Boolean) as number[])].sort((a, b) => b - a);
     return [
-      { key: 'client', label: 'Client', options: az(used(lists.clients, (p) => p.clients).map((c) => ({ value: c.id, label: c.name }))) },
-      { key: 'category', label: 'Project type', options: az(used(lists.categories, (p) => p.categories).map((c) => ({ value: c.id, label: c.name }))) },
+      {
+        key: 'client',
+        label: 'Client',
+        options: az(used(lists.clients, (p) => p.clients).map((c) => ({ value: c.id, label: c.name }))),
+      },
+      {
+        key: 'category',
+        label: 'Project type',
+        options: az(used(lists.categories, (p) => p.categories).map((c) => ({ value: c.id, label: c.name }))),
+      },
       {
         key: 'capability',
         label: 'Capability',
@@ -44,9 +45,7 @@ export function WorkView({
     ];
   }, [projects, lists]);
 
-  const [value, setValue] = useState<FilterValue>(() =>
-    filtersFromSearchParams(new URLSearchParams(initialQuery), dimensions),
-  );
+  const [value, setValue] = useState<FilterValue>(() => filtersFromSearchParams(new URLSearchParams(initialQuery), dimensions));
   const [search, setSearch] = useState(() => new URLSearchParams(initialQuery).get('q') ?? '');
 
   const syncUrl = (next: FilterValue, q: string) => {
@@ -70,29 +69,38 @@ export function WorkView({
     const has = (key: string, ids: string[]) => !value[key]?.length || value[key].some((v) => ids.includes(v));
     return projects.filter(
       (p) =>
-        has('client', p.clients.map((c) => c.id)) &&
-        has('category', p.categories.map((c) => c.id)) &&
-        has('capability', p.capabilities.map((c) => c.id)) &&
+        has(
+          'client',
+          p.clients.map((c) => c.id),
+        ) &&
+        has(
+          'category',
+          p.categories.map((c) => c.id),
+        ) &&
+        has(
+          'capability',
+          p.capabilities.map((c) => c.id),
+        ) &&
         has('year', p.year ? [String(p.year)] : []) &&
         (!q ||
           // Search reads everything on the card and its tags: title, clients,
           // project type, capabilities, tools, status and year.
-          [p.title, p.one_liner, ...p.clients.map((c) => c.name), ...p.categories.map((c) => c.name), ...p.capabilities.map((c) => c.name), ...p.tools.map((c) => c.name), STATUS_LABEL[p.status], p.year ? String(p.year) : '']
+          [
+            p.title,
+            p.one_liner,
+            ...p.clients.map((c) => c.name),
+            ...p.categories.map((c) => c.name),
+            ...p.capabilities.map((c) => c.name),
+            ...p.tools.map((c) => c.name),
+            STATUS_LABEL[p.status],
+            p.year ? String(p.year) : '',
+          ]
             .filter(Boolean)
             .some((t) => t!.toLowerCase().includes(q))),
     );
   }, [projects, value, search]);
 
-  // Once the page scrolls past the top of the filter bar, it sits on a hairline.
-  const sentinel = useRef<HTMLSpanElement>(null);
-  const [stuck, setStuck] = useState(false);
-  useEffect(() => {
-    const el = sentinel.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting && e.boundingClientRect.top < 0));
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const applied = Object.values(value).reduce((n, v) => n + (v?.length ?? 0), 0);
 
   const clearAll = () => {
     setValue({});
@@ -101,18 +109,21 @@ export function WorkView({
   };
 
   return (
-    <SiteShell
-      header={
-        <PageHeader
-          title="Our Works"
-          subtitle="Every AI project we can show, featured work first in line. Filter by client, project type, capability or year."
-        />
-      }
-    >
+    <SiteShell>
+      {/* The page opens in order: the header, the filter bar, then the work one
+          tile at a time. The header sits in the page (not the shell's header
+          slot) so the divider under it can sit close to the filters. */}
       <div className={styles.stack}>
-        {/* Search, filters and the count stay at the top while the work scrolls. */}
-        <span ref={sentinel} className={styles.sentinel} aria-hidden />
-        <div className={styles.bar} data-stuck={stuck || undefined}>
+        <div className={`${styles.head} ${enter.enter}`}>
+          <PageHeader
+            title="Our Works"
+            subtitle="Every AI project we can show, featured work first in line. Filter by client, project type, capability or year."
+          />
+          {/* TODO(design-system: no Divider component). */}
+          <hr className={styles.divider} />
+        </div>
+        {/* The filters, with the count at the end of their row. */}
+        <div className={`${styles.bar} ${enter.enter}`} style={{ '--at': 1 } as React.CSSProperties}>
           {/* TODO(design-system: Filters has no search inside a filter's panel; add it there, then turn it on here). */}
           <Filters
             dimensions={dimensions}
@@ -126,6 +137,7 @@ export function WorkView({
           />
           <p className={styles.count} aria-live="polite">
             {shown.length} of {projects.length} {projects.length === 1 ? 'project' : 'projects'}
+            {applied > 0 && ` · ${applied} ${applied === 1 ? 'filter' : 'filters'}`}
           </p>
         </div>
         {shown.length ? (

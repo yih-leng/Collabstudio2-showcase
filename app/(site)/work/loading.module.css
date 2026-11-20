@@ -5,6 +5,14 @@
   gap: var(--spacing-24);
 }
 
+.divider {
+  width: 100%;
+  /* The filters sit a little closer under it, as on the page. */
+  margin: 0 0 calc(var(--spacing-8) * -1);
+  border: 0;
+  border-top: var(--border-width-sm) solid var(--color-neutral-3);
+}
+
 .block {
   display: block;
   border-radius: var(--radius-sm);
@@ -15,32 +23,36 @@
   height: var(--control-height-md);
 }
 
-.grid {
+.count {
+  width: var(--spacing-120);
+  height: var(--text-caption-lh);
+  margin-top: calc(var(--spacing-12) * -1);
+}
+
+/* Matches the bento grid's rows and gaps. */
+.bento,
+.row {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, calc(var(--spacing-120) * 2.4)), 1fr));
-  gap: var(--spacing-24);
+  gap: var(--spacing-16);
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-8);
-}
-
-.thumb {
-  aspect-ratio: 16 / 9;
+.tile {
   border-radius: var(--radius-lg);
   background: var(--color-neutral-3);
 }
 
-.line {
-  width: 70%;
-  height: var(--text-h4-lh);
-}
+@media (max-width: 768px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
 
-.lineShort {
-  width: 45%;
-  height: var(--text-body2-lh);
+  .tile {
+    aspect-ratio: 4 / 5 !important;
+  }
+
+  .row:nth-child(n + 3) {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: no-preference) {

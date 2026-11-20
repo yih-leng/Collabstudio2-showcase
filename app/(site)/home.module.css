@@ -1,7 +1,7 @@
 .intro {
   display: grid;
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  align-items: end;
+  align-items: center;
   gap: var(--spacing-40);
 }
 
@@ -11,6 +11,11 @@
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-24);
+}
+
+/* The slider's cards start coming in just after the slider itself (see enter.module.css). */
+.slider {
+  --cards-at: calc(var(--duration-base) * 2 + var(--duration-fast));
 }
 
 /* Brand moment: the one place Source Serif 4 appears. */

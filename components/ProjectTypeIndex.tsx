@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Badge } from '@collabrium/ui';
+import { useRouter } from 'next/navigation';
+import { Badge, Button } from '@collabrium/ui';
 import type { ProjectTypeSummary } from '@/lib/types';
 import { MediaFrame } from './MediaFrame';
 import styles from './ProjectTypeIndex.module.css';
@@ -19,6 +20,7 @@ const CYCLE_MS = 1400;
  * another (not on touch screens, which have no pointer to follow).
  */
 export function ProjectTypeIndex({ types }: { types: ProjectTypeSummary[] }) {
+  const router = useRouter();
   const [active, setActive] = useState<ProjectTypeSummary | null>(null);
   const [shown, setShown] = useState(0);
   const preview = useRef<HTMLDivElement>(null);
@@ -54,9 +56,14 @@ export function ProjectTypeIndex({ types }: { types: ProjectTypeSummary[] }) {
 
   return (
     <section aria-labelledby="types-heading" className={styles.section} onMouseMove={follow} onMouseLeave={() => setActive(null)}>
-      <h2 id="types-heading" className={styles.heading}>
-        Projects we did
-      </h2>
+      <div className={styles.head}>
+        <h2 id="types-heading" className={styles.heading}>
+          Projects we did
+        </h2>
+        <Button variant="link" trailingArrow="right" onClick={() => router.push('/work')}>
+          View all projects
+        </Button>
+      </div>
       <ul className={styles.list}>
         {types.map((t) => (
           <li key={t.id}>

@@ -10,11 +10,19 @@
     inset: 0 0 auto;
     z-index: calc(var(--z-float) - 1);
     display: block;
-    height: calc(var(--spacing-120) - var(--spacing-20));
+    height: var(--spacing-120);
+    /* Solid behind the nav tile, then a long, eased fade (more steps than a
+       plain two-stop gradient, so there is no visible edge). */
     background: linear-gradient(
       to bottom,
-      var(--color-canvas-warm) 75%,
-      color-mix(in srgb, var(--color-canvas-warm) 0%, transparent)
+      var(--color-canvas-warm) 0%,
+      var(--color-canvas-warm) 45%,
+      color-mix(in srgb, var(--color-canvas-warm) 92%, transparent) 55%,
+      color-mix(in srgb, var(--color-canvas-warm) 74%, transparent) 65%,
+      color-mix(in srgb, var(--color-canvas-warm) 50%, transparent) 75%,
+      color-mix(in srgb, var(--color-canvas-warm) 26%, transparent) 85%,
+      color-mix(in srgb, var(--color-canvas-warm) 8%, transparent) 94%,
+      color-mix(in srgb, var(--color-canvas-warm) 0%, transparent) 100%
     );
     pointer-events: none;
   }

@@ -5,9 +5,18 @@
   margin-top: var(--section-gap);
 }
 
+/* The title, with View all projects at the other end. */
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-16);
+  margin-bottom: var(--spacing-24);
+}
+
 /* Styled like the home page's other section titles ("Clients we've made work for"). */
 .heading {
-  margin: 0 0 var(--spacing-24);
+  margin: 0;
   font-size: var(--text-caption-size);
   font-weight: var(--weight-bold);
   letter-spacing: var(--tracking-eyebrow);

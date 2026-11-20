@@ -165,6 +165,8 @@ export interface ProjectCardData {
   one_liner: string | null;
   featured: boolean;
   cover: Media | null;
+  /** On Our Works only: a clip that can play silently on the tile (an upload, YouTube or Vimeo). */
+  preview?: Media | null;
 }
 
 /** One card in the home page's work slider: a project, or the studio showreel. */
